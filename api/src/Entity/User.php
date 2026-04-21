@@ -6,11 +6,18 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    public const ROLE_CLIENT = 'ROLE_CLIENT';
+    public const ROLE_ORGANIZER = 'ROLE_ORGANIZER';
+    public const ROLE_STAFF = 'ROLE_STAFF';
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_user')]
@@ -114,6 +121,11 @@ class User
         return $this;
     }
 
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
     public function getPasswordHash(): ?string
     {
         return $this->passwordHash;
@@ -126,6 +138,11 @@ class User
         return $this;
     }
 
+    public function getPassword(): ?string
+    {
+        return $this->passwordHash;
+    }
+
     public function getRole(): ?string
     {
         return $this->role;
@@ -133,9 +150,24 @@ class User
 
     public function setRole(string $role): static
     {
-        $this->role = $role;
+        $this->role = $this->normalizeRole($role);
 
         return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles = [$this->role ? $this->normalizeRole($this->role) : self::ROLE_CLIENT];
+        $roles[] = 'ROLE_USER';
+
+        return array_values(array_unique($roles));
+    }
+
+    public function eraseCredentials(): void
+    {
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
@@ -298,5 +330,16 @@ class User
         }
 
         return $this;
+    }
+
+    private function normalizeRole(string $role): string
+    {
+        $role = strtoupper(trim($role));
+
+        if (!str_starts_with($role, 'ROLE_')) {
+            $role = 'ROLE_'.$role;
+        }
+
+        return $role;
     }
 }

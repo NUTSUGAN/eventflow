@@ -1,4 +1,15 @@
 
+# Local editor files
+.vscode/
+.idea/
 
-#Ignore vscode AI rules
-.github\instructions\codacy.instructions.md
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env.local
+.env.*.local
+
+# Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
