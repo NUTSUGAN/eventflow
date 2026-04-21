@@ -36,7 +36,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $passwordHash = null;
 
     #[ORM\Column(name: 'role', length: 20)]
-    private ?string $role = null;
+    private ?string $role = self::ROLE_CLIENT;
 
     #[ORM\Column(name: 'created_at')]
     private ?\DateTimeImmutable $createdAt = null;

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class HealthController
@@ -24,5 +25,11 @@ final class HealthController
             'status' => 'ok',
             'service' => 'eventflow-api',
         ]);
+    }
+
+    #[Route('/favicon.ico', name: 'app_favicon', methods: ['GET'])]
+    public function favicon(): Response
+    {
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 }

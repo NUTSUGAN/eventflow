@@ -5,10 +5,14 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: eventflow_app
     working_dir: /var/www/api
+    command: sh -c "mkdir -p var/cache var/log && chown -R www-data:www-data var && php-fpm"
     volumes:
       - ./api:/var/www/api
+      - eventflow_vendor:/var/www/api/vendor
+      - eventflow_var:/var/www/api/var
     environment:
       APP_ENV: dev
+      APP_DEBUG: 0
       DATABASE_URL: "mysql://root:@host.docker.internal:3306/eventflow?serverVersion=10.4.32-MariaDB&charset=utf8mb4"
 
 
@@ -22,3 +26,7 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
+
+volumes:
+  eventflow_vendor:
+  eventflow_var:
