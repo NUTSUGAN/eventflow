@@ -69,6 +69,79 @@ class AuthController extends AbstractController
     #[Route('/api/me', name: 'api_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
+        $user = $this->getAuthenticatedUser();
+
+        if ($user instanceof JsonResponse) {
+            return $user;
+        }
+
+        return $this->json($this->serializeUser($user));
+    }
+
+    #[Route('/api/me', name: 'api_me_update', methods: ['PATCH'])]
+    public function updateMe(
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $user = $this->getAuthenticatedUser();
+
+        if ($user instanceof JsonResponse) {
+            return $user;
+        }
+
+        $data = $request->toArray();
+
+        if (isset($data['firstName'])) {
+            if (trim((string) $data['firstName']) === '') {
+                return $this->json([
+                    'message' => 'Le prénom ne peut pas être vide.'
+                ], 400);
+            }
+
+            $user->setFirstName(trim((string) $data['firstName']));
+        }
+
+        if (isset($data['lastName'])) {
+            if (trim((string) $data['lastName']) === '') {
+                return $this->json([
+                    'message' => 'Le nom ne peut pas être vide.'
+                ], 400);
+            }
+
+            $user->setLastName(trim((string) $data['lastName']));
+        }
+
+        if (isset($data['email'])) {
+            $newEmail = trim((string) $data['email']);
+
+            if ($newEmail === '') {
+                return $this->json([
+                    'message' => 'L’email ne peut pas être vide.'
+                ], 400);
+            }
+
+            $existingUser = $userRepository->findOneBy(['email' => $newEmail]);
+
+            if ($existingUser && $existingUser->getId() !== $user->getId()) {
+                return $this->json([
+                    'message' => 'Cet email est déjà utilisé.'
+                ], 409);
+            }
+
+            $user->setEmail($newEmail);
+        }
+
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => 'Profil mis à jour avec succès.',
+            'user' => $this->serializeUser($user)
+        ]);
+    }
+
+    private function getAuthenticatedUser(): User|JsonResponse
+    {
         $user = $this->getUser();
 
         if (!$user instanceof User) {
@@ -77,12 +150,18 @@ class AuthController extends AbstractController
             ], 401);
         }
 
-        return $this->json([
+        return $user;
+    }
+
+    private function serializeUser(User $user): array
+    {
+        return [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
             'role' => $user->getRole(),
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
-        ]);
+            'createdAt' => $user->getCreatedAt()?->format(DATE_ATOM),
+        ];
     }
 }
