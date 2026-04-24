@@ -38,6 +38,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'role', length: 20)]
     private ?string $role = self::ROLE_CLIENT;
 
+    #[ORM\Column(name: 'profile_photo', length: 255, nullable: true)]
+    private ?string $profilePhoto = null;
+
     #[ORM\Column(name: 'created_at')]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -164,6 +167,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER';
 
         return array_values(array_unique($roles));
+    }
+
+    public function getProfilePhoto(): ?string
+    {
+        return $this->profilePhoto;
+    }
+
+    public function setProfilePhoto(?string $profilePhoto): static
+    {
+        $this->profilePhoto = $profilePhoto;
+
+        return $this;
     }
 
     public function eraseCredentials(): void
