@@ -16,28 +16,19 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
-    //    /**
-    //     * @return Event[] Returns an array of Event objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('e.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Event
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneForPublicDetail(int $id): ?Event
+    {
+        return $this->createQueryBuilder('event')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->leftJoin('event.category', 'category')->addSelect('category')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->leftJoin('event.ticketTypes', 'ticketType')->addSelect('ticketType')
+            ->andWhere('event.id = :id')
+            ->setParameter('id', $id)
+            ->orderBy('ticketType.price', 'ASC')
+            ->addOrderBy('ticketType.id', 'ASC')
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }
