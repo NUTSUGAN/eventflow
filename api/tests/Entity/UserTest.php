@@ -22,6 +22,13 @@ class UserTest extends TestCase
         self::assertSame(['ROLE_CLIENT', 'ROLE_USER'], $user->getRoles());
     }
 
+    public function testProfilePhotoCanBeStored(): void
+    {
+        $user = (new User())->setProfilePhoto('/uploads/users/organizer.png');
+
+        self::assertSame('/uploads/users/organizer.png', $user->getProfilePhoto());
+    }
+
     public function testKnownApplicationRolesAreAvailable(): void
     {
         self::assertSame('ROLE_CLIENT', User::ROLE_CLIENT);
