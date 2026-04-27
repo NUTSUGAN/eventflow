@@ -45,7 +45,7 @@ class EventController extends AbstractController
         );
 
         return $this->json(array_map(
-            fn (Event $event): array => $this->serializeEventSummary($event),
+            fn (Event $event): array => $this->serializeEventSummary($request, $event),
             $events
         ));
     }
@@ -53,6 +53,7 @@ class EventController extends AbstractController
     #[Route('/api/events/{id}', name: 'api_event_detail', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         int $id,
+        Request $request,
         EventRepository $eventRepository,
         AbonnementOrganisateurRepository $subscriptionRepository
     ): JsonResponse {
@@ -99,8 +100,8 @@ class EventController extends AbstractController
                 'description' => $event->getCategory()?->getDescription(),
             ],
             'media' => [
-                'thumbnailUrl' => $this->normalizeMediaPath($event->getThumbnailPhoto()),
-                'coverUrl' => $this->normalizeMediaPath($event->getCoverPhoto()),
+                'thumbnailUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto()),
+                'coverUrl' => $this->toPublicAssetUrl($request, $event->getCoverPhoto()),
             ],
             'location' => [
                 'address' => $event->getLocation()?->getAddress(),
@@ -116,7 +117,7 @@ class EventController extends AbstractController
                 'lastName' => $organizer->getLastName(),
                 'fullName' => trim(sprintf('%s %s', $organizer->getFirstName(), $organizer->getLastName())),
                 'role' => $this->resolvePrimaryRole($organizer),
-                'profilePhoto' => $this->normalizeMediaPath($organizer->getProfilePhoto()),
+                'profilePhoto' => $this->toPublicAssetUrl($request, $organizer->getProfilePhoto()),
             ] : null,
             'subscription' => $subscription,
             'ticketTypes' => array_map(
@@ -136,7 +137,7 @@ class EventController extends AbstractController
         ]);
     }
 
-    private function serializeEventSummary(Event $event): array
+    private function serializeEventSummary(Request $request, Event $event): array
     {
         $minPrice = null;
 
@@ -165,7 +166,7 @@ class EventController extends AbstractController
             'venue' => $venue,
             'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
             'category' => $event->getCategory()?->getName() ?? 'Evenement',
-            'coverImageUrl' => $this->normalizeMediaPath($event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
+            'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
             'currency' => 'EUR',
         ];
@@ -211,6 +212,24 @@ class EventController extends AbstractController
         }
 
         return $this->publicFileExists($normalizedPath) ? $normalizedPath : null;
+    }
+
+    private function toPublicAssetUrl(Request $request, ?string $path): ?string
+    {
+        $normalizedPath = $this->normalizeMediaPath($path);
+
+        if (null === $normalizedPath) {
+            return null;
+        }
+
+        if (
+            str_starts_with($normalizedPath, 'http://')
+            || str_starts_with($normalizedPath, 'https://')
+        ) {
+            return $normalizedPath;
+        }
+
+        return $request->getSchemeAndHttpHost().$normalizedPath;
     }
 
     private function publicFileExists(string $publicPath): bool
