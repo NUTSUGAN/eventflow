@@ -165,7 +165,7 @@ class EventController extends AbstractController
             'venue' => $venue,
             'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
             'category' => $event->getCategory()?->getName() ?? 'Evenement',
-            'coverImageUrl' => $this->normalizeMediaPath($event->getCoverPhoto() ?? $event->getThumbnailPhoto()),
+            'coverImageUrl' => $this->normalizeMediaPath($event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
             'currency' => 'EUR',
         ];
@@ -199,10 +199,32 @@ class EventController extends AbstractController
             || str_starts_with($path, 'https://')
             || str_starts_with($path, '/')
         ) {
-            return $path;
+            return $this->publicFileExists($path) ? $path : null;
         }
 
-        return null;
+        $normalizedPath = str_replace('\\', '/', $path);
+
+        if (!str_contains($normalizedPath, '/')) {
+            $normalizedPath = '/uploads/events/'.$normalizedPath;
+        } elseif (!str_starts_with($normalizedPath, '/')) {
+            $normalizedPath = '/'.$normalizedPath;
+        }
+
+        return $this->publicFileExists($normalizedPath) ? $normalizedPath : null;
+    }
+
+    private function publicFileExists(string $publicPath): bool
+    {
+        if (
+            str_starts_with($publicPath, 'http://')
+            || str_starts_with($publicPath, 'https://')
+        ) {
+            return true;
+        }
+
+        $filesystemPath = dirname(__DIR__, 2).'/public'.str_replace('/', DIRECTORY_SEPARATOR, $publicPath);
+
+        return is_file($filesystemPath);
     }
 
     private function resolvePrimaryRole(User $user): string
