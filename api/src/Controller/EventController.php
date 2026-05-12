@@ -9,14 +9,60 @@ use App\Repository\AbonnementOrganisateurRepository;
 use App\Repository\EventRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class EventController extends AbstractController
 {
+    #[Route('/api/events/filters', name: 'api_event_filters', methods: ['GET'])]
+    public function filters(EventRepository $eventRepository): JsonResponse
+    {
+        return $this->json([
+            'categories' => $eventRepository->findPublicCategoryFilters(),
+            'cities' => $eventRepository->findPublicCityFilters(),
+        ]);
+    }
+
+    #[Route('/api/events', name: 'api_event_list', methods: ['GET'])]
+    public function index(Request $request, EventRepository $eventRepository): JsonResponse
+    {
+        $dateFilter = null;
+        $dateValue = trim((string) $request->query->get('date', ''));
+
+        if ('' !== $dateValue) {
+            $dateFilter = \DateTimeImmutable::createFromFormat('!Y-m-d', $dateValue);
+
+            if (!$dateFilter instanceof \DateTimeImmutable) {
+                return $this->json([
+                    'message' => 'Le filtre date doit etre au format YYYY-MM-DD.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        $typeFilter = trim((string) $request->query->get('type', $request->query->get('category', '')));
+        $cityFilter = trim((string) $request->query->get('city', ''));
+        $searchFilter = trim((string) $request->query->get('search', ''));
+        $limit = max(1, min(24, $request->query->getInt('limit', 18)));
+
+        $events = $eventRepository->findPublicList(
+            '' !== $searchFilter ? $searchFilter : null,
+            '' !== $typeFilter ? $typeFilter : null,
+            '' !== $cityFilter ? $cityFilter : null,
+            $dateFilter,
+            $limit
+        );
+
+        return $this->json(array_map(
+            fn (Event $event): array => $this->serializeEventSummary($request, $event),
+            $events
+        ));
+    }
+
     #[Route('/api/events/{id}', name: 'api_event_detail', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         int $id,
+        Request $request,
         EventRepository $eventRepository,
         AbonnementOrganisateurRepository $subscriptionRepository
     ): JsonResponse {
@@ -35,18 +81,32 @@ class EventController extends AbstractController
             'canFollow' => false,
             'isFollowing' => false,
             'status' => null,
+            'requiresAuth' => false,
+            'isOwnOrganizer' => false,
         ];
 
-        if ($currentUser instanceof User && $organizer instanceof User && $currentUser->getId() !== $organizer->getId()) {
-            $existingSubscription = $subscriptionRepository->findOneForClientAndOrganizer($currentUser, $organizer);
-            $subscriptionStatus = $existingSubscription?->getStatus();
+        if ($organizer instanceof User) {
+            if (!$currentUser instanceof User) {
+                $subscription['requiresAuth'] = true;
+            } elseif ($currentUser->getId() === $organizer->getId()) {
+                $subscription['isOwnOrganizer'] = true;
+            } else {
+                $existingSubscription = $subscriptionRepository->findOneForClientAndOrganizer($currentUser, $organizer);
+                $subscriptionStatus = $existingSubscription?->getStatus();
 
-            $subscription = [
-                'canFollow' => true,
-                'isFollowing' => 'ACTIVE' === $subscriptionStatus,
-                'status' => $subscriptionStatus,
-            ];
+                $subscription = [
+                    'canFollow' => true,
+                    'isFollowing' => 'ACTIVE' === $subscriptionStatus,
+                    'status' => $subscriptionStatus,
+                    'requiresAuth' => false,
+                    'isOwnOrganizer' => false,
+                ];
+            }
         }
+
+        /** @var \App\Repository\TicketTypeRepository $ticketTypeRepository */
+        $ticketTypeRepository = $eventRepository->getEntityManager()->getRepository(TicketType::class);
+        $ticketTypes = $ticketTypeRepository->findActiveForEventOrdered($event->getId());
 
         return $this->json([
             'id' => $event->getId(),
@@ -63,8 +123,8 @@ class EventController extends AbstractController
                 'description' => $event->getCategory()?->getDescription(),
             ],
             'media' => [
-                'thumbnailUrl' => $event->getThumbnailPhoto(),
-                'coverUrl' => $event->getCoverPhoto(),
+                'thumbnailUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto()),
+                'coverUrl' => $this->toPublicAssetUrl($request, $event->getCoverPhoto()),
             ],
             'location' => [
                 'address' => $event->getLocation()?->getAddress(),
@@ -80,14 +140,14 @@ class EventController extends AbstractController
                 'lastName' => $organizer->getLastName(),
                 'fullName' => trim(sprintf('%s %s', $organizer->getFirstName(), $organizer->getLastName())),
                 'role' => $this->resolvePrimaryRole($organizer),
-                'profilePhoto' => $organizer->getProfilePhoto(),
+                'profilePhoto' => $this->toPublicAssetUrl($request, $organizer->getProfilePhoto()),
             ] : null,
             'subscription' => $subscription,
             'ticketTypes' => array_map(
                 fn (TicketType $ticketType): array => [
                     'id' => $ticketType->getId(),
                     'name' => $ticketType->getName(),
-                    'type' => $ticketType->getType(),
+                    'description' => $ticketType->getDescription(),
                     'basePrice' => null !== $ticketType->getPrice() ? (float) $ticketType->getPrice() : null,
                     'stock' => $ticketType->getStock(),
                     'saleStartAt' => $ticketType->getSalesStartAt()?->format(DATE_ATOM),
@@ -95,9 +155,112 @@ class EventController extends AbstractController
                     'maxPerOrder' => $ticketType->getMaxPerOrder(),
                     'isActive' => $ticketType->isActive(),
                 ],
-                $event->getTicketTypes()->toArray()
+                $ticketTypes
             ),
         ]);
+    }
+
+    private function serializeEventSummary(Request $request, Event $event): array
+    {
+        $minPrice = null;
+
+        foreach ($event->getTicketTypes() as $ticketType) {
+            if (!$ticketType->isActive()) {
+                continue;
+            }
+
+            $price = $ticketType->getPrice();
+
+            if (null === $price) {
+                continue;
+            }
+
+            $floatPrice = (float) $price;
+            $minPrice = null === $minPrice ? $floatPrice : min($minPrice, $floatPrice);
+        }
+
+        $venue = $event->getLocation()?->getAddress() ?? $event->getLocation()?->getCity() ?? 'Lieu a confirmer';
+
+        return [
+            'id' => $event->getId(),
+            'title' => $event->getTitle(),
+            'shortDescription' => $this->createExcerpt($event->getDescription()),
+            'city' => $event->getLocation()?->getCity() ?? 'Ville a confirmer',
+            'venue' => $venue,
+            'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
+            'category' => $event->getCategory()?->getName() ?? 'Evenement',
+            'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
+            'minPrice' => $minPrice,
+            'currency' => 'EUR',
+        ];
+    }
+
+    private function createExcerpt(?string $text, int $maxLength = 140): string
+    {
+        $text = trim(preg_replace('/\s+/', ' ', (string) $text) ?? '');
+
+        if ('' === $text) {
+            return 'Informations a venir pour cet evenement.';
+        }
+
+        if (mb_strlen($text) <= $maxLength) {
+            return $text;
+        }
+
+        return rtrim(mb_substr($text, 0, $maxLength - 1)).'...';
+    }
+
+    private function normalizeMediaPath(?string $path): ?string
+    {
+        $path = trim((string) $path);
+
+        if ('' === $path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $normalizedPath = str_replace('\\', '/', $path);
+
+        if (!str_starts_with($normalizedPath, '/')) {
+            return null;
+        }
+
+        return $this->publicFileExists($normalizedPath) ? $normalizedPath : null;
+    }
+
+    private function toPublicAssetUrl(Request $request, ?string $path): ?string
+    {
+        $normalizedPath = $this->normalizeMediaPath($path);
+
+        if (null === $normalizedPath) {
+            return null;
+        }
+
+        if (
+            str_starts_with($normalizedPath, 'http://')
+            || str_starts_with($normalizedPath, 'https://')
+        ) {
+            return $normalizedPath;
+        }
+
+        return $request->getSchemeAndHttpHost().$normalizedPath;
+    }
+
+    private function publicFileExists(string $publicPath): bool
+    {
+        if (
+            str_starts_with($publicPath, 'http://')
+            || str_starts_with($publicPath, 'https://')
+        ) {
+            return true;
+        }
+
+        $filesystemPath = dirname(__DIR__, 2).'/public'.str_replace('/', DIRECTORY_SEPARATOR, $publicPath);
+
+        return is_file($filesystemPath);
     }
 
     private function resolvePrimaryRole(User $user): string

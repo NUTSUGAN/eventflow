@@ -24,8 +24,8 @@ class TicketType
     #[ORM\Column(name: 'name', length: 60)]
     private ?string $name = null;
 
-    #[ORM\Column(name: 'type', length: 30)]
-    private ?string $type = null;
+    #[ORM\Column(name: 'description', type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     #[ORM\Column(name: 'base_price', type: Types::DECIMAL, precision: 15, scale: 2)]
     private ?string $price = null;
@@ -95,14 +95,14 @@ class TicketType
         return $this;
     }
 
-    public function getType(): ?string
+    public function getDescription(): ?string
     {
-        return $this->type;
+        return $this->description;
     }
 
-    public function setType(string $type): static
+    public function setDescription(?string $description): static
     {
-        $this->type = $type;
+        $this->description = $description;
 
         return $this;
     }

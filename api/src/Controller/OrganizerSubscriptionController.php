@@ -103,6 +103,8 @@ class OrganizerSubscriptionController extends AbstractController
                     'canFollow' => true,
                     'isFollowing' => false,
                     'status' => null,
+                    'requiresAuth' => false,
+                    'isOwnOrganizer' => false,
                 ],
                 'organizer' => $this->buildOrganizerPayload($organizer),
             ], Response::HTTP_OK);
@@ -126,6 +128,8 @@ class OrganizerSubscriptionController extends AbstractController
             'canFollow' => true,
             'isFollowing' => 'ACTIVE' === $status,
             'status' => $status,
+            'requiresAuth' => false,
+            'isOwnOrganizer' => false,
         ];
     }
 
@@ -143,7 +147,11 @@ class OrganizerSubscriptionController extends AbstractController
 
     private function isOrganizer(User $user): bool
     {
-        return User::ROLE_ORGANIZER === $this->resolvePrimaryRole($user);
+        return in_array(
+            $this->resolvePrimaryRole($user),
+            [User::ROLE_ORGANIZER, User::ROLE_ADMIN],
+            true
+        );
     }
 
     private function resolvePrimaryRole(User $user): string
