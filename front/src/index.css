@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap');
+
+:root {
+  --color-primary: #bf6a41;
+  --color-secondary: #f88f52;
+  --color-danger: #7d0e13;
+  --color-background: #191716;
+  --color-surface: #221f1d;
+  --color-surface-strong: #2b2522;
+  --color-surface-soft: #e9dfec;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(248, 143, 82, 0.34);
+  --color-text: #ffffff;
+  --color-text-muted: rgba(255, 255, 255, 0.76);
+  --color-text-soft: rgba(255, 255, 255, 0.58);
+  --color-highlight: rgba(248, 143, 82, 0.14);
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.24);
+  --shadow-strong: 0 28px 60px rgba(0, 0, 0, 0.32);
+  --font-body:
+    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading:
+    'Montserrat', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-family: var(--font-body);
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at top left, rgba(248, 143, 82, 0.22), transparent 24%),
+    radial-gradient(circle at left top, rgba(143, 77, 255, 0.18), transparent 26%),
+    linear-gradient(180deg, #11100f 0%, #171413 18%, #1c1917 100%);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  letter-spacing: 0;
+}
+
+p {
+  color: var(--color-text-muted);
+}
+
+::selection {
+  background: rgba(248, 143, 82, 0.32);
+  color: var(--color-text);
+}
