@@ -12,6 +12,20 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'orders')]
 class Order
 {
+    public const STATUS_PENDING_PAYMENT = 'pending_payment';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_EXPIRED = 'expired';
+
+    public const TYPE_TICKET = 'ticket';
+
+    public const RESERVED_STATUSES = [
+        self::STATUS_PENDING_PAYMENT,
+        self::STATUS_PAID,
+    ];
+
+    public const DEFAULT_CURRENCY = 'EUR';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_order')]
@@ -101,6 +115,18 @@ class Order
     public function setReference(string $reference): static
     {
         $this->reference = $reference;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

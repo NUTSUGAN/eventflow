@@ -10,8 +10,10 @@ import { EventDetailPage } from './pages/EventDetailPage/EventDetailPage'
 import { ExplorerPage } from './pages/ExplorerPage/ExplorerPage'
 import { EventsListPage } from './pages/EventsListPage/EventsListPage'
 import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
+import { OrderPreparationPage } from './pages/OrderPreparationPage/OrderPreparationPage'
 import { OrganizerAccessPage } from './pages/OrganizerAccessPage/OrganizerAccessPage'
 import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage/OrganizerDashboardPage'
+import { OrganizerEventCreatePage } from './pages/OrganizerEventCreatePage/OrganizerEventCreatePage'
 import { OrganizerProfilePage } from './pages/OrganizerProfilePage/OrganizerProfilePage'
 import './App.css'
 
@@ -41,10 +43,15 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/explorer" element={<ExplorerPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/orders/prepare" element={<OrderPreparationPage />} />
           <Route path="/organizer-access" element={<OrganizerAccessPage />} />
           <Route
             path="/organizer/dashboard"
             element={<OrganizerDashboardPage />}
+          />
+          <Route
+            path="/organizer/events/new"
+            element={<OrganizerEventCreatePage />}
           />
           <Route path="/organizers/:organizerId" element={<OrganizerProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />

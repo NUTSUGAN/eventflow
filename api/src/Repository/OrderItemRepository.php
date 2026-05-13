@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\OrderItem;
+use App\Entity\TicketType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,18 @@ class OrderItemRepository extends ServiceEntityRepository
         parent::__construct($registry, OrderItem::class);
     }
 
-    //    /**
-    //     * @return OrderItem[] Returns an array of OrderItem objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function countReservedQuantityForTicketType(TicketType $ticketType, array $reservedStatuses): int
+    {
+        $reservedQuantity = $this->createQueryBuilder('orderItem')
+            ->select('COALESCE(SUM(orderItem.quantity), 0)')
+            ->innerJoin('orderItem.customerOrder', 'customerOrder')
+            ->andWhere('orderItem.ticketType = :ticketType')
+            ->andWhere('customerOrder.status IN (:statuses)')
+            ->setParameter('ticketType', $ticketType)
+            ->setParameter('statuses', $reservedStatuses)
+            ->getQuery()
+            ->getSingleScalarResult();
 
-    //    public function findOneBySomeField($value): ?OrderItem
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return (int) $reservedQuantity;
+    }
 }
