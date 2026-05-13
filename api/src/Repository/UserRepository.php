@@ -16,28 +16,42 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<User>
+     */
+    public function findPublicOrganizerSuggestions(string $query, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('user')
+            ->distinct()
+            ->innerJoin('user.organizedEvents', 'event')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->andWhere(
+                'LOWER(user.firstName) LIKE :query
+                OR LOWER(user.lastName) LIKE :query
+                OR LOWER(CONCAT(user.firstName, \' \', user.lastName)) LIKE :query
+                OR LOWER(CONCAT(user.lastName, \' \', user.firstName)) LIKE :query'
+            )
+            ->setParameter('publishedStatus', 'published')
+            ->setParameter('query', '%'.mb_strtolower($query).'%')
+            ->orderBy('user.lastName', 'ASC')
+            ->addOrderBy('user.firstName', 'ASC')
+            ->setMaxResults(max(1, min(10, $limit)))
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findPublicOrganizerById(int $id): ?User
+    {
+        return $this->createQueryBuilder('user')
+            ->distinct()
+            ->innerJoin('user.organizedEvents', 'event')
+            ->andWhere('user.id = :id')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('id', $id)
+            ->setParameter('publishedStatus', 'published')
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }

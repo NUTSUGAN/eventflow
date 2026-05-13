@@ -26,12 +26,28 @@ security:
                 username_path: email
                 password_path: password
 
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 1209600
+                path: /
+                remember_me_parameter: _remember_me
+                always_remember_me: false
+
             logout:
                 path: /api/logout
+                delete_cookies:
+                    REMEMBERME: null
 
     access_control:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/password, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
+        - { path: ^/api/search, roles: PUBLIC_ACCESS }
+        - { path: ^/api/events, roles: PUBLIC_ACCESS }
+        - { path: ^/api/organizers/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/admin/organizer-applications, roles: ROLE_ADMIN }
+        - { path: ^/api/organizer-application, roles: ROLE_USER }
         - { path: ^/api/me, roles: ROLE_USER }
 
 when@test:

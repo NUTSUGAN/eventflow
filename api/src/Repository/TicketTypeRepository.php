@@ -16,28 +16,25 @@ class TicketTypeRepository extends ServiceEntityRepository
         parent::__construct($registry, TicketType::class);
     }
 
-    //    /**
-    //     * @return TicketType[] Returns an array of TicketType objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('t.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<TicketType>
+     */
+    public function findActiveForEventOrdered(int $eventId): array
+    {
+        $now = new \DateTimeImmutable();
 
-    //    public function findOneBySomeField($value): ?TicketType
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $this->createQueryBuilder('ticketType')
+            ->andWhere('ticketType.event = :eventId')
+            ->andWhere('ticketType.isActive = true')
+            ->andWhere('ticketType.salesStartAt <= :now')
+            ->andWhere('ticketType.salesEndAt >= :now')
+            ->setParameter('eventId', $eventId)
+            ->setParameter('now', $now)
+            ->orderBy('ticketType.salesStartAt', 'ASC')
+            ->addOrderBy('ticketType.salesEndAt', 'ASC')
+            ->addOrderBy('ticketType.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

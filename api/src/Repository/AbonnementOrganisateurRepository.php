@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\AbonnementOrganisateur;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,15 @@ class AbonnementOrganisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, AbonnementOrganisateur::class);
     }
 
-    //    /**
-    //     * @return AbonnementOrganisateur[] Returns an array of AbonnementOrganisateur objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?AbonnementOrganisateur
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneForClientAndOrganizer(User $client, User $organizer): ?AbonnementOrganisateur
+    {
+        return $this->createQueryBuilder('subscription')
+            ->andWhere('subscription.client = :client')
+            ->andWhere('subscription.organizer = :organizer')
+            ->setParameter('client', $client)
+            ->setParameter('organizer', $organizer)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }

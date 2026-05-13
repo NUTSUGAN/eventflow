@@ -24,17 +24,29 @@ class TicketType
     #[ORM\Column(name: 'name', length: 60)]
     private ?string $name = null;
 
+    #[ORM\Column(name: 'description', type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
     #[ORM\Column(name: 'base_price', type: Types::DECIMAL, precision: 15, scale: 2)]
-    private ?string $basePrice = null;
+    private ?string $price = null;
 
     #[ORM\Column(name: 'stock')]
     private ?int $stock = null;
 
     #[ORM\Column(name: 'sale_start_at')]
-    private ?\DateTimeImmutable $saleStartAt = null;
+    private ?\DateTimeImmutable $salesStartAt = null;
 
     #[ORM\Column(name: 'sale_end_at')]
-    private ?\DateTimeImmutable $saleEndAt = null;
+    private ?\DateTimeImmutable $salesEndAt = null;
+
+    #[ORM\Column(name: 'max_per_order', nullable: true)]
+    private ?int $maxPerOrder = null;
+
+    #[ORM\Column(name: 'is_active', options: ['default' => true])]
+    private bool $isActive = true;
+
+    #[ORM\Column(name: 'created_at')]
+    private ?\DateTimeImmutable $createdAt = null;
 
     /**
      * @var Collection<int, OrderItem>
@@ -83,14 +95,26 @@ class TicketType
         return $this;
     }
 
-    public function getBasePrice(): ?string
+    public function getDescription(): ?string
     {
-        return $this->basePrice;
+        return $this->description;
     }
 
-    public function setBasePrice(string $basePrice): static
+    public function setDescription(?string $description): static
     {
-        $this->basePrice = $basePrice;
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(string $price): static
+    {
+        $this->price = $price;
 
         return $this;
     }
@@ -107,26 +131,62 @@ class TicketType
         return $this;
     }
 
-    public function getSaleStartAt(): ?\DateTimeImmutable
+    public function getSalesStartAt(): ?\DateTimeImmutable
     {
-        return $this->saleStartAt;
+        return $this->salesStartAt;
     }
 
-    public function setSaleStartAt(\DateTimeImmutable $saleStartAt): static
+    public function setSalesStartAt(\DateTimeImmutable $salesStartAt): static
     {
-        $this->saleStartAt = $saleStartAt;
+        $this->salesStartAt = $salesStartAt;
 
         return $this;
     }
 
-    public function getSaleEndAt(): ?\DateTimeImmutable
+    public function getSalesEndAt(): ?\DateTimeImmutable
     {
-        return $this->saleEndAt;
+        return $this->salesEndAt;
     }
 
-    public function setSaleEndAt(\DateTimeImmutable $saleEndAt): static
+    public function setSalesEndAt(\DateTimeImmutable $salesEndAt): static
     {
-        $this->saleEndAt = $saleEndAt;
+        $this->salesEndAt = $salesEndAt;
+
+        return $this;
+    }
+
+    public function getMaxPerOrder(): ?int
+    {
+        return $this->maxPerOrder;
+    }
+
+    public function setMaxPerOrder(?int $maxPerOrder): static
+    {
+        $this->maxPerOrder = $maxPerOrder;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -152,7 +212,6 @@ class TicketType
     public function removeOrderItem(OrderItem $orderItem): static
     {
         if ($this->orderItems->removeElement($orderItem)) {
-            // set the owning side to null (unless already changed)
             if ($orderItem->getTicketType() === $this) {
                 $orderItem->setTicketType(null);
             }
@@ -182,7 +241,6 @@ class TicketType
     public function removeTicket(Ticket $ticket): static
     {
         if ($this->tickets->removeElement($ticket)) {
-            // set the owning side to null (unless already changed)
             if ($ticket->getTicketType() === $this) {
                 $ticket->setTicketType(null);
             }

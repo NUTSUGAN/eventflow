@@ -38,6 +38,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'role', length: 20)]
     private ?string $role = self::ROLE_CLIENT;
 
+    #[ORM\Column(name: 'profile_photo', length: 255, nullable: true)]
+    private ?string $profilePhoto = null;
+
+    #[ORM\Column(name: 'terms_accepted_at', nullable: true)]
+    private ?\DateTimeImmutable $termsAcceptedAt = null;
+
+    #[ORM\Column(name: 'privacy_accepted_at', nullable: true)]
+    private ?\DateTimeImmutable $privacyAcceptedAt = null;
+
     #[ORM\Column(name: 'created_at')]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -71,6 +80,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Checkin::class, mappedBy: 'staffUser')]
     private Collection $staffCheckins;
 
+    /**
+     * @var Collection<int, UserOauthAccount>
+     */
+    #[ORM\OneToMany(
+        targetEntity: UserOauthAccount::class,
+        mappedBy: 'user',
+        orphanRemoval: true,
+        cascade: ['persist']
+    )]
+    private Collection $oauthAccounts;
+
+    /**
+     * @var Collection<int, NewsletterSubscription>
+     */
+    #[ORM\OneToMany(
+        targetEntity: NewsletterSubscription::class,
+        mappedBy: 'user',
+        orphanRemoval: true,
+        cascade: ['persist']
+    )]
+    private Collection $newsletterSubscriptions;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: OrganizerApplication::class, cascade: ['persist', 'remove'])]
+    private ?OrganizerApplication $organizerApplication = null;
+
     public function __construct()
     {
         $this->organizedEvents = new ArrayCollection();
@@ -78,6 +112,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->organizerSubscriptions = new ArrayCollection();
         $this->clientOrders = new ArrayCollection();
         $this->staffCheckins = new ArrayCollection();
+        $this->oauthAccounts = new ArrayCollection();
+        $this->newsletterSubscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -164,6 +200,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER';
 
         return array_values(array_unique($roles));
+    }
+
+    public function getProfilePhoto(): ?string
+    {
+        return $this->profilePhoto;
+    }
+
+    public function setProfilePhoto(?string $profilePhoto): static
+    {
+        $this->profilePhoto = $profilePhoto;
+
+        return $this;
+    }
+
+    public function getTermsAcceptedAt(): ?\DateTimeImmutable
+    {
+        return $this->termsAcceptedAt;
+    }
+
+    public function setTermsAcceptedAt(?\DateTimeImmutable $termsAcceptedAt): static
+    {
+        $this->termsAcceptedAt = $termsAcceptedAt;
+
+        return $this;
+    }
+
+    public function getPrivacyAcceptedAt(): ?\DateTimeImmutable
+    {
+        return $this->privacyAcceptedAt;
+    }
+
+    public function setPrivacyAcceptedAt(?\DateTimeImmutable $privacyAcceptedAt): static
+    {
+        $this->privacyAcceptedAt = $privacyAcceptedAt;
+
+        return $this;
     }
 
     public function eraseCredentials(): void
@@ -326,6 +398,90 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($staffCheckin->getStaffUser() === $this) {
                 $staffCheckin->setStaffUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserOauthAccount>
+     */
+    public function getOauthAccounts(): Collection
+    {
+        return $this->oauthAccounts;
+    }
+
+    public function addOauthAccount(UserOauthAccount $oauthAccount): static
+    {
+        if (!$this->oauthAccounts->contains($oauthAccount)) {
+            $this->oauthAccounts->add($oauthAccount);
+            $oauthAccount->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOauthAccount(UserOauthAccount $oauthAccount): static
+    {
+        if ($this->oauthAccounts->removeElement($oauthAccount)) {
+            if ($oauthAccount->getUser() === $this) {
+                $oauthAccount->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, NewsletterSubscription>
+     */
+    public function getNewsletterSubscriptions(): Collection
+    {
+        return $this->newsletterSubscriptions;
+    }
+
+    public function addNewsletterSubscription(NewsletterSubscription $newsletterSubscription): static
+    {
+        if (!$this->newsletterSubscriptions->contains($newsletterSubscription)) {
+            $this->newsletterSubscriptions->add($newsletterSubscription);
+            $newsletterSubscription->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function getOrganizerApplication(): ?OrganizerApplication
+    {
+        return $this->organizerApplication;
+    }
+
+    public function setOrganizerApplication(?OrganizerApplication $organizerApplication): static
+    {
+        if (null === $organizerApplication) {
+            if ($this->organizerApplication instanceof OrganizerApplication) {
+                $this->organizerApplication->setUser(null);
+            }
+
+            $this->organizerApplication = null;
+
+            return $this;
+        }
+
+        if ($organizerApplication->getUser() !== $this) {
+            $organizerApplication->setUser($this);
+        }
+
+        $this->organizerApplication = $organizerApplication;
+
+        return $this;
+    }
+
+    public function removeNewsletterSubscription(NewsletterSubscription $newsletterSubscription): static
+    {
+        if ($this->newsletterSubscriptions->removeElement($newsletterSubscription)) {
+            if ($newsletterSubscription->getUser() === $this) {
+                $newsletterSubscription->setUser(null);
             }
         }
 
