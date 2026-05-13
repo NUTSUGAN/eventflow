@@ -55,7 +55,7 @@ import {
   FollowIcon,
 } from './eventDetailPageElements'
 import heroImage from '../../assets/hero.png'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 function formatEventDate(date: string | null): string {
   if (!date) {
@@ -131,6 +131,7 @@ function normalizeStatusValue(status: string): string {
 }
 
 export function EventDetailPage() {
+  const navigate = useNavigate()
   const { eventId } = useParams()
   const [event, setEvent] = useState<EventDetail | null>(null)
   const [relatedEvents, setRelatedEvents] = useState<EventSummary[]>([])
@@ -296,11 +297,14 @@ export function EventDetailPage() {
     })
   }
 
-  function handleReserveTicket() {
-    document.getElementById('site-auth-cta')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    })
+  function handleReserveTicket(selectedTicketTypeId: number) {
+    if (!event) {
+      return
+    }
+
+    navigate(
+      `/orders/prepare?eventId=${event.id}&ticketTypeId=${selectedTicketTypeId}`,
+    )
   }
 
   if (isLoading) {
@@ -429,11 +433,14 @@ export function EventDetailPage() {
                       </DetailTicketMeta>
                       </div>
 
-                      <TicketReserveButton type="button" onClick={handleReserveTicket}>
+                      <TicketReserveButton
+                        type="button"
+                        onClick={() => handleReserveTicket(ticketType.id)}
+                      >
                         Reserver
                       </TicketReserveButton>
                       <TicketReserveHint>
-                        La reservation sera branchee a la commande juste apres.
+                        Tu choisiras la quantite juste apres.
                       </TicketReserveHint>
                     </DetailTicketActions>
                   </DetailTicketListItem>

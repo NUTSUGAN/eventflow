@@ -102,3 +102,28 @@ export const OrganizerDashboardState = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(255, 239, 229, 0.84);
 `
+
+export const OrganizerDashboardEventTitle = styled.h3`
+  margin: 0;
+  color: #fff8f2;
+  font-size: 1rem;
+`
+
+export const OrganizerDashboardEventMeta = styled.p`
+  margin: 0;
+  color: rgba(255, 237, 222, 0.74);
+  line-height: 1.6;
+`
+
+export const OrganizerDashboardEventBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff3e5;
+  font-size: 0.85rem;
+  font-weight: 600;
+`
