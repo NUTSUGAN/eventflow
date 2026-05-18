@@ -99,8 +99,19 @@ export function OrganizerAccessPage() {
       setStatusMessage(null)
 
       try {
-        const currentUser = await getCurrentUser()
+        const currentUser = await getCurrentUser(true)
         const organizerState = await getMyOrganizerApplication()
+
+        if (
+          currentUser.role === 'ROLE_ORGANIZER' ||
+          currentUser.role === 'ROLE_ADMIN'
+        ) {
+          if (isMounted) {
+            navigate('/organizer/dashboard', { replace: true })
+          }
+
+          return
+        }
 
         if (isMounted) {
           setUser(currentUser)
@@ -127,7 +138,7 @@ export function OrganizerAccessPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [navigate])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

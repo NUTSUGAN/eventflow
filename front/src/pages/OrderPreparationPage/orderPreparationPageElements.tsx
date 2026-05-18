@@ -155,6 +155,11 @@ export const OrderPreparationPrimaryButton = styled.button`
   font-size: 0.96rem;
   font-weight: 700;
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+  }
 `
 
 export const OrderPreparationSecondaryButton = styled.button`
@@ -167,4 +172,12 @@ export const OrderPreparationSecondaryButton = styled.button`
   font-size: 0.96rem;
   font-weight: 700;
   cursor: pointer;
+`
+
+export const OrderPreparationCheckoutButton = styled(OrderPreparationPrimaryButton)`
+  width: 100%;
+  min-height: 58px;
+  font-size: 1rem;
+  justify-content: center;
+  box-shadow: 0 18px 36px rgba(201, 108, 61, 0.18);
 `

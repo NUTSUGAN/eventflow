@@ -104,6 +104,11 @@ export const OrganizerEventCreateInput = styled.input`
 
 export const OrganizerEventCreateSelect = styled.select`
   ${fieldStyles}
+
+  option {
+    color: #201712;
+    background: #fff8f2;
+  }
 `
 
 export const OrganizerEventCreateTextarea = styled.textarea`
@@ -135,6 +140,11 @@ export const OrganizerEventCreatePrimaryButton = styled.button`
   font-size: 0.96rem;
   font-weight: 700;
   cursor: pointer;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.72;
+  }
 `
 
 export const OrganizerEventCreateSecondaryButton = styled.button`

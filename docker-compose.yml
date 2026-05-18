@@ -5,7 +5,7 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: eventflow_app
     working_dir: /var/www/api
-    command: sh -c "mkdir -p var/cache var/log && chown -R www-data:www-data var && php-fpm"
+    command: sh -c "mkdir -p var/cache/dev/profiler var/cache/dev/doctrine/orm/Proxies var/log && chown -R www-data:www-data var && chmod -R 775 var && php-fpm"
     volumes:
       - ./api:/var/www/api
       - eventflow_vendor:/var/www/api/vendor

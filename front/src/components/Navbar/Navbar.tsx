@@ -219,13 +219,25 @@ export function Navbar() {
     navigate('/explorer')
   }
 
-  function handleOrganizerNavigation() {
+  async function handleOrganizerNavigation() {
     setIsSearchOpen(false)
     setIsMobileMenuOpen(false)
     setIsProfileMenuOpen(false)
 
     if (currentUser) {
-      navigate('/organizer-access')
+      try {
+        const refreshedUser = await getCurrentUser(true)
+        setCurrentUser(refreshedUser)
+
+        const userHasOrganizerAccess =
+          refreshedUser.role === 'ROLE_ORGANIZER' ||
+          refreshedUser.role === 'ROLE_ADMIN'
+
+        navigate(userHasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
+      } catch {
+        handleAuthNavigation('login', 'organizer')
+      }
+
       return
     }
 
@@ -450,7 +462,7 @@ export function Navbar() {
                   type="button"
                   onClick={() => {
                     setIsProfileMenuOpen(false)
-                    navigate(hasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
+                      navigate(hasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
                   }}
                 >
                   {hasOrganizerAccess ? 'Ouvrir mon espace organisateur' : 'Devenir organisateur'}

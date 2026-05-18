@@ -9,6 +9,7 @@ import {
   OrderPreparationActions,
   OrderPreparationCard,
   OrderPreparationCardTitle,
+  OrderPreparationCheckoutButton,
   OrderPreparationError,
   OrderPreparationEyebrow,
   OrderPreparationField,
@@ -48,6 +49,36 @@ function formatDateTime(value: string | null): string {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
+}
+
+function formatOrderStatusLabel(status: string): string {
+  switch (status) {
+    case 'pending_payment':
+      return 'En attente de paiement'
+    case 'paid':
+      return 'Payee'
+    case 'cancelled':
+      return 'Annulee'
+    case 'expired':
+      return 'Expirée'
+    default:
+      return status
+  }
+}
+
+function resolveAvailableStock(ticketType: EventTicketType | null): number {
+  if (!ticketType) {
+    return 0
+  }
+
+  if (
+    ticketType.availableStock !== null &&
+    ticketType.availableStock !== undefined
+  ) {
+    return ticketType.availableStock
+  }
+
+  return ticketType.stock ?? 0
 }
 
 export function OrderPreparationPage() {
@@ -122,14 +153,31 @@ export function OrderPreparationPage() {
 
   const maxAllowedQuantity = useMemo(() => {
     if (!selectedTicketType) {
-      return 1
+      return 0
     }
 
-    return selectedTicketType.maxPerOrder ?? selectedTicketType.stock ?? 1
+    const availableStock = resolveAvailableStock(selectedTicketType)
+
+    if (
+      selectedTicketType.maxPerOrder !== null &&
+      selectedTicketType.maxPerOrder !== undefined
+    ) {
+      return Math.max(
+        0,
+        Math.min(selectedTicketType.maxPerOrder, availableStock),
+      )
+    }
+
+    return Math.max(0, availableStock)
   }, [selectedTicketType])
 
+  const hasAvailableStock = maxAllowedQuantity > 0
+
   const effectiveQuantity = useMemo(
-    () => Math.max(1, Math.min(quantity, maxAllowedQuantity)),
+    () =>
+      maxAllowedQuantity === 0
+        ? 0
+        : Math.max(1, Math.min(quantity, maxAllowedQuantity)),
     [maxAllowedQuantity, quantity],
   )
 
@@ -142,7 +190,7 @@ export function OrderPreparationPage() {
   }, [effectiveQuantity, selectedTicketType])
 
   async function handlePrepareOrder() {
-    if (!selectedTicketType || isSubmitting) {
+    if (!selectedTicketType || isSubmitting || !hasAvailableStock) {
       return
     }
 
@@ -180,6 +228,20 @@ export function OrderPreparationPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  function handleContinueToPayment() {
+    if (!preparedOrder || !event) {
+      return
+    }
+
+    const checkoutUrl = new URL('/checkout', window.location.origin)
+    checkoutUrl.searchParams.set('orderId', String(preparedOrder.id))
+    checkoutUrl.searchParams.set('reference', preparedOrder.reference)
+    checkoutUrl.searchParams.set('total', String(preparedOrder.total))
+    checkoutUrl.searchParams.set('eventTitle', preparedOrder.event.title ?? event.title)
+
+    navigate(`${checkoutUrl.pathname}${checkoutUrl.search}`)
   }
 
   if (isLoading) {
@@ -255,8 +317,10 @@ export function OrderPreparationPage() {
                 </OrderPreparationValue>
               </OrderPreparationListRow>
               <OrderPreparationListRow>
-                <OrderPreparationLabel>Stock affiche</OrderPreparationLabel>
-                <OrderPreparationValue>{selectedTicketType.stock ?? 0}</OrderPreparationValue>
+                <OrderPreparationLabel>Stock restant</OrderPreparationLabel>
+                <OrderPreparationValue>
+                  {resolveAvailableStock(selectedTicketType)}
+                </OrderPreparationValue>
               </OrderPreparationListRow>
             </OrderPreparationList>
 
@@ -264,15 +328,18 @@ export function OrderPreparationPage() {
               <OrderPreparationFieldLabel>Quantite</OrderPreparationFieldLabel>
               <OrderPreparationInput
                 type="number"
-                min="1"
-                max={selectedTicketType.maxPerOrder ?? selectedTicketType.stock ?? undefined}
-                value={effectiveQuantity}
+                min={hasAvailableStock ? '1' : '0'}
+                max={maxAllowedQuantity > 0 ? maxAllowedQuantity : undefined}
+                value={hasAvailableStock ? effectiveQuantity : 0}
+                disabled={!hasAvailableStock}
                 onChange={(event) =>
                   setQuantity(Math.max(1, Number.parseInt(event.target.value || '1', 10)))
                 }
               />
               <OrderPreparationHint>
-                {selectedTicketType.maxPerOrder
+                {!hasAvailableStock
+                  ? 'Ce billet est complet pour le moment.'
+                  : selectedTicketType.maxPerOrder
                   ? `Maximum ${selectedTicketType.maxPerOrder} billet(s) par commande.`
                   : 'Aucune limite specifique par commande sur ce billet.'}
               </OrderPreparationHint>
@@ -282,9 +349,13 @@ export function OrderPreparationPage() {
               <OrderPreparationPrimaryButton
                 type="button"
                 onClick={handlePrepareOrder}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !hasAvailableStock}
               >
-                {isSubmitting ? 'Preparation en cours...' : 'Preparer la commande'}
+                {isSubmitting
+                  ? 'Preparation en cours...'
+                  : hasAvailableStock
+                    ? 'Preparer la commande'
+                    : 'Billet indisponible'}
               </OrderPreparationPrimaryButton>
               <OrderPreparationSecondaryButton
                 type="button"
@@ -326,7 +397,9 @@ export function OrderPreparationPage() {
                   </OrderPreparationListRow>
                   <OrderPreparationListRow>
                     <OrderPreparationLabel>Statut</OrderPreparationLabel>
-                    <OrderPreparationValue>{preparedOrder.status}</OrderPreparationValue>
+                    <OrderPreparationValue>
+                      {formatOrderStatusLabel(preparedOrder.status)}
+                    </OrderPreparationValue>
                   </OrderPreparationListRow>
                   <OrderPreparationListRow>
                     <OrderPreparationLabel>Total</OrderPreparationLabel>
@@ -338,10 +411,16 @@ export function OrderPreparationPage() {
                 <OrderPreparationHint>
                   La prochaine etape branchera le paiement sur cette commande preparee.
                 </OrderPreparationHint>
+                <OrderPreparationCheckoutButton
+                  type="button"
+                  onClick={handleContinueToPayment}
+                >
+                  Continuer vers le paiement
+                </OrderPreparationCheckoutButton>
               </>
             ) : (
               <OrderPreparationHint>
-                Le backend calculera le total final, verifiera le stock reserve et creera
+                Le backend calculera le total final, verifiera le stock disponible et creera
                 la commande avant paiement.
               </OrderPreparationHint>
             )}

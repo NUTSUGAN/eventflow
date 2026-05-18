@@ -1,0 +1,4 @@
+organizer_event_controller:
+    resource: ../../src/Controller/OrganizerEventController.php
+    type: attribute
+

@@ -134,14 +134,14 @@ final class OrderPreparationController extends AbstractController
 
             $reservedQuantity = $orderItemRepository->countReservedQuantityForTicketType(
                 $ticketType,
-                Order::RESERVED_STATUSES
+                Order::STOCK_CONSUMING_STATUSES
             );
             $availableStock = max(0, $ticketType->getStock() - $reservedQuantity);
 
             if ($quantity > $availableStock) {
                 return $this->json([
                     'message' => sprintf(
-                        'Stock insuffisant pour "%s". Il reste %d billet(s) reservables.',
+                        'Stock insuffisant pour "%s". Il reste %d billet(s) disponibles.',
                         $ticketType->getName(),
                         $availableStock
                     ),
@@ -195,10 +195,7 @@ final class OrderPreparationController extends AbstractController
                 'quantity' => $lineItem['quantity'],
                 'unitPrice' => (float) $lineItem['unitPrice'],
                 'lineTotal' => (float) $this->centsToMoneyString($lineItem['lineTotalInCents']),
-                'availableStockAfterPreparation' => max(
-                    0,
-                    $lineItem['availableStock'] - $lineItem['quantity']
-                ),
+                'availableStockAfterPreparation' => $lineItem['availableStock'],
             ];
         }
 

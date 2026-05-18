@@ -1,0 +1,9 @@
+Invalid credentials.: Identifiants invalides.
+Username could not be found.: Aucun compte ne correspond a cet identifiant.
+Bad credentials.: Identifiants invalides.
+An authentication exception occurred.: Une erreur d authentification est survenue.
+Authentication request could not be processed due to a system problem.: La demande d authentification n a pas pu etre traitee a cause d un probleme systeme.
+Not privileged to request the resource.: Acces refuse a cette ressource.
+Full authentication is required to access this resource.: Connecte-toi pour acceder a cette ressource.
+Insufficient authentication.: Authentification insuffisante.
+Remember me login has expired.: La connexion memorisee a expire. Merci de te reconnecter.

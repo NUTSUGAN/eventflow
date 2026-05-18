@@ -105,6 +105,88 @@ function formatTicketPrice(price: number | null): string {
   }).format(price)
 }
 
+function resolveAvailableStock(ticketType: EventDetail['ticketTypes'][number]): number {
+  if (ticketType.availableStock !== null) {
+    return ticketType.availableStock
+  }
+
+  return ticketType.stock ?? 0
+}
+
+function isTicketSaleOpen(ticketType: EventDetail['ticketTypes'][number]): boolean {
+  const now = Date.now()
+  const saleStartAt = ticketType.saleStartAt ? new Date(ticketType.saleStartAt).getTime() : null
+  const saleEndAt = ticketType.saleEndAt ? new Date(ticketType.saleEndAt).getTime() : null
+
+  if (saleStartAt !== null && !Number.isNaN(saleStartAt) && now < saleStartAt) {
+    return false
+  }
+
+  if (saleEndAt !== null && !Number.isNaN(saleEndAt) && now > saleEndAt) {
+    return false
+  }
+
+  return true
+}
+
+function getTicketAvailabilityState(ticketType: EventDetail['ticketTypes'][number]):
+  | 'available'
+  | 'sold_out'
+  | 'upcoming'
+  | 'ended' {
+  const availableStock = resolveAvailableStock(ticketType)
+
+  if (availableStock <= 0) {
+    return 'sold_out'
+  }
+
+  const now = Date.now()
+  const saleStartAt = ticketType.saleStartAt ? new Date(ticketType.saleStartAt).getTime() : null
+  const saleEndAt = ticketType.saleEndAt ? new Date(ticketType.saleEndAt).getTime() : null
+
+  if (saleStartAt !== null && !Number.isNaN(saleStartAt) && now < saleStartAt) {
+    return 'upcoming'
+  }
+
+  if (saleEndAt !== null && !Number.isNaN(saleEndAt) && now > saleEndAt) {
+    return 'ended'
+  }
+
+  return 'available'
+}
+
+function getTicketButtonLabel(ticketType: EventDetail['ticketTypes'][number]): string {
+  const state = getTicketAvailabilityState(ticketType)
+
+  if (state === 'sold_out') {
+    return 'Complet'
+  }
+
+  if (state === 'upcoming' || state === 'ended') {
+    return 'Indisponible'
+  }
+
+  return 'Reserver'
+}
+
+function getTicketReserveHintText(ticketType: EventDetail['ticketTypes'][number]): string {
+  const state = getTicketAvailabilityState(ticketType)
+
+  if (state === 'sold_out') {
+    return 'Ce billet est complet pour le moment.'
+  }
+
+  if (state === 'upcoming') {
+    return 'La vente de ce billet n a pas encore commence.'
+  }
+
+  if (state === 'ended') {
+    return 'La vente de ce billet est terminee.'
+  }
+
+  return 'Tu choisiras la quantite juste apres.'
+}
+
 function getOrganizerInitials(fullName: string): string {
   return fullName
     .split(' ')
@@ -117,7 +199,7 @@ function getOrganizerInitials(fullName: string): string {
 const eventStatusOptions = [
   { value: 'draft', label: 'Brouillon' },
   { value: 'pending', label: 'En attente' },
-  { value: 'published', label: 'Publie' },
+  { value: 'published', label: 'Public' },
   { value: 'cancelled', label: 'Annule' },
   { value: 'completed', label: 'Termine' },
 ]
@@ -261,6 +343,16 @@ export function EventDetailPage() {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
   }, [event])
 
+  const availableTicketTypeCount = useMemo(() => {
+    if (!event) {
+      return 0
+    }
+
+    return event.ticketTypes.filter(
+      (ticketType) => resolveAvailableStock(ticketType) > 0 && isTicketSaleOpen(ticketType),
+    ).length
+  }, [event])
+
   async function handleFollowToggle() {
     if (!event?.organizer || !event.subscription.canFollow || isFollowLoading) {
       return
@@ -401,7 +493,9 @@ export function EventDetailPage() {
           <DetailPanel>
             <DetailPanelHeader>
               <DetailPanelTitle>Billets disponibles</DetailPanelTitle>
-              <DetailCaption>{event.ticketTypes.length} billet(s) disponible(s)</DetailCaption>
+              <DetailCaption>
+                {availableTicketTypeCount} type(s) de billet encore disponible(s)
+              </DetailCaption>
             </DetailPanelHeader>
 
             {event.ticketTypes.length > 0 ? (
@@ -416,7 +510,8 @@ export function EventDetailPage() {
                         </DetailTicketDescription>
                       ) : null}
                       <DetailTicketMeta>
-                        Stock {ticketType.stock ?? 0}
+                        Stock restant {resolveAvailableStock(ticketType)}
+                        {` / ${ticketType.stock ?? 0}`}
                         {ticketType.maxPerOrder
                           ? ` - Max ${ticketType.maxPerOrder} / commande`
                           : ''}
@@ -436,11 +531,12 @@ export function EventDetailPage() {
                       <TicketReserveButton
                         type="button"
                         onClick={() => handleReserveTicket(ticketType.id)}
+                        disabled={getTicketAvailabilityState(ticketType) !== 'available'}
                       >
-                        Reserver
+                        {getTicketButtonLabel(ticketType)}
                       </TicketReserveButton>
                       <TicketReserveHint>
-                        Tu choisiras la quantite juste apres.
+                        {getTicketReserveHintText(ticketType)}
                       </TicketReserveHint>
                     </DetailTicketActions>
                   </DetailTicketListItem>

@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\OrderItem;
 use App\Entity\TicketType;
 use App\Entity\User;
 use App\Repository\AbonnementOrganisateurRepository;
 use App\Repository\EventRepository;
+use App\Repository\OrderItemRepository;
+use App\Repository\TicketTypeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class EventController extends AbstractController
 {
+    private const PUBLIC_TIMEZONE = 'Europe/Paris';
+
     #[Route('/api/events/filters', name: 'api_event_filters', methods: ['GET'])]
     public function filters(EventRepository $eventRepository): JsonResponse
     {
@@ -64,7 +69,9 @@ class EventController extends AbstractController
         int $id,
         Request $request,
         EventRepository $eventRepository,
-        AbonnementOrganisateurRepository $subscriptionRepository
+        AbonnementOrganisateurRepository $subscriptionRepository,
+        TicketTypeRepository $ticketTypeRepository,
+        OrderItemRepository $orderItemRepository
     ): JsonResponse {
         $event = $eventRepository->findOneForPublicDetail($id);
 
@@ -104,8 +111,6 @@ class EventController extends AbstractController
             }
         }
 
-        /** @var \App\Repository\TicketTypeRepository $ticketTypeRepository */
-        $ticketTypeRepository = $eventRepository->getEntityManager()->getRepository(TicketType::class);
         $ticketTypes = $ticketTypeRepository->findActiveForEventOrdered($event->getId());
 
         return $this->json([
@@ -113,10 +118,10 @@ class EventController extends AbstractController
             'title' => $event->getTitle(),
             'description' => $event->getDescription(),
             'status' => $event->getStatus(),
-            'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
-            'endsAt' => $event->getEndDatetime()?->format(DATE_ATOM),
+            'startsAt' => $this->formatDateTimeForFrontend($event->getStartDatetime()),
+            'endsAt' => $this->formatDateTimeForFrontend($event->getEndDatetime()),
             'capacity' => $event->getCapacity(),
-            'createdAt' => $event->getCreatedAt()?->format(DATE_ATOM),
+            'createdAt' => $this->formatDateTimeForFrontend($event->getCreatedAt()),
             'category' => [
                 'id' => $event->getCategory()?->getId(),
                 'name' => $event->getCategory()?->getName(),
@@ -144,20 +149,32 @@ class EventController extends AbstractController
             ] : null,
             'subscription' => $subscription,
             'ticketTypes' => array_map(
-                fn (TicketType $ticketType): array => [
-                    'id' => $ticketType->getId(),
-                    'name' => $ticketType->getName(),
-                    'description' => $ticketType->getDescription(),
-                    'basePrice' => null !== $ticketType->getPrice() ? (float) $ticketType->getPrice() : null,
-                    'stock' => $ticketType->getStock(),
-                    'saleStartAt' => $ticketType->getSalesStartAt()?->format(DATE_ATOM),
-                    'saleEndAt' => $ticketType->getSalesEndAt()?->format(DATE_ATOM),
-                    'maxPerOrder' => $ticketType->getMaxPerOrder(),
-                    'isActive' => $ticketType->isActive(),
-                ],
+                fn (TicketType $ticketType): array => $this->serializePublicTicketType(
+                    $ticketType,
+                    $orderItemRepository->countReservedQuantityForTicketType($ticketType, \App\Entity\Order::STOCK_CONSUMING_STATUSES)
+                ),
                 $ticketTypes
             ),
         ]);
+    }
+
+    private function serializePublicTicketType(TicketType $ticketType, int $reservedQuantity): array
+    {
+        $stock = (int) ($ticketType->getStock() ?? 0);
+
+        return [
+            'id' => $ticketType->getId(),
+            'name' => $ticketType->getName(),
+            'description' => $ticketType->getDescription(),
+            'basePrice' => null !== $ticketType->getPrice() ? (float) $ticketType->getPrice() : null,
+            'stock' => $stock,
+            'reservedQuantity' => $reservedQuantity,
+            'availableStock' => max(0, $stock - $reservedQuantity),
+            'saleStartAt' => $this->formatDateTimeForFrontend($ticketType->getSalesStartAt()),
+            'saleEndAt' => $this->formatDateTimeForFrontend($ticketType->getSalesEndAt()),
+            'maxPerOrder' => $ticketType->getMaxPerOrder(),
+            'isActive' => $ticketType->isActive(),
+        ];
     }
 
     private function serializeEventSummary(Request $request, Event $event): array
@@ -187,12 +204,23 @@ class EventController extends AbstractController
             'shortDescription' => $this->createExcerpt($event->getDescription()),
             'city' => $event->getLocation()?->getCity() ?? 'Ville a confirmer',
             'venue' => $venue,
-            'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
+            'startsAt' => $this->formatDateTimeForFrontend($event->getStartDatetime()),
             'category' => $event->getCategory()?->getName() ?? 'Evenement',
             'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
             'currency' => 'EUR',
         ];
+    }
+
+    private function formatDateTimeForFrontend(?\DateTimeImmutable $dateTime): ?string
+    {
+        if (!$dateTime instanceof \DateTimeImmutable) {
+            return null;
+        }
+
+        return $dateTime
+            ->setTimezone(new \DateTimeZone(self::PUBLIC_TIMEZONE))
+            ->format(DATE_ATOM);
     }
 
     private function createExcerpt(?string $text, int $maxLength = 140): string

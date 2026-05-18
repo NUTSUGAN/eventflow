@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Order;
 use App\Entity\TicketType;
 use App\Entity\User;
 use App\Repository\EventRepository;
+use App\Repository\OrderItemRepository;
 use App\Repository\TicketTypeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,11 +18,15 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/organizer')]
 class OrganizerTicketTypeController extends AbstractController
 {
+    private const ORGANIZER_TIMEZONE = 'Europe/Paris';
+
     #[Route('/events/{eventId}/ticket-types', name: 'api_organizer_ticket_type_create', methods: ['POST'])]
     public function create(
         int $eventId,
         Request $request,
         EventRepository $eventRepository,
+        TicketTypeRepository $ticketTypeRepository,
+        OrderItemRepository $orderItemRepository,
         EntityManagerInterface $entityManager
     ): JsonResponse {
         $user = $this->getUser();
@@ -86,10 +92,10 @@ class OrganizerTicketTypeController extends AbstractController
             ], 400);
         }
 
-        try {
-            $salesStartAt = new \DateTimeImmutable((string) $salesStartAtRaw);
-            $salesEndAt = new \DateTimeImmutable((string) $salesEndAtRaw);
-        } catch (\Throwable) {
+        $salesStartAt = $this->parseLocalDateTime($salesStartAtRaw);
+        $salesEndAt = $this->parseLocalDateTime($salesEndAtRaw);
+
+        if (!$salesStartAt instanceof \DateTimeImmutable || !$salesEndAt instanceof \DateTimeImmutable) {
             return $this->json([
                 'message' => 'Format de date invalide pour salesStartAt ou salesEndAt.',
             ], 400);
@@ -98,6 +104,31 @@ class OrganizerTicketTypeController extends AbstractController
         if ($salesStartAt >= $salesEndAt) {
             return $this->json([
                 'message' => 'La date de debut de vente doit etre avant la date de fin de vente.',
+            ], 400);
+        }
+
+        if ($salesStartAt >= $event->getStartDatetime()) {
+            return $this->json([
+                'message' => 'Le debut de vente doit intervenir avant le debut de l evenement.',
+            ], 400);
+        }
+
+        if ($salesEndAt > $event->getStartDatetime()) {
+            return $this->json([
+                'message' => 'La fin de vente ne peut pas depasser le debut de l evenement.',
+            ], 400);
+        }
+
+        $allocatedStock = $ticketTypeRepository->sumStockForEvent($event);
+        $nextEventStock = $allocatedStock + (int) $stock;
+
+        if ($nextEventStock > (int) $event->getCapacity()) {
+            return $this->json([
+                'message' => sprintf(
+                    'Le stock total des billets (%d) depasserait la capacite de l evenement (%d).',
+                    $nextEventStock,
+                    (int) $event->getCapacity()
+                ),
             ], 400);
         }
 
@@ -119,9 +150,14 @@ class OrganizerTicketTypeController extends AbstractController
         $entityManager->persist($ticketType);
         $entityManager->flush();
 
+        $reservedQuantity = $orderItemRepository->countReservedQuantityForTicketType(
+            $ticketType,
+            Order::STOCK_CONSUMING_STATUSES
+        );
+
         return $this->json([
             'message' => 'Billet cree avec succes.',
-            'ticketType' => $this->serializeTicketType($ticketType),
+            'ticketType' => $this->serializeTicketType($ticketType, $reservedQuantity),
         ], 201);
     }
 
@@ -129,7 +165,8 @@ class OrganizerTicketTypeController extends AbstractController
     public function index(
         int $eventId,
         EventRepository $eventRepository,
-        TicketTypeRepository $ticketTypeRepository
+        TicketTypeRepository $ticketTypeRepository,
+        OrderItemRepository $orderItemRepository
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -165,7 +202,10 @@ class OrganizerTicketTypeController extends AbstractController
         );
 
         $data = array_map(
-            fn (TicketType $ticketType) => $this->serializeTicketType($ticketType),
+            fn (TicketType $ticketType) => $this->serializeTicketType(
+                $ticketType,
+                $orderItemRepository->countReservedQuantityForTicketType($ticketType, Order::STOCK_CONSUMING_STATUSES)
+            ),
             $ticketTypes
         );
 
@@ -177,6 +217,7 @@ class OrganizerTicketTypeController extends AbstractController
         int $id,
         Request $request,
         TicketTypeRepository $ticketTypeRepository,
+        OrderItemRepository $orderItemRepository,
         EntityManagerInterface $entityManager
     ): JsonResponse {
         $user = $this->getUser();
@@ -270,9 +311,9 @@ class OrganizerTicketTypeController extends AbstractController
         $salesEndAt = $ticketType->getSalesEndAt();
 
         if (array_key_exists('salesStartAt', $data)) {
-            try {
-                $salesStartAt = new \DateTimeImmutable((string) $data['salesStartAt']);
-            } catch (\Throwable) {
+            $salesStartAt = $this->parseLocalDateTime($data['salesStartAt']);
+
+            if (!$salesStartAt instanceof \DateTimeImmutable) {
                 return $this->json([
                     'message' => 'Format invalide pour salesStartAt.',
                 ], 400);
@@ -282,9 +323,9 @@ class OrganizerTicketTypeController extends AbstractController
         }
 
         if (array_key_exists('salesEndAt', $data)) {
-            try {
-                $salesEndAt = new \DateTimeImmutable((string) $data['salesEndAt']);
-            } catch (\Throwable) {
+            $salesEndAt = $this->parseLocalDateTime($data['salesEndAt']);
+
+            if (!$salesEndAt instanceof \DateTimeImmutable) {
                 return $this->json([
                     'message' => 'Format invalide pour salesEndAt.',
                 ], 400);
@@ -299,11 +340,48 @@ class OrganizerTicketTypeController extends AbstractController
             ], 400);
         }
 
+        $event = $ticketType->getEvent();
+
+        if ($event instanceof Event) {
+            if ($salesStartAt >= $event->getStartDatetime()) {
+                return $this->json([
+                    'message' => 'Le debut de vente doit intervenir avant le debut de l evenement.',
+                ], 400);
+            }
+
+            if ($salesEndAt > $event->getStartDatetime()) {
+                return $this->json([
+                    'message' => 'La fin de vente ne peut pas depasser le debut de l evenement.',
+                ], 400);
+            }
+
+            $allocatedStock = $ticketTypeRepository->sumStockForEvent(
+                $event,
+                $ticketType->getId()
+            );
+            $nextEventStock = $allocatedStock + (int) ($ticketType->getStock() ?? 0);
+
+            if ($nextEventStock > (int) $event->getCapacity()) {
+                return $this->json([
+                    'message' => sprintf(
+                        'Le stock total des billets (%d) depasserait la capacite de l evenement (%d).',
+                        $nextEventStock,
+                        (int) $event->getCapacity()
+                    ),
+                ], 400);
+            }
+        }
+
         $entityManager->flush();
+
+        $reservedQuantity = $orderItemRepository->countReservedQuantityForTicketType(
+            $ticketType,
+            Order::STOCK_CONSUMING_STATUSES
+        );
 
         return $this->json([
             'message' => 'Billet mis a jour avec succes.',
-            'ticketType' => $this->serializeTicketType($ticketType),
+            'ticketType' => $this->serializeTicketType($ticketType, $reservedQuantity),
         ]);
     }
 
@@ -349,19 +427,23 @@ class OrganizerTicketTypeController extends AbstractController
         ]);
     }
 
-    private function serializeTicketType(TicketType $ticketType): array
+    private function serializeTicketType(TicketType $ticketType, int $reservedQuantity = 0): array
     {
+        $stock = (int) ($ticketType->getStock() ?? 0);
+
         return [
             'id' => $ticketType->getId(),
             'name' => $ticketType->getName(),
             'description' => $ticketType->getDescription(),
             'price' => $ticketType->getPrice(),
-            'stock' => $ticketType->getStock(),
-            'salesStartAt' => $ticketType->getSalesStartAt()?->format(\DateTimeInterface::ATOM),
-            'salesEndAt' => $ticketType->getSalesEndAt()?->format(\DateTimeInterface::ATOM),
+            'stock' => $stock,
+            'reservedQuantity' => $reservedQuantity,
+            'availableStock' => max(0, $stock - $reservedQuantity),
+            'salesStartAt' => $this->formatDateTimeForFrontend($ticketType->getSalesStartAt()),
+            'salesEndAt' => $this->formatDateTimeForFrontend($ticketType->getSalesEndAt()),
             'maxPerOrder' => $ticketType->getMaxPerOrder(),
             'isActive' => $ticketType->isActive(),
-            'createdAt' => $ticketType->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'createdAt' => $this->formatDateTimeForFrontend($ticketType->getCreatedAt()),
             'event' => [
                 'id' => $ticketType->getEvent()?->getId(),
                 'title' => $ticketType->getEvent()?->getTitle(),
@@ -403,5 +485,39 @@ class OrganizerTicketTypeController extends AbstractController
         }
 
         return $this->canManageEvent($user, $event);
+    }
+
+    private function parseLocalDateTime(mixed $value): ?\DateTimeImmutable
+    {
+        if (!is_string($value) || '' === trim($value)) {
+            return null;
+        }
+
+        $normalizedValue = trim($value);
+        $timezone = new \DateTimeZone(self::ORGANIZER_TIMEZONE);
+
+        try {
+            $dateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $normalizedValue, $timezone)
+                ?: \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s', $normalizedValue, $timezone);
+
+            if ($dateTime instanceof \DateTimeImmutable) {
+                return $dateTime;
+            }
+
+            return new \DateTimeImmutable($normalizedValue, $timezone);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function formatDateTimeForFrontend(?\DateTimeImmutable $dateTime): ?string
+    {
+        if (!$dateTime instanceof \DateTimeImmutable) {
+            return null;
+        }
+
+        return $dateTime
+            ->setTimezone(new \DateTimeZone(self::ORGANIZER_TIMEZONE))
+            ->format(\DateTimeInterface::ATOM);
     }
 }

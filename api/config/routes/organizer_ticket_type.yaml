@@ -1,0 +1,3 @@
+organizer_ticket_type_controller:
+    resource: ../../src/Controller/OrganizerTicketTypeController.php
+    type: attribute

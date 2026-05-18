@@ -272,6 +272,13 @@ export const TicketReserveButton = styled.button`
   font-family: var(--font-heading);
   font-size: 0.92rem;
   cursor: pointer;
+
+  &:disabled {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 243, 229, 0.58);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
 `
 
 export const TicketReserveHint = styled.span`

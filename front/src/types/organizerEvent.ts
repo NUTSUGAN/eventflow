@@ -4,17 +4,8 @@ export type OrganizerEventOptionCategory = {
   description: string | null
 }
 
-export type OrganizerEventOptionLocation = {
-  id: number
-  address: string
-  city: string
-  postalCode: string
-  country: string
-}
-
 export type OrganizerEventFormOptions = {
   categories: OrganizerEventOptionCategory[]
-  locations: OrganizerEventOptionLocation[]
 }
 
 export type OrganizerEventSummary = {
@@ -39,10 +30,28 @@ export type OrganizerEventSummary = {
     city: string | null
     postalCode: string | null
     country: string | null
+    latitude: string | null
+    longitude: string | null
   }
 }
 
 export type OrganizerEventCreateResponse = {
+  message: string
+  event: OrganizerEventSummary
+}
+
+export type OrganizerEventStatus = 'draft' | 'published'
+
+export type OrganizerEventStatusUpdateResponse = {
+  message: string
+  event: OrganizerEventSummary
+}
+
+export type OrganizerEventDetailResponse = {
+  event: OrganizerEventSummary
+}
+
+export type OrganizerEventUpdateResponse = {
   message: string
   event: OrganizerEventSummary
 }

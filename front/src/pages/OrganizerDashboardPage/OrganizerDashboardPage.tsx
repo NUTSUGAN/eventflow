@@ -2,9 +2,15 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
-import { getMyOrganizerEvents } from '../../api/organizerEvents'
+import {
+  getMyOrganizerEvents,
+  updateOrganizerEventStatus,
+} from '../../api/organizerEvents'
 import type { AuthUser } from '../../types/auth'
-import type { OrganizerEventSummary } from '../../types/organizerEvent'
+import type {
+  OrganizerEventStatus,
+  OrganizerEventSummary,
+} from '../../types/organizerEvent'
 import {
   OrganizerDashboardActions,
   OrganizerDashboardCard,
@@ -12,13 +18,21 @@ import {
   OrganizerDashboardCardTitle,
   OrganizerDashboardEyebrow,
   OrganizerDashboardEventBadge,
+  OrganizerDashboardEventHeader,
   OrganizerDashboardEventMeta,
+  OrganizerDashboardEventSelect,
+  OrganizerDashboardEventStatusBlock,
+  OrganizerDashboardEventStatusLabel,
   OrganizerDashboardEventTitle,
+  OrganizerDashboardEventsSection,
   OrganizerDashboardGrid,
   OrganizerDashboardHero,
+  OrganizerDashboardInlineState,
   OrganizerDashboardPrimaryButton,
   OrganizerDashboardSecondaryButton,
   OrganizerDashboardSection,
+  OrganizerDashboardSectionHeader,
+  OrganizerDashboardSectionTitle,
   OrganizerDashboardState,
   OrganizerDashboardText,
   OrganizerDashboardTitle,
@@ -35,11 +49,21 @@ function formatDashboardDate(date: string | null): string {
   }).format(new Date(date))
 }
 
+function formatStatusLabel(status: string): string {
+  if (status === 'published') {
+    return 'Public'
+  }
+
+  return 'Brouillon'
+}
+
 export function OrganizerDashboardPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState<AuthUser | null>(null)
   const [events, setEvents] = useState<OrganizerEventSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [updatingEventId, setUpdatingEventId] = useState<number | null>(null)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -48,7 +72,7 @@ export function OrganizerDashboardPage() {
       setIsLoading(true)
 
       try {
-        const currentUser = await getCurrentUser()
+        const currentUser = await getCurrentUser(true)
 
         if (
           currentUser.role !== 'ROLE_ORGANIZER' &&
@@ -103,6 +127,37 @@ export function OrganizerDashboardPage() {
     }
   }, [navigate])
 
+  async function handleStatusChange(eventId: number, nextStatus: OrganizerEventStatus) {
+    setUpdatingEventId(eventId)
+    setStatusMessage(null)
+
+    try {
+      const response = await updateOrganizerEventStatus(eventId, nextStatus)
+
+      setEvents((current) =>
+        current.map((event) => (event.id === eventId ? response.event : event)),
+      )
+      setStatusMessage(response.message)
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        (error as { response?: { data?: { message?: unknown } } }).response?.data?.message
+      ) {
+        setStatusMessage(
+          String(
+            (error as { response?: { data?: { message?: unknown } } }).response?.data?.message,
+          ),
+        )
+      } else {
+        setStatusMessage("Impossible de mettre a jour le statut de l'evenement pour le moment.")
+      }
+    } finally {
+      setUpdatingEventId(null)
+    }
+  }
+
   return (
     <OrganizerDashboardSection>
       <OrganizerDashboardHero>
@@ -125,6 +180,12 @@ export function OrganizerDashboardPage() {
               >
                 Creer un evenement
               </OrganizerDashboardPrimaryButton>
+              <OrganizerDashboardSecondaryButton
+                type="button"
+                onClick={() => navigate('/organizer/events')}
+              >
+                Voir mes evenements
+              </OrganizerDashboardSecondaryButton>
               <OrganizerDashboardSecondaryButton
                 type="button"
                 onClick={() => navigate('/explorer')}
@@ -157,42 +218,89 @@ export function OrganizerDashboardPage() {
               <OrganizerDashboardCard>
                 <OrganizerDashboardCardTitle>Creation d evenement</OrganizerDashboardCardTitle>
                 <OrganizerDashboardCardText>
-                  La prochaine etape sera de brancher ici le vrai parcours de creation, les medias, les dates et les billets.
+                  Tu peux maintenant creer un evenement complet, puis l ouvrir dans un espace dedie pour modifier les informations essentielles.
                 </OrganizerDashboardCardText>
               </OrganizerDashboardCard>
               <OrganizerDashboardCard>
                 <OrganizerDashboardCardTitle>Billetterie et suivi</OrganizerDashboardCardTitle>
                 <OrganizerDashboardCardText>
-                  On fera ensuite vivre cet espace avec les ventes, les demandes de mise en avant et les outils de suivi.
+                  L etape suivante sera de brancher les billets, le stock et la preparation de commande a partir de ces fiches evenement.
                 </OrganizerDashboardCardText>
               </OrganizerDashboardCard>
-              {events.length > 0 ? (
-                events.slice(0, 3).map((event) => (
-                  <OrganizerDashboardCard key={event.id}>
-                    <OrganizerDashboardEventBadge>{event.status}</OrganizerDashboardEventBadge>
-                    <OrganizerDashboardEventTitle>{event.title}</OrganizerDashboardEventTitle>
-                    <OrganizerDashboardEventMeta>
-                      {event.category.name ?? 'Categorie'} - {event.location.city ?? 'Ville'}
-                    </OrganizerDashboardEventMeta>
-                    <OrganizerDashboardEventMeta>
-                      {formatDashboardDate(event.startDatetime)}
-                    </OrganizerDashboardEventMeta>
-                    <OrganizerDashboardEventMeta>
-                      {event.ticketTypesCount} billet(s) pour le moment
-                    </OrganizerDashboardEventMeta>
-                  </OrganizerDashboardCard>
-                ))
-              ) : (
-                <OrganizerDashboardCard>
-                  <OrganizerDashboardCardTitle>Premiere publication</OrganizerDashboardCardTitle>
-                  <OrganizerDashboardCardText>
-                    Tu n as pas encore d evenement sur ton espace organisateur. Cree
-                    le premier pour enchainer ensuite avec les billets et la
-                    preparation de commande.
-                  </OrganizerDashboardCardText>
-                </OrganizerDashboardCard>
-              )}
             </OrganizerDashboardGrid>
+
+            <OrganizerDashboardEventsSection>
+              <OrganizerDashboardSectionHeader>
+                <OrganizerDashboardSectionTitle>Derniers evenements</OrganizerDashboardSectionTitle>
+                <OrganizerDashboardSecondaryButton
+                  type="button"
+                  onClick={() => navigate('/organizer/events')}
+                >
+                  Ouvrir la gestion complete
+                </OrganizerDashboardSecondaryButton>
+              </OrganizerDashboardSectionHeader>
+
+              {statusMessage ? (
+                <OrganizerDashboardInlineState>{statusMessage}</OrganizerDashboardInlineState>
+              ) : null}
+
+              <OrganizerDashboardGrid>
+                {events.length > 0 ? (
+                  events.map((event) => (
+                    <OrganizerDashboardCard key={event.id}>
+                      <OrganizerDashboardEventHeader>
+                        <OrganizerDashboardEventBadge>
+                          {formatStatusLabel(event.status)}
+                        </OrganizerDashboardEventBadge>
+                        <OrganizerDashboardEventStatusBlock>
+                          <OrganizerDashboardEventStatusLabel>
+                            Statut
+                          </OrganizerDashboardEventStatusLabel>
+                          <OrganizerDashboardEventSelect
+                            value={event.status}
+                            onChange={(changeEvent) =>
+                              void handleStatusChange(
+                                event.id,
+                                changeEvent.target.value as OrganizerEventStatus,
+                              )
+                            }
+                            disabled={updatingEventId === event.id}
+                          >
+                            <option value="draft">Brouillon</option>
+                            <option value="published">Public</option>
+                          </OrganizerDashboardEventSelect>
+                        </OrganizerDashboardEventStatusBlock>
+                      </OrganizerDashboardEventHeader>
+                      <OrganizerDashboardEventTitle>{event.title}</OrganizerDashboardEventTitle>
+                      <OrganizerDashboardSecondaryButton
+                        type="button"
+                        onClick={() => navigate(`/organizer/events/${event.id}`)}
+                      >
+                        Ouvrir la fiche
+                      </OrganizerDashboardSecondaryButton>
+                      <OrganizerDashboardEventMeta>
+                        {event.category.name ?? 'Categorie'} - {event.location.city ?? 'Ville'}
+                      </OrganizerDashboardEventMeta>
+                      <OrganizerDashboardEventMeta>
+                        {formatDashboardDate(event.startDatetime)}
+                      </OrganizerDashboardEventMeta>
+                      <OrganizerDashboardEventMeta>
+                        {event.ticketTypesCount} billet(s) pour le moment
+                      </OrganizerDashboardEventMeta>
+                    </OrganizerDashboardCard>
+                  ))
+                ) : (
+                  <OrganizerDashboardCard>
+                    <OrganizerDashboardCardTitle>Premiere publication</OrganizerDashboardCardTitle>
+                    <OrganizerDashboardCardText>
+                      Tu n as pas encore d evenement sur ton espace organisateur. Cree
+                      le premier pour enchainer ensuite avec les billets et la
+                      preparation de commande.
+                    </OrganizerDashboardCardText>
+                  </OrganizerDashboardCard>
+                )}
+              </OrganizerDashboardGrid>
+            </OrganizerDashboardEventsSection>
           </>
         )}
       </OrganizerDashboardHero>

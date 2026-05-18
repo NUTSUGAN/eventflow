@@ -131,18 +131,55 @@ function resolvePostAuthPath(intent: AuthIntent): string {
 }
 
 function extractApiError(error: unknown, fallbackMessage: string): string {
-  if (
+  const responseMessage =
     typeof error === 'object' &&
     error !== null &&
     'response' in error &&
-    typeof (error as { response?: { data?: { message?: unknown } } }).response?.data
-      ?.message === 'string'
-  ) {
-    return (error as { response?: { data?: { message?: string } } }).response?.data
-      ?.message as string
+    typeof (error as { response?: { data?: { message?: unknown; error?: unknown } } }).response
+      ?.data?.message === 'string'
+      ? ((error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message as string)
+      : typeof error === 'object' &&
+          error !== null &&
+          'response' in error &&
+          typeof (error as { response?: { data?: { message?: unknown; error?: unknown } } }).response
+            ?.data?.error === 'string'
+        ? ((error as { response?: { data?: { error?: string } } }).response?.data?.error as string)
+        : null
+
+  const responseStatus =
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof (error as { response?: { status?: unknown } }).response?.status === 'number'
+      ? ((error as { response?: { status?: number } }).response?.status as number)
+      : null
+
+  if (responseMessage) {
+    return responseMessage
+  }
+
+  if (responseStatus === 401) {
+    return 'Identifiants invalides.'
+  }
+
+  if (responseStatus === 403) {
+    return 'Acces refuse pour cette action.'
+  }
+
+  if (responseStatus !== null && responseStatus >= 500) {
+    return 'Le serveur EventFlow a rencontre une erreur temporaire. Reessaie dans un instant.'
   }
 
   if (error instanceof Error && error.message.trim() !== '') {
+    if (
+      error.message.includes('Network Error') ||
+      error.message.includes('ERR_NETWORK') ||
+      error.message.includes('Failed to fetch')
+    ) {
+      return 'Impossible de contacter le serveur EventFlow pour le moment.'
+    }
+
     return error.message
   }
 

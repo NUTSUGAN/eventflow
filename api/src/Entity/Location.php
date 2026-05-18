@@ -29,10 +29,10 @@ class Location
     #[ORM\Column(name: 'country', length: 80)]
     private ?string $country = null;
 
-    #[ORM\Column(name: 'latitude', type: Types::DECIMAL, precision: 10, scale: 7)]
+    #[ORM\Column(name: 'latitude', type: Types::DECIMAL, precision: 10, scale: 7, nullable: true)]
     private ?string $latitude = null;
 
-    #[ORM\Column(name: 'longitude', type: Types::DECIMAL, precision: 10, scale: 7)]
+    #[ORM\Column(name: 'longitude', type: Types::DECIMAL, precision: 10, scale: 7, nullable: true)]
     private ?string $longitude = null;
 
     /**
@@ -104,7 +104,7 @@ class Location
         return $this->latitude;
     }
 
-    public function setLatitude(string $latitude): static
+    public function setLatitude(?string $latitude): static
     {
         $this->latitude = $latitude;
 
@@ -116,7 +116,7 @@ class Location
         return $this->longitude;
     }
 
-    public function setLongitude(string $longitude): static
+    public function setLongitude(?string $longitude): static
     {
         $this->longitude = $longitude;
 

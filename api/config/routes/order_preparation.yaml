@@ -1,0 +1,4 @@
+order_preparation_controller:
+    resource: ../../src/Controller/OrderPreparationController.php
+    type: attribute
+

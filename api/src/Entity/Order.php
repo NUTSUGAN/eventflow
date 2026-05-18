@@ -19,8 +19,11 @@ class Order
 
     public const TYPE_TICKET = 'ticket';
 
+    public const STOCK_CONSUMING_STATUSES = [
+        self::STATUS_PAID,
+    ];
+
     public const RESERVED_STATUSES = [
-        self::STATUS_PENDING_PAYMENT,
         self::STATUS_PAID,
     ];
 

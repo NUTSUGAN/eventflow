@@ -127,3 +127,70 @@ export const OrganizerDashboardEventBadge = styled.span`
   font-size: 0.85rem;
   font-weight: 600;
 `
+
+export const OrganizerDashboardEventHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+`
+
+export const OrganizerDashboardEventStatusBlock = styled.div`
+  display: grid;
+  gap: 8px;
+  min-width: 170px;
+`
+
+export const OrganizerDashboardEventStatusLabel = styled.span`
+  color: rgba(255, 237, 222, 0.72);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+`
+
+export const OrganizerDashboardEventSelect = styled.select`
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff3e5;
+  font-size: 0.94rem;
+  font-weight: 600;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+
+  option {
+    color: #1a1512;
+  }
+`
+
+export const OrganizerDashboardEventsSection = styled.section`
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+`
+
+export const OrganizerDashboardSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+`
+
+export const OrganizerDashboardSectionTitle = styled.h2`
+  margin: 0;
+  color: #fff8f2;
+  font-size: 1.28rem;
+`
+
+export const OrganizerDashboardInlineState = styled.p`
+  margin: 0;
+  color: #ffcfb4;
+  font-size: 0.88rem;
+  line-height: 1.5;
+`

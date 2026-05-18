@@ -82,6 +82,8 @@ export type EventTicketType = {
   description: string | null
   basePrice: number | null
   stock: number | null
+  reservedQuantity: number | null
+  availableStock: number | null
   saleStartAt: string | null
   saleEndAt: string | null
   maxPerOrder: number | null

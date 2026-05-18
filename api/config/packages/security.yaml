@@ -25,6 +25,7 @@ security:
                 check_path: /api/login
                 username_path: email
                 password_path: password
+                failure_handler: App\Security\JsonAuthenticationFailureHandler
 
             remember_me:
                 secret: '%kernel.secret%'
@@ -49,6 +50,7 @@ security:
         - { path: ^/api/admin/organizer-applications, roles: ROLE_ADMIN }
         - { path: ^/api/orders, roles: ROLE_USER }
         - { path: ^/api/organizer/events, roles: ROLE_USER }
+        - { path: ^/api/organizer/ticket-types, roles: ROLE_USER }
         - { path: ^/api/organizer-application, roles: ROLE_USER }
         - { path: ^/api/me, roles: ROLE_USER }
 

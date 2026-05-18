@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Event;
 use App\Entity\TicketType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,20 +22,31 @@ class TicketTypeRepository extends ServiceEntityRepository
      */
     public function findActiveForEventOrdered(int $eventId): array
     {
-        $now = new \DateTimeImmutable();
-
         return $this->createQueryBuilder('ticketType')
             ->andWhere('ticketType.event = :eventId')
             ->andWhere('ticketType.isActive = true')
-            ->andWhere('ticketType.salesStartAt <= :now')
-            ->andWhere('ticketType.salesEndAt >= :now')
             ->setParameter('eventId', $eventId)
-            ->setParameter('now', $now)
             ->orderBy('ticketType.salesStartAt', 'ASC')
             ->addOrderBy('ticketType.salesEndAt', 'ASC')
             ->addOrderBy('ticketType.id', 'ASC')
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function sumStockForEvent(Event $event, ?int $excludeTicketTypeId = null): int
+    {
+        $queryBuilder = $this->createQueryBuilder('ticketType')
+            ->select('COALESCE(SUM(ticketType.stock), 0)')
+            ->andWhere('ticketType.event = :event')
+            ->setParameter('event', $event);
+
+        if (null !== $excludeTicketTypeId) {
+            $queryBuilder
+                ->andWhere('ticketType.id != :excludeTicketTypeId')
+                ->setParameter('excludeTicketTypeId', $excludeTicketTypeId);
+        }
+
+        return (int) $queryBuilder->getQuery()->getSingleScalarResult();
     }
 }
