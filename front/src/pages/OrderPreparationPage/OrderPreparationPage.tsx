@@ -231,15 +231,12 @@ export function OrderPreparationPage() {
   }
 
   function handleContinueToPayment() {
-    if (!preparedOrder || !event) {
+    if (!preparedOrder) {
       return
     }
 
     const checkoutUrl = new URL('/checkout', window.location.origin)
     checkoutUrl.searchParams.set('orderId', String(preparedOrder.id))
-    checkoutUrl.searchParams.set('reference', preparedOrder.reference)
-    checkoutUrl.searchParams.set('total', String(preparedOrder.total))
-    checkoutUrl.searchParams.set('eventTitle', preparedOrder.event.title ?? event.title)
 
     navigate(`${checkoutUrl.pathname}${checkoutUrl.search}`)
   }
@@ -409,7 +406,7 @@ export function OrderPreparationPage() {
                   </OrderPreparationListRow>
                 </OrderPreparationList>
                 <OrderPreparationHint>
-                  La prochaine etape branchera le paiement sur cette commande preparee.
+                  Cette commande est prete. On peut maintenant ouvrir Stripe pour finaliser le paiement.
                 </OrderPreparationHint>
                 <OrderPreparationCheckoutButton
                   type="button"

@@ -1,0 +1,3 @@
+stripe_webhook_controller:
+    resource: ../../src/Controller/StripeWebhookController.php
+    type: attribute

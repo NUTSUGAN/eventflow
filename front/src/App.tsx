@@ -48,6 +48,8 @@ function App() {
           <Route path="/events/:eventId" element={<EventDetailPage />} />
           <Route path="/orders/prepare" element={<OrderPreparationPage />} />
           <Route path="/checkout" element={<OrderCheckoutPage />} />
+          <Route path="/checkout/success" element={<OrderCheckoutPage />} />
+          <Route path="/checkout/cancel" element={<OrderCheckoutPage />} />
           <Route path="/organizer-access" element={<OrganizerAccessPage />} />
           <Route
             path="/organizer/dashboard"

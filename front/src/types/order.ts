@@ -11,7 +11,7 @@ export type PreparedOrderItem = {
   quantity: number
   unitPrice: number
   lineTotal: number
-  availableStockAfterPreparation: number
+  availableStockAfterPreparation: number | null
 }
 
 export type PreparedOrder = {
@@ -28,9 +28,30 @@ export type PreparedOrder = {
     title: string | null
   }
   items: PreparedOrderItem[]
+  payment: OrderPayment | null
+  canStartCheckout: boolean
 }
 
 export type OrderPreparationResponse = {
   message: string
   order: PreparedOrder
+}
+
+export type OrderPayment = {
+  provider: string | null
+  providerPaymentId: string | null
+  amount: number
+  currency: string | null
+  status: string | null
+  paidAt: string | null
+}
+
+export type OrderSummaryResponse = {
+  order: PreparedOrder
+}
+
+export type OrderCheckoutSessionResponse = {
+  message: string
+  checkoutUrl: string
+  sessionId: string
 }

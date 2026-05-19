@@ -1,7 +1,9 @@
 import { apiClient } from './client'
 import type {
+  OrderCheckoutSessionResponse,
   OrderPreparationPayload,
   OrderPreparationResponse,
+  OrderSummaryResponse,
 } from '../types/order'
 
 export async function prepareOrder(
@@ -10,6 +12,22 @@ export async function prepareOrder(
   const response = await apiClient.post<OrderPreparationResponse>(
     '/api/orders/prepare',
     payload,
+  )
+
+  return response.data
+}
+
+export async function getOrder(orderId: number): Promise<OrderSummaryResponse> {
+  const response = await apiClient.get<OrderSummaryResponse>(`/api/orders/${orderId}`)
+
+  return response.data
+}
+
+export async function createStripeCheckoutSession(
+  orderId: number,
+): Promise<OrderCheckoutSessionResponse> {
+  const response = await apiClient.post<OrderCheckoutSessionResponse>(
+    `/api/orders/${orderId}/checkout-session`,
   )
 
   return response.data

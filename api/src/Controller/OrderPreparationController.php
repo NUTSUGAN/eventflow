@@ -2,13 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\Payment;
 use App\Entity\TicketType;
 use App\Entity\User;
 use App\Repository\OrderItemRepository;
+use App\Repository\OrderRepository;
 use App\Repository\TicketTypeRepository;
+use App\Service\StripePaymentService;
 use Doctrine\ORM\EntityManagerInterface;
+use Stripe\Exception\ApiErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +28,8 @@ final class OrderPreparationController extends AbstractController
         Request $request,
         TicketTypeRepository $ticketTypeRepository,
         OrderItemRepository $orderItemRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        StripePaymentService $stripePaymentService,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -178,8 +184,6 @@ final class OrderPreparationController extends AbstractController
 
         $entityManager->persist($order);
 
-        $serializedItems = [];
-
         foreach ($lineItems as $lineItem) {
             $orderItem = new OrderItem();
             $orderItem->setCustomerOrder($order);
@@ -188,37 +192,94 @@ final class OrderPreparationController extends AbstractController
             $orderItem->setUnitPriceAtPurchase($lineItem['unitPrice']);
 
             $entityManager->persist($orderItem);
-
-            $serializedItems[] = [
-                'ticketTypeId' => $lineItem['ticketType']->getId(),
-                'ticketName' => $lineItem['ticketType']->getName(),
-                'quantity' => $lineItem['quantity'],
-                'unitPrice' => (float) $lineItem['unitPrice'],
-                'lineTotal' => (float) $this->centsToMoneyString($lineItem['lineTotalInCents']),
-                'availableStockAfterPreparation' => $lineItem['availableStock'],
-            ];
         }
 
         $entityManager->flush();
 
         return $this->json([
             'message' => 'Commande preparee avec succes.',
-            'order' => [
-                'id' => $order->getId(),
-                'reference' => $order->getReference(),
-                'status' => $order->getStatus(),
-                'orderType' => $order->getOrderType(),
-                'currency' => $order->getCurrency(),
-                'subtotal' => (float) $order->getTotalAmount(),
-                'total' => (float) $order->getTotalAmount(),
-                'createdAt' => $order->getCreatedAt()?->format(DATE_ATOM),
-                'event' => [
-                    'id' => $event?->getId(),
-                    'title' => $event?->getTitle(),
-                ],
-                'items' => $serializedItems,
-            ],
+            'order' => $this->serializeOrder($order, $stripePaymentService),
         ], Response::HTTP_CREATED);
+    }
+
+    #[Route('/{orderId<\d+>}', name: 'api_order_show', methods: ['GET'])]
+    public function show(
+        int $orderId,
+        OrderRepository $orderRepository,
+        StripePaymentService $stripePaymentService,
+    ): JsonResponse {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->json([
+                'message' => 'Non authentifie.',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $order = $orderRepository->find($orderId);
+
+        if (!$order instanceof Order || $order->getClient()?->getId() !== $user->getId()) {
+            return $this->json([
+                'message' => 'Commande introuvable.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json([
+            'order' => $this->serializeOrder($order, $stripePaymentService),
+        ]);
+    }
+
+    #[Route('/{orderId<\d+>}/checkout-session', name: 'api_order_checkout_session_create', methods: ['POST'])]
+    public function createCheckoutSession(
+        int $orderId,
+        OrderRepository $orderRepository,
+        StripePaymentService $stripePaymentService,
+    ): JsonResponse {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->json([
+                'message' => 'Non authentifie.',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $order = $orderRepository->find($orderId);
+
+        if (!$order instanceof Order || $order->getClient()?->getId() !== $user->getId()) {
+            return $this->json([
+                'message' => 'Commande introuvable.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if (Order::STATUS_PAID === $order->getStatus()) {
+            return $this->json([
+                'message' => 'Cette commande est deja payee.',
+                'order' => $this->serializeOrder($order, $stripePaymentService),
+            ], Response::HTTP_CONFLICT);
+        }
+
+        try {
+            $session = $stripePaymentService->createCheckoutSession($order);
+        } catch (\LogicException $exception) {
+            return $this->json([
+                'message' => $exception->getMessage(),
+                'order' => $this->serializeOrder($order, $stripePaymentService),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\RuntimeException $exception) {
+            return $this->json([
+                'message' => $exception->getMessage(),
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        } catch (ApiErrorException $exception) {
+            return $this->json([
+                'message' => $this->buildStripeCheckoutErrorMessage($exception),
+            ], Response::HTTP_BAD_GATEWAY);
+        }
+
+        return $this->json([
+            'message' => 'Session Stripe creee avec succes.',
+            'checkoutUrl' => $session->url,
+            'sessionId' => $session->id,
+        ]);
     }
 
     private function generateOrderReference(): string
@@ -238,5 +299,94 @@ final class OrderPreparationController extends AbstractController
     private function centsToMoneyString(int $amountInCents): string
     {
         return number_format($amountInCents / 100, 2, '.', '');
+    }
+
+    private function buildStripeCheckoutErrorMessage(ApiErrorException $exception): string
+    {
+        $message = trim($exception->getMessage());
+
+        if (str_contains(strtolower($message), 'set an account or business name')) {
+            return "Le compte Stripe de test n'est pas encore completement configure. Ajoute d'abord le nom du compte ou de l'entreprise dans le dashboard Stripe, puis reessaie.";
+        }
+
+        if ('' !== $message) {
+            return sprintf('Stripe a refuse la creation de la session : %s', $message);
+        }
+
+        return 'Impossible de creer la session Stripe pour le moment.';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeOrder(Order $order, StripePaymentService $stripePaymentService): array
+    {
+        $event = $this->getOrderEvent($order);
+        $items = [];
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $ticketType = $orderItem->getTicketType();
+            $unitPrice = (string) ($orderItem->getUnitPriceAtPurchase() ?? '0.00');
+            $quantity = $orderItem->getQuantity() ?? 0;
+
+            $items[] = [
+                'ticketTypeId' => $ticketType?->getId(),
+                'ticketName' => $ticketType?->getName(),
+                'quantity' => $quantity,
+                'unitPrice' => (float) $unitPrice,
+                'lineTotal' => (float) $this->centsToMoneyString($this->moneyStringToCents($unitPrice) * $quantity),
+                'availableStockAfterPreparation' => null,
+            ];
+        }
+
+        return [
+            'id' => $order->getId(),
+            'reference' => $order->getReference(),
+            'status' => $order->getStatus(),
+            'orderType' => $order->getOrderType(),
+            'currency' => $order->getCurrency(),
+            'subtotal' => (float) ($order->getTotalAmount() ?? '0.00'),
+            'total' => (float) ($order->getTotalAmount() ?? '0.00'),
+            'createdAt' => $order->getCreatedAt()?->format(DATE_ATOM),
+            'event' => [
+                'id' => $event?->getId(),
+                'title' => $event?->getTitle(),
+            ],
+            'items' => $items,
+            'payment' => $this->serializePayment($order->getPayment()),
+            'canStartCheckout' => $stripePaymentService->canStartCheckout($order),
+        ];
+    }
+
+    private function getOrderEvent(Order $order): ?Event
+    {
+        foreach ($order->getOrderItems() as $orderItem) {
+            $event = $orderItem->getTicketType()?->getEvent();
+
+            if ($event instanceof Event) {
+                return $event;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function serializePayment(?Payment $payment): ?array
+    {
+        if (!$payment instanceof Payment) {
+            return null;
+        }
+
+        return [
+            'provider' => $payment->getProvider(),
+            'providerPaymentId' => $payment->getProviderPaymentId(),
+            'amount' => (float) ($payment->getAmount() ?? '0.00'),
+            'currency' => $payment->getCurrency(),
+            'status' => $payment->getStatus(),
+            'paidAt' => $payment->getPaidAt()?->format(DATE_ATOM),
+        ];
     }
 }

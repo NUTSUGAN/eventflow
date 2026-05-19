@@ -10,6 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'payments')]
 class Payment
 {
+    public const PROVIDER_STRIPE = 'stripe';
+    public const STATUS_PAID = 'paid';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_payment')]
@@ -71,7 +74,7 @@ class Payment
         return $this->providerPaymentId;
     }
 
-    public function setProviderPaymentId(int $providerPaymentId): static
+    public function setProviderPaymentId(string $providerPaymentId): static
     {
         $this->providerPaymentId = $providerPaymentId;
 

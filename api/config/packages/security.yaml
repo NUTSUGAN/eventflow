@@ -46,6 +46,7 @@ security:
         - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
         - { path: ^/api/search, roles: PUBLIC_ACCESS }
         - { path: ^/api/events, roles: PUBLIC_ACCESS }
+        - { path: ^/api/stripe/webhook$, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/organizers/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/admin/organizer-applications, roles: ROLE_ADMIN }
         - { path: ^/api/orders, roles: ROLE_USER }
