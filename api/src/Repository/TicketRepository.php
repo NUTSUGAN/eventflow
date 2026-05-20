@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Order;
 use App\Entity\Ticket;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,48 @@ class TicketRepository extends ServiceEntityRepository
         parent::__construct($registry, Ticket::class);
     }
 
-    //    /**
-    //     * @return Ticket[] Returns an array of Ticket objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('t.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Ticket>
+     */
+    public function findPaidTicketsForUser(User $user): array
+    {
+        /** @var list<Ticket> $tickets */
+        $tickets = $this->createQueryBuilder('ticket')
+            ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
+            ->innerJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('customerOrder.client = :user')
+            ->andWhere('customerOrder.status = :paidStatus')
+            ->setParameter('user', $user)
+            ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->orderBy('event.startDatetime', 'ASC')
+            ->addOrderBy('ticket.id', 'ASC')
+            ->getQuery()
+            ->getResult();
 
-    //    public function findOneBySomeField($value): ?Ticket
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $tickets;
+    }
+
+    public function findPaidTicketForUserById(User $user, int $ticketId): ?Ticket
+    {
+        /** @var Ticket|null $ticket */
+        $ticket = $this->createQueryBuilder('ticket')
+            ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
+            ->innerJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('ticket.id = :ticketId')
+            ->andWhere('customerOrder.client = :user')
+            ->andWhere('customerOrder.status = :paidStatus')
+            ->setParameter('ticketId', $ticketId)
+            ->setParameter('user', $user)
+            ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $ticket;
+    }
 }

@@ -1,0 +1,3 @@
+my_ticket_controller:
+    resource: ../../src/Controller/MyTicketController.php
+    type: attribute

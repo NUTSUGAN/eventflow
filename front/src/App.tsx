@@ -12,12 +12,14 @@ import { EventsListPage } from './pages/EventsListPage/EventsListPage'
 import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
 import { OrderPreparationPage } from './pages/OrderPreparationPage/OrderPreparationPage'
 import { OrderCheckoutPage } from './pages/OrderCheckoutPage/OrderCheckoutPage'
+import { MyTicketsPage } from './pages/MyTicketsPage/MyTicketsPage'
 import { OrganizerAccessPage } from './pages/OrganizerAccessPage/OrganizerAccessPage'
 import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage/OrganizerDashboardPage'
 import { OrganizerEventCreatePage } from './pages/OrganizerEventCreatePage/OrganizerEventCreatePage'
 import { OrganizerEventDetailPage } from './pages/OrganizerEventDetailPage/OrganizerEventDetailPage'
 import { OrganizerEventsPage } from './pages/OrganizerEventsPage/OrganizerEventsPage'
 import { OrganizerProfilePage } from './pages/OrganizerProfilePage/OrganizerProfilePage'
+import { TicketDetailPage } from './pages/TicketDetailPage/TicketDetailPage'
 import './App.css'
 
 function ScrollToTop() {
@@ -50,6 +52,8 @@ function App() {
           <Route path="/checkout" element={<OrderCheckoutPage />} />
           <Route path="/checkout/success" element={<OrderCheckoutPage />} />
           <Route path="/checkout/cancel" element={<OrderCheckoutPage />} />
+          <Route path="/mes-billets" element={<MyTicketsPage />} />
+          <Route path="/mes-billets/:ticketId" element={<TicketDetailPage />} />
           <Route path="/organizer-access" element={<OrganizerAccessPage />} />
           <Route
             path="/organizer/dashboard"

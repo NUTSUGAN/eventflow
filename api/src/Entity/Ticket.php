@@ -11,6 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'tickets')]
 class Ticket
 {
+    public const STATUS_ISSUED = 'issued';
+    public const STATUS_USED = 'used';
+    public const STATUS_CANCELLED = 'cancelled';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_ticket')]

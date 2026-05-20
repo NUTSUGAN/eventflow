@@ -357,16 +357,24 @@ export function OrderCheckoutPage() {
 
           <OrderPreparationActions>
             {paymentAlreadyCompleted ? (
-              <OrderPreparationPrimaryButton
-                type="button"
-                onClick={() =>
-                  order.event.id
-                    ? navigate(`/events/${order.event.id}`)
-                    : navigate('/explorer')
-                }
-              >
-                Retour a l evenement
-              </OrderPreparationPrimaryButton>
+              <>
+                <OrderPreparationPrimaryButton
+                  type="button"
+                  onClick={() => navigate('/mes-billets')}
+                >
+                  Voir mes billets
+                </OrderPreparationPrimaryButton>
+                <OrderPreparationSecondaryButton
+                  type="button"
+                  onClick={() =>
+                    order.event.id
+                      ? navigate(`/events/${order.event.id}`)
+                      : navigate('/explorer')
+                  }
+                >
+                  Retour a l evenement
+                </OrderPreparationSecondaryButton>
+              </>
             ) : (
               <OrderPreparationCheckoutButton
                 type="button"
@@ -377,12 +385,14 @@ export function OrderCheckoutPage() {
               </OrderPreparationCheckoutButton>
             )}
 
-            <OrderPreparationSecondaryButton
-              type="button"
-              onClick={() => navigate(-1)}
-            >
-              Retour
-            </OrderPreparationSecondaryButton>
+            {!paymentAlreadyCompleted ? (
+              <OrderPreparationSecondaryButton
+                type="button"
+                onClick={() => navigate(-1)}
+              >
+                Retour
+              </OrderPreparationSecondaryButton>
+            ) : null}
           </OrderPreparationActions>
         </OrderPreparationCard>
       </OrderPreparationHero>

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Repository\OrderRepository;
 use App\Service\StripePaymentService;
+use App\Service\TicketFulfillmentService;
 use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
@@ -22,6 +23,7 @@ final class StripeWebhookController extends AbstractController
         Request $request,
         OrderRepository $orderRepository,
         StripePaymentService $stripePaymentService,
+        TicketFulfillmentService $ticketFulfillmentService,
         LoggerInterface $logger,
     ): JsonResponse {
         $payload = $request->getContent();
@@ -82,6 +84,7 @@ final class StripeWebhookController extends AbstractController
             case 'checkout.session.async_payment_succeeded':
                 if ('paid' === (string) $session->payment_status) {
                     $stripePaymentService->markOrderAsPaid($order, $session);
+                    $ticketFulfillmentService->fulfillPaidOrder($order);
                 }
                 break;
 

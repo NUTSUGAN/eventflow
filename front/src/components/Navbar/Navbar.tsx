@@ -280,6 +280,12 @@ export function Navbar() {
     navigate('/account')
   }
 
+  function handleMyTicketsNavigation() {
+    setIsProfileMenuOpen(false)
+    setIsMobileMenuOpen(false)
+    navigate('/mes-billets')
+  }
+
   function getUserInitials(user: AuthUser): string {
     return `${user.firstName} ${user.lastName}`
       .split(' ')
@@ -458,6 +464,9 @@ export function Navbar() {
                 <ProfileDropdownAction type="button" onClick={handleProfileNavigation}>
                   Voir mon profil
                 </ProfileDropdownAction>
+                <ProfileDropdownAction type="button" onClick={handleMyTicketsNavigation}>
+                  Mes billets
+                </ProfileDropdownAction>
                 <ProfileDropdownAction
                   type="button"
                   onClick={() => {
@@ -521,6 +530,9 @@ export function Navbar() {
               </MobileMenuProfileIdentity>
               <MobileMenuLink type="button" onClick={handleProfileNavigation}>
                 Voir mon profil
+              </MobileMenuLink>
+              <MobileMenuLink type="button" onClick={handleMyTicketsNavigation}>
+                Mes billets
               </MobileMenuLink>
               <MobileMenuLink
                 type="button"

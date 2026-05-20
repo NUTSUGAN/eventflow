@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,27 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
-    //    /**
-    //     * @return Order[] Returns an array of Order objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Order>
+     */
+    public function findPaidOrdersForUser(User $user): array
+    {
+        /** @var list<Order> $orders */
+        $orders = $this->createQueryBuilder('customerOrder')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->leftJoin('customerOrder.tickets', 'tickets')->addSelect('tickets')
+            ->leftJoin('customerOrder.orderItems', 'orderItems')->addSelect('orderItems')
+            ->leftJoin('orderItems.ticketType', 'ticketType')->addSelect('ticketType')
+            ->leftJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->andWhere('customerOrder.client = :user')
+            ->andWhere('customerOrder.status = :paidStatus')
+            ->setParameter('user', $user)
+            ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->orderBy('customerOrder.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
-    //    public function findOneBySomeField($value): ?Order
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $orders;
+    }
 }
