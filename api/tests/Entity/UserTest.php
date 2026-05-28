@@ -3,6 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\NewsletterSubscription;
+use App\Entity\OrganizerStaffMember;
 use App\Entity\User;
 use App\Entity\UserOauthAccount;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +22,24 @@ class UserTest extends TestCase
         $user = (new User())->setRole('client');
 
         self::assertSame('ROLE_CLIENT', $user->getRole());
+        self::assertSame('ROLE_CLIENT', $user->getBaseRole());
+        self::assertSame('ROLE_CLIENT', $user->getEffectiveRole());
         self::assertSame(['ROLE_CLIENT', 'ROLE_USER'], $user->getRoles());
+    }
+
+    public function testActiveStaffMembershipAddsEffectiveStaffRole(): void
+    {
+        $user = (new User())->setRole('client');
+        $membership = (new OrganizerStaffMember())
+            ->setStatus(OrganizerStaffMember::STATUS_ACTIVE)
+            ->setCreatedAt(new \DateTimeImmutable('2026-05-22 10:00:00'))
+            ->setStatusChangedAt(new \DateTimeImmutable('2026-05-22 10:00:00'));
+
+        $user->addStaffMembership($membership);
+
+        self::assertSame('ROLE_CLIENT', $user->getBaseRole());
+        self::assertSame('ROLE_STAFF', $user->getEffectiveRole());
+        self::assertSame(['ROLE_STAFF', 'ROLE_CLIENT', 'ROLE_USER'], $user->getRoles());
     }
 
     public function testProfilePhotoCanBeStored(): void

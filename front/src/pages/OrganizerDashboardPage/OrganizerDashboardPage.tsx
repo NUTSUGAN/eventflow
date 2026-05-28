@@ -180,6 +180,22 @@ export function OrganizerDashboardPage() {
               >
                 Creer un evenement
               </OrganizerDashboardPrimaryButton>
+              {user?.canManageStaff ? (
+                <OrganizerDashboardSecondaryButton
+                  type="button"
+                  onClick={() => navigate('/organizer/staff')}
+                >
+                  Gerer mon staff
+                </OrganizerDashboardSecondaryButton>
+              ) : null}
+              {user?.canAccessStaffTools ? (
+                <OrganizerDashboardSecondaryButton
+                  type="button"
+                  onClick={() => navigate('/staff/scan')}
+                >
+                  Scanner les billets
+                </OrganizerDashboardSecondaryButton>
+              ) : null}
               <OrganizerDashboardSecondaryButton
                 type="button"
                 onClick={() => navigate('/organizer/events')}

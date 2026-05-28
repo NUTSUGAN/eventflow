@@ -46,6 +46,16 @@ import {
   OrganizerEventDetailMediaLabel,
   OrganizerEventDetailMediaPreview,
   OrganizerEventDetailPrimaryButton,
+  OrganizerEventDetailScanStaffCard,
+  OrganizerEventDetailScanStaffHeader,
+  OrganizerEventDetailScanStaffList,
+  OrganizerEventDetailScanStaffMeta,
+  OrganizerEventDetailScanStaffName,
+  OrganizerEventDetailScanStaffTotal,
+  OrganizerEventDetailScanStat,
+  OrganizerEventDetailScanStatLabel,
+  OrganizerEventDetailScanStatValue,
+  OrganizerEventDetailScanSummaryGrid,
   OrganizerEventDetailSecondaryButton,
   OrganizerEventDetailSection,
   OrganizerEventDetailSelect,
@@ -358,6 +368,8 @@ export function OrganizerEventDetailPage() {
     (createdFromEventSetup
       ? "Evenement cree avec succes. Tu peux maintenant ajouter les billets de cet evenement."
       : null)
+  const scanStats = event?.scanStats ?? null
+  const scanStaffMembers = scanStats?.staffMembers ?? []
 
   function revealTicketSection() {
     window.requestAnimationFrame(() => {
@@ -539,9 +551,13 @@ export function OrganizerEventDetailPage() {
       }
 
       const response = await updateOrganizerEvent(Number(eventId), payload)
+      const updatedEvent = {
+        ...response.event,
+        scanStats: response.event.scanStats ?? event?.scanStats,
+      }
 
-      setEvent(response.event)
-      setEventForm(buildEventFormFromEvent(response.event))
+      setEvent(updatedEvent)
+      setEventForm(buildEventFormFromEvent(updatedEvent))
       setEventSuccessMessage(response.message)
     } catch (error) {
       setEventErrorMessage(
@@ -1063,6 +1079,101 @@ export function OrganizerEventDetailPage() {
               ) : null}
             </OrganizerEventDetailActions>
           </OrganizerEventDetailForm>
+        </OrganizerEventDetailSplitSection>
+
+        <OrganizerEventDetailDivider />
+
+        <OrganizerEventDetailSplitSection>
+          <OrganizerEventDetailSplitHeader>
+            <OrganizerEventDetailSplitEyebrow>Scan</OrganizerEventDetailSplitEyebrow>
+            <OrganizerEventDetailSplitTitle>Activite du staff</OrganizerEventDetailSplitTitle>
+            <OrganizerEventDetailSplitText>
+              Suis le nombre de scans realises pour cet evenement, avec le detail
+              par membre du staff ou organisateur ayant utilise le poste de scan.
+            </OrganizerEventDetailSplitText>
+          </OrganizerEventDetailSplitHeader>
+
+          <OrganizerEventDetailScanSummaryGrid>
+            <OrganizerEventDetailScanStat>
+              <OrganizerEventDetailScanStatLabel>Total scans</OrganizerEventDetailScanStatLabel>
+              <OrganizerEventDetailScanStatValue>
+                {scanStats?.totalScans ?? 0}
+              </OrganizerEventDetailScanStatValue>
+            </OrganizerEventDetailScanStat>
+            <OrganizerEventDetailScanStat>
+              <OrganizerEventDetailScanStatLabel>Valides</OrganizerEventDetailScanStatLabel>
+              <OrganizerEventDetailScanStatValue>
+                {scanStats?.validScans ?? 0}
+              </OrganizerEventDetailScanStatValue>
+            </OrganizerEventDetailScanStat>
+            <OrganizerEventDetailScanStat>
+              <OrganizerEventDetailScanStatLabel>Deja utilises</OrganizerEventDetailScanStatLabel>
+              <OrganizerEventDetailScanStatValue>
+                {scanStats?.alreadyUsedScans ?? 0}
+              </OrganizerEventDetailScanStatValue>
+            </OrganizerEventDetailScanStat>
+            <OrganizerEventDetailScanStat>
+              <OrganizerEventDetailScanStatLabel>Invalides</OrganizerEventDetailScanStatLabel>
+              <OrganizerEventDetailScanStatValue>
+                {scanStats?.invalidScans ?? 0}
+              </OrganizerEventDetailScanStatValue>
+            </OrganizerEventDetailScanStat>
+          </OrganizerEventDetailScanSummaryGrid>
+
+          {scanStaffMembers.length > 0 ? (
+            <OrganizerEventDetailScanStaffList>
+              {scanStaffMembers.map((staffSummary) => (
+                <OrganizerEventDetailScanStaffCard
+                  key={staffSummary.staffUser.id ?? staffSummary.staffUser.email ?? staffSummary.staffUser.displayName}
+                >
+                  <OrganizerEventDetailScanStaffHeader>
+                    <div>
+                      <OrganizerEventDetailScanStaffName>
+                        {staffSummary.staffUser.displayName}
+                      </OrganizerEventDetailScanStaffName>
+                      <OrganizerEventDetailScanStaffMeta>
+                        {staffSummary.staffUser.email ?? 'Email indisponible'}
+                      </OrganizerEventDetailScanStaffMeta>
+                    </div>
+                    <OrganizerEventDetailScanStaffTotal>
+                      {staffSummary.totalScans} scan(s)
+                    </OrganizerEventDetailScanStaffTotal>
+                  </OrganizerEventDetailScanStaffHeader>
+
+                  <OrganizerEventDetailTicketStats>
+                    <OrganizerEventDetailTicketStat>
+                      <OrganizerEventDetailTicketStatLabel>Total</OrganizerEventDetailTicketStatLabel>
+                      <OrganizerEventDetailTicketStatValue>
+                        {staffSummary.totalScans}
+                      </OrganizerEventDetailTicketStatValue>
+                    </OrganizerEventDetailTicketStat>
+                    <OrganizerEventDetailTicketStat>
+                      <OrganizerEventDetailTicketStatLabel>Valides</OrganizerEventDetailTicketStatLabel>
+                      <OrganizerEventDetailTicketStatValue>
+                        {staffSummary.validScans}
+                      </OrganizerEventDetailTicketStatValue>
+                    </OrganizerEventDetailTicketStat>
+                    <OrganizerEventDetailTicketStat>
+                      <OrganizerEventDetailTicketStatLabel>Deja utilises</OrganizerEventDetailTicketStatLabel>
+                      <OrganizerEventDetailTicketStatValue>
+                        {staffSummary.alreadyUsedScans}
+                      </OrganizerEventDetailTicketStatValue>
+                    </OrganizerEventDetailTicketStat>
+                    <OrganizerEventDetailTicketStat>
+                      <OrganizerEventDetailTicketStatLabel>Invalides</OrganizerEventDetailTicketStatLabel>
+                      <OrganizerEventDetailTicketStatValue>
+                        {staffSummary.invalidScans}
+                      </OrganizerEventDetailTicketStatValue>
+                    </OrganizerEventDetailTicketStat>
+                  </OrganizerEventDetailTicketStats>
+                </OrganizerEventDetailScanStaffCard>
+              ))}
+            </OrganizerEventDetailScanStaffList>
+          ) : (
+            <OrganizerEventDetailState>
+              Aucun scan n a encore ete enregistre pour cet evenement.
+            </OrganizerEventDetailState>
+          )}
         </OrganizerEventDetailSplitSection>
 
         <OrganizerEventDetailDivider />

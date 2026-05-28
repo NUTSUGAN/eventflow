@@ -51,8 +51,10 @@ security:
         - { path: ^/api/admin/organizer-applications, roles: ROLE_ADMIN }
         - { path: ^/api/orders, roles: ROLE_USER }
         - { path: ^/api/organizer/events, roles: ROLE_USER }
+        - { path: ^/api/organizer/staff, roles: ROLE_USER }
         - { path: ^/api/organizer/ticket-types, roles: ROLE_USER }
         - { path: ^/api/organizer-application, roles: ROLE_USER }
+        - { path: ^/api/staff, roles: ROLE_USER }
         - { path: ^/api/me, roles: ROLE_USER }
 
 when@test:

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Entity\OrderItem;
 use App\Entity\Payment;
 use App\Entity\Ticket;
 use App\Entity\User;
@@ -91,6 +92,7 @@ final class MyTicketController extends AbstractController
             'displayCode' => sprintf('EVF-%06d', (int) ($ticket->getId() ?? 0)),
             'status' => $ticket->getStatus(),
             'issuedAt' => $this->formatDateTimeForFrontend($ticket->getIssuedAt()),
+            'amount' => $this->resolveTicketAmount($ticket),
             'qrToken' => $includeQrToken ? $ticket->getQrToken() : null,
             'ticketType' => [
                 'id' => $ticketType?->getId(),
@@ -116,6 +118,26 @@ final class MyTicketController extends AbstractController
                 'coverImageUrl' => $this->toPublicAssetUrl($request, $event?->getCoverPhoto() ?? $event?->getThumbnailPhoto()),
             ],
         ];
+    }
+
+    private function resolveTicketAmount(Ticket $ticket): float
+    {
+        $order = $ticket->getCustomerOrder();
+        $ticketType = $ticket->getTicketType();
+        $ticketTypeId = $ticketType?->getId();
+
+        if ($order instanceof Order && null !== $ticketTypeId) {
+            foreach ($order->getOrderItems() as $orderItem) {
+                if (
+                    $orderItem instanceof OrderItem
+                    && $orderItem->getTicketType()?->getId() === $ticketTypeId
+                ) {
+                    return (float) ($orderItem->getUnitPriceAtPurchase() ?? '0.00');
+                }
+            }
+        }
+
+        return (float) ($ticketType?->getPrice() ?? '0.00');
     }
 
     /**

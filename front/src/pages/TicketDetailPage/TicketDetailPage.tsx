@@ -548,7 +548,7 @@ export function TicketDetailPage() {
                     Montant
                   </span>
                   <span style={{ fontSize: '20px', fontWeight: 700 }}>
-                    {formatCurrency(ticket.order.total, ticket.order.currency)}
+                    {formatCurrency(ticket.amount, ticket.order.currency)}
                   </span>
                 </div>
               </div>

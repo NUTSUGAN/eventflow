@@ -757,12 +757,18 @@ class AuthController extends AbstractController
      *   id: int|null,
      *   email: string|null,
      *   role: string|null,
+     *   baseRole: string|null,
+     *   roles: list<string>,
      *   firstName: string|null,
      *   lastName: string|null,
      *   profilePhoto: string|null,
      *   termsAcceptedAt: string|null,
      *   privacyAcceptedAt: string|null,
-     *   newsletterSubscribed: bool
+     *   newsletterSubscribed: bool,
+     *   canManageStaff: bool,
+     *   canAccessStaffTools: bool,
+     *   managedStaffCount: int,
+     *   staffOrganizerCount: int
      * }
      */
     private function serializeUser(User $user): array
@@ -770,13 +776,22 @@ class AuthController extends AbstractController
         return [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
-            'role' => $user->getRole(),
+            'role' => $user->getEffectiveRole(),
+            'baseRole' => $user->getBaseRole(),
+            'roles' => array_values(array_filter(
+                $user->getRoles(),
+                static fn (string $role): bool => 'ROLE_USER' !== $role,
+            )),
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
             'profilePhoto' => $user->getProfilePhoto(),
             'termsAcceptedAt' => $user->getTermsAcceptedAt()?->format(DATE_ATOM),
             'privacyAcceptedAt' => $user->getPrivacyAcceptedAt()?->format(DATE_ATOM),
             'newsletterSubscribed' => $this->hasActiveNewsletterSubscription($user),
+            'canManageStaff' => $user->canManageStaff(),
+            'canAccessStaffTools' => $user->canAccessStaffTools(),
+            'managedStaffCount' => $user->countActiveManagedStaffMembers(),
+            'staffOrganizerCount' => $user->countActiveStaffMemberships(),
         ];
     }
 

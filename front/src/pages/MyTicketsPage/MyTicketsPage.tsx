@@ -304,7 +304,7 @@ export function MyTicketsPage() {
                   <MyTicketsSummaryItem>
                     <MyTicketsSummaryLabel>Montant paye</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
-                      {formatCurrency(ticket.order.total, ticket.order.currency)}
+                      {formatCurrency(ticket.amount, ticket.order.currency)}
                     </MyTicketsSummaryValue>
                   </MyTicketsSummaryItem>
                   <MyTicketsSummaryItem>

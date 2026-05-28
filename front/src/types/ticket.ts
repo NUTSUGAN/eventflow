@@ -38,6 +38,7 @@ export type TicketRecord = {
   displayCode: string
   status: string | null
   issuedAt: string | null
+  amount: number
   qrToken: string | null
   ticketType: TicketTypeSummary
   order: TicketOrderSummary

@@ -113,6 +113,90 @@ export const OrganizerEventDetailInfoText = styled.p`
   line-height: 1.6;
 `
 
+export const OrganizerEventDetailScanSummaryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 980px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const OrganizerEventDetailScanStat = styled.div`
+  display: grid;
+  gap: 6px;
+  min-height: 92px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+`
+
+export const OrganizerEventDetailScanStatLabel = styled.span`
+  color: rgba(255, 237, 222, 0.66);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+`
+
+export const OrganizerEventDetailScanStatValue = styled.span`
+  color: #fff8f2;
+  font-size: 1.42rem;
+  font-weight: 800;
+`
+
+export const OrganizerEventDetailScanStaffList = styled.div`
+  display: grid;
+  gap: 12px;
+`
+
+export const OrganizerEventDetailScanStaffCard = styled.article`
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+`
+
+export const OrganizerEventDetailScanStaffHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+`
+
+export const OrganizerEventDetailScanStaffName = styled.h3`
+  margin: 0;
+  color: #fff8f2;
+  font-size: 1rem;
+`
+
+export const OrganizerEventDetailScanStaffMeta = styled.p`
+  margin: 0;
+  color: rgba(255, 237, 222, 0.66);
+  font-size: 0.9rem;
+`
+
+export const OrganizerEventDetailScanStaffTotal = styled.span`
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(235, 148, 81, 0.14);
+  border: 1px solid rgba(235, 148, 81, 0.22);
+  color: #ffe2cb;
+  font-size: 0.84rem;
+  font-weight: 800;
+`
+
 export const OrganizerEventDetailMediaGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

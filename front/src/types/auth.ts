@@ -4,12 +4,18 @@ export type AuthUser = {
   id: number
   email: string
   role: string
+  baseRole: string
+  roles: string[]
   firstName: string
   lastName: string
   profilePhoto: string | null
   termsAcceptedAt: string | null
   privacyAcceptedAt: string | null
   newsletterSubscribed: boolean
+  canManageStaff: boolean
+  canAccessStaffTools: boolean
+  managedStaffCount: number
+  staffOrganizerCount: number
 }
 
 export type LoginPayload = {

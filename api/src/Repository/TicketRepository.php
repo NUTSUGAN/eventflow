@@ -27,6 +27,8 @@ class TicketRepository extends ServiceEntityRepository
         $tickets = $this->createQueryBuilder('ticket')
             ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
             ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->leftJoin('customerOrder.orderItems', 'orderItems')->addSelect('orderItems')
+            ->leftJoin('orderItems.ticketType', 'orderItemTicketType')->addSelect('orderItemTicketType')
             ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
             ->innerJoin('ticketType.event', 'event')->addSelect('event')
             ->leftJoin('event.location', 'location')->addSelect('location')
@@ -48,6 +50,8 @@ class TicketRepository extends ServiceEntityRepository
         $ticket = $this->createQueryBuilder('ticket')
             ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
             ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->leftJoin('customerOrder.orderItems', 'orderItems')->addSelect('orderItems')
+            ->leftJoin('orderItems.ticketType', 'orderItemTicketType')->addSelect('orderItemTicketType')
             ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
             ->innerJoin('ticketType.event', 'event')->addSelect('event')
             ->leftJoin('event.location', 'location')->addSelect('location')
@@ -59,6 +63,26 @@ class TicketRepository extends ServiceEntityRepository
             ->setParameter('paidStatus', Order::STATUS_PAID)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $ticket;
+    }
+
+    public function findOneForCheckinByQrToken(string $qrToken): ?Ticket
+    {
+        /** @var Ticket|null $ticket */
+        $ticket = $this->createQueryBuilder('ticket')
+            ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->innerJoin('customerOrder.client', 'client')->addSelect('client')
+            ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
+            ->innerJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->andWhere('ticket.qrToken = :qrToken')
+            ->setParameter('qrToken', trim($qrToken))
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
 
         return $ticket;
     }

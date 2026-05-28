@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\Location;
 use App\Entity\User;
 use App\Repository\CategoryRepository;
+use App\Repository\CheckinRepository;
 use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -280,7 +281,8 @@ final class OrganizerEventController extends AbstractController
     #[Route('/{eventId}', name: 'api_organizer_event_show', methods: ['GET'])]
     public function show(
         int $eventId,
-        EventRepository $eventRepository
+        EventRepository $eventRepository,
+        CheckinRepository $checkinRepository,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -305,7 +307,10 @@ final class OrganizerEventController extends AbstractController
         }
 
         return $this->json([
-            'event' => $this->serializeEvent($event),
+            'event' => $this->serializeEvent(
+                $event,
+                $this->serializeScanStats($checkinRepository->findStaffScanStatsForEvent($event)),
+            ),
         ]);
     }
 
@@ -752,9 +757,12 @@ final class OrganizerEventController extends AbstractController
         };
     }
 
-    private function serializeEvent(Event $event): array
+    /**
+     * @param array<string, mixed>|null $scanStats
+     */
+    private function serializeEvent(Event $event, ?array $scanStats = null): array
     {
-        return [
+        $serializedEvent = [
             'id' => $event->getId(),
             'title' => $event->getTitle(),
             'description' => $event->getDescription(),
@@ -779,6 +787,78 @@ final class OrganizerEventController extends AbstractController
                 'latitude' => $event->getLocation()?->getLatitude(),
                 'longitude' => $event->getLocation()?->getLongitude(),
             ],
+        ];
+
+        if (null !== $scanStats) {
+            $serializedEvent['scanStats'] = $scanStats;
+        }
+
+        return $serializedEvent;
+    }
+
+    /**
+     * @param list<array{
+     *   staffUserId: int|null,
+     *   firstName: string|null,
+     *   lastName: string|null,
+     *   email: string|null,
+     *   totalScans: int,
+     *   validScans: int,
+     *   invalidScans: int,
+     *   alreadyUsedScans: int
+     * }> $staffRows
+     *
+     * @return array<string, mixed>
+     */
+    private function serializeScanStats(array $staffRows): array
+    {
+        $totalScans = 0;
+        $validScans = 0;
+        $invalidScans = 0;
+        $alreadyUsedScans = 0;
+        $staffMembers = [];
+
+        foreach ($staffRows as $row) {
+            $staffTotalScans = (int) $row['totalScans'];
+            $staffValidScans = (int) $row['validScans'];
+            $staffInvalidScans = (int) $row['invalidScans'];
+            $staffAlreadyUsedScans = (int) $row['alreadyUsedScans'];
+            $displayName = trim(sprintf(
+                '%s %s',
+                (string) ($row['firstName'] ?? ''),
+                (string) ($row['lastName'] ?? ''),
+            ));
+
+            if ('' === $displayName) {
+                $displayName = (string) ($row['email'] ?? 'Membre du staff');
+            }
+
+            $totalScans += $staffTotalScans;
+            $validScans += $staffValidScans;
+            $invalidScans += $staffInvalidScans;
+            $alreadyUsedScans += $staffAlreadyUsedScans;
+
+            $staffMembers[] = [
+                'staffUser' => [
+                    'id' => $row['staffUserId'],
+                    'email' => $row['email'],
+                    'firstName' => $row['firstName'],
+                    'lastName' => $row['lastName'],
+                    'displayName' => $displayName,
+                ],
+                'totalScans' => $staffTotalScans,
+                'validScans' => $staffValidScans,
+                'invalidScans' => $staffInvalidScans,
+                'alreadyUsedScans' => $staffAlreadyUsedScans,
+            ];
+        }
+
+        return [
+            'totalScans' => $totalScans,
+            'validScans' => $validScans,
+            'invalidScans' => $invalidScans,
+            'alreadyUsedScans' => $alreadyUsedScans,
+            'staffMembers' => $staffMembers,
         ];
     }
 

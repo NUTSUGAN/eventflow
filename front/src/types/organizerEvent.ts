@@ -8,6 +8,26 @@ export type OrganizerEventFormOptions = {
   categories: OrganizerEventOptionCategory[]
 }
 
+export type OrganizerEventScanStats = {
+  totalScans: number
+  validScans: number
+  invalidScans: number
+  alreadyUsedScans: number
+  staffMembers: Array<{
+    staffUser: {
+      id: number | null
+      email: string | null
+      firstName: string | null
+      lastName: string | null
+      displayName: string
+    }
+    totalScans: number
+    validScans: number
+    invalidScans: number
+    alreadyUsedScans: number
+  }>
+}
+
 export type OrganizerEventSummary = {
   id: number
   title: string
@@ -33,6 +53,7 @@ export type OrganizerEventSummary = {
     latitude: string | null
     longitude: string | null
   }
+  scanStats?: OrganizerEventScanStats
 }
 
 export type OrganizerEventCreateResponse = {

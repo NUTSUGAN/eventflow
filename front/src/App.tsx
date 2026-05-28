@@ -18,7 +18,9 @@ import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage/Organizer
 import { OrganizerEventCreatePage } from './pages/OrganizerEventCreatePage/OrganizerEventCreatePage'
 import { OrganizerEventDetailPage } from './pages/OrganizerEventDetailPage/OrganizerEventDetailPage'
 import { OrganizerEventsPage } from './pages/OrganizerEventsPage/OrganizerEventsPage'
+import { OrganizerStaffPage } from './pages/OrganizerStaffPage/OrganizerStaffPage'
 import { OrganizerProfilePage } from './pages/OrganizerProfilePage/OrganizerProfilePage'
+import { StaffScanPage } from './pages/StaffScanPage/StaffScanPage'
 import { TicketDetailPage } from './pages/TicketDetailPage/TicketDetailPage'
 import './App.css'
 
@@ -59,6 +61,7 @@ function App() {
             path="/organizer/dashboard"
             element={<OrganizerDashboardPage />}
           />
+          <Route path="/organizer/staff" element={<OrganizerStaffPage />} />
           <Route
             path="/organizer/events"
             element={<OrganizerEventsPage />}
@@ -71,6 +74,7 @@ function App() {
             path="/organizer/events/:eventId"
             element={<OrganizerEventDetailPage />}
           />
+          <Route path="/staff/scan" element={<StaffScanPage />} />
           <Route path="/organizers/:organizerId" element={<OrganizerProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

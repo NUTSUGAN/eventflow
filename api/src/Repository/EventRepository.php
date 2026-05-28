@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Event;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -209,5 +210,66 @@ class EventRepository extends ServiceEntityRepository
             static fn (array $row): string => (string) $row['city'],
             $rows
         ));
+    }
+
+    /**
+     * @param list<int> $accessibleOrganizerIds
+     *
+     * @return list<Event>
+     */
+    public function findAccessibleForStaffScan(User $user, array $accessibleOrganizerIds = []): array
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->leftJoin('event.ticketTypes', 'ticketType')->addSelect('ticketType')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('publishedStatus', 'published')
+            ->orderBy('event.startDatetime', 'ASC')
+            ->addOrderBy('event.id', 'DESC')
+        ;
+
+        if ($user->getRole() === User::ROLE_ADMIN) {
+            /** @var list<Event> $events */
+            $events = $queryBuilder->getQuery()->getResult();
+
+            return $events;
+        }
+
+        $uniqueOrganizerIds = array_values(array_unique(array_filter(
+            array_map(static fn (int $organizerId): int => (int) $organizerId, $accessibleOrganizerIds),
+            static fn (int $organizerId): bool => $organizerId > 0,
+        )));
+
+        if ([] === $uniqueOrganizerIds) {
+            return [];
+        }
+
+        /** @var list<Event> $events */
+        $events = $queryBuilder
+            ->andWhere('IDENTITY(event.organizer) IN (:organizerIds)')
+            ->setParameter('organizerIds', $uniqueOrganizerIds)
+            ->getQuery()
+            ->getResult()
+        ;
+
+        return $events;
+    }
+
+    public function findOneForStaffScanById(int $eventId): ?Event
+    {
+        /** @var Event|null $event */
+        $event = $this->createQueryBuilder('event')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('event.id = :eventId')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('eventId', $eventId)
+            ->setParameter('publishedStatus', 'published')
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        return $event;
     }
 }

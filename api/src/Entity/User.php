@@ -81,6 +81,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $staffCheckins;
 
     /**
+     * @var Collection<int, OrganizerStaffMember>
+     */
+    #[ORM\OneToMany(targetEntity: OrganizerStaffMember::class, mappedBy: 'organizer', orphanRemoval: true)]
+    private Collection $managedStaffMembers;
+
+    /**
+     * @var Collection<int, OrganizerStaffMember>
+     */
+    #[ORM\OneToMany(targetEntity: OrganizerStaffMember::class, mappedBy: 'staffUser', orphanRemoval: true)]
+    private Collection $staffMemberships;
+
+    /**
      * @var Collection<int, UserOauthAccount>
      */
     #[ORM\OneToMany(
@@ -112,6 +124,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->organizerSubscriptions = new ArrayCollection();
         $this->clientOrders = new ArrayCollection();
         $this->staffCheckins = new ArrayCollection();
+        $this->managedStaffMembers = new ArrayCollection();
+        $this->staffMemberships = new ArrayCollection();
         $this->oauthAccounts = new ArrayCollection();
         $this->newsletterSubscriptions = new ArrayCollection();
     }
@@ -143,6 +157,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->lastName = $lastName;
 
         return $this;
+    }
+
+    public function getDisplayName(): string
+    {
+        $fullName = trim(sprintf(
+            '%s %s',
+            (string) ($this->firstName ?? ''),
+            (string) ($this->lastName ?? ''),
+        ));
+
+        return '' !== $fullName ? $fullName : (string) ($this->email ?? 'Utilisateur EventFlow');
     }
 
     public function getEmail(): ?string
@@ -184,6 +209,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->role;
     }
 
+    public function getBaseRole(): string
+    {
+        return $this->role ? $this->normalizeRole($this->role) : self::ROLE_CLIENT;
+    }
+
     public function setRole(string $role): static
     {
         $this->role = $this->normalizeRole($role);
@@ -196,10 +226,84 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = [$this->role ? $this->normalizeRole($this->role) : self::ROLE_CLIENT];
+        $baseRole = $this->getBaseRole();
+        $roles = [$baseRole];
+
+        if ($this->hasActiveStaffMembership() && !in_array($baseRole, [self::ROLE_ADMIN, self::ROLE_ORGANIZER], true)) {
+            array_unshift($roles, self::ROLE_STAFF);
+        } elseif ($this->hasActiveStaffMembership()) {
+            $roles[] = self::ROLE_STAFF;
+        }
+
         $roles[] = 'ROLE_USER';
 
         return array_values(array_unique($roles));
+    }
+
+    public function getEffectiveRole(): string
+    {
+        $roles = array_values(array_filter(
+            $this->getRoles(),
+            static fn (string $role): bool => 'ROLE_USER' !== $role,
+        ));
+
+        return $roles[0] ?? self::ROLE_CLIENT;
+    }
+
+    public function isOrganizerOrAdmin(): bool
+    {
+        return in_array(
+            $this->getBaseRole(),
+            [self::ROLE_ORGANIZER, self::ROLE_ADMIN],
+            true,
+        );
+    }
+
+    public function canManageStaff(): bool
+    {
+        return $this->isOrganizerOrAdmin();
+    }
+
+    public function canAccessStaffTools(): bool
+    {
+        return $this->canManageStaff() || $this->hasActiveStaffMembership();
+    }
+
+    public function hasActiveStaffMembership(): bool
+    {
+        foreach ($this->staffMemberships as $staffMembership) {
+            if ($staffMembership->isActive()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function countActiveManagedStaffMembers(): int
+    {
+        $count = 0;
+
+        foreach ($this->managedStaffMembers as $managedStaffMember) {
+            if ($managedStaffMember->isActive()) {
+                ++$count;
+            }
+        }
+
+        return $count;
+    }
+
+    public function countActiveStaffMemberships(): int
+    {
+        $count = 0;
+
+        foreach ($this->staffMemberships as $staffMembership) {
+            if ($staffMembership->isActive()) {
+                ++$count;
+            }
+        }
+
+        return $count;
     }
 
     public function getProfilePhoto(): ?string
@@ -387,6 +491,64 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if (!$this->staffCheckins->contains($staffCheckin)) {
             $this->staffCheckins->add($staffCheckin);
             $staffCheckin->setStaffUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganizerStaffMember>
+     */
+    public function getManagedStaffMembers(): Collection
+    {
+        return $this->managedStaffMembers;
+    }
+
+    public function addManagedStaffMember(OrganizerStaffMember $managedStaffMember): static
+    {
+        if (!$this->managedStaffMembers->contains($managedStaffMember)) {
+            $this->managedStaffMembers->add($managedStaffMember);
+            $managedStaffMember->setOrganizer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeManagedStaffMember(OrganizerStaffMember $managedStaffMember): static
+    {
+        if ($this->managedStaffMembers->removeElement($managedStaffMember)) {
+            if ($managedStaffMember->getOrganizer() === $this) {
+                $managedStaffMember->setOrganizer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrganizerStaffMember>
+     */
+    public function getStaffMemberships(): Collection
+    {
+        return $this->staffMemberships;
+    }
+
+    public function addStaffMembership(OrganizerStaffMember $staffMembership): static
+    {
+        if (!$this->staffMemberships->contains($staffMembership)) {
+            $this->staffMemberships->add($staffMembership);
+            $staffMembership->setStaffUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStaffMembership(OrganizerStaffMember $staffMembership): static
+    {
+        if ($this->staffMemberships->removeElement($staffMembership)) {
+            if ($staffMembership->getStaffUser() === $this) {
+                $staffMembership->setStaffUser(null);
+            }
         }
 
         return $this;

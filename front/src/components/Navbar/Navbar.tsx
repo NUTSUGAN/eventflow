@@ -286,6 +286,18 @@ export function Navbar() {
     navigate('/mes-billets')
   }
 
+  function handleOrganizerStaffNavigation() {
+    setIsProfileMenuOpen(false)
+    setIsMobileMenuOpen(false)
+    navigate('/organizer/staff')
+  }
+
+  function handleStaffScanNavigation() {
+    setIsProfileMenuOpen(false)
+    setIsMobileMenuOpen(false)
+    navigate('/staff/scan')
+  }
+
   function getUserInitials(user: AuthUser): string {
     return `${user.firstName} ${user.lastName}`
       .split(' ')
@@ -467,6 +479,16 @@ export function Navbar() {
                 <ProfileDropdownAction type="button" onClick={handleMyTicketsNavigation}>
                   Mes billets
                 </ProfileDropdownAction>
+                {currentUser.canAccessStaffTools ? (
+                  <ProfileDropdownAction type="button" onClick={handleStaffScanNavigation}>
+                    Scanner billets
+                  </ProfileDropdownAction>
+                ) : null}
+                {currentUser.canManageStaff ? (
+                  <ProfileDropdownAction type="button" onClick={handleOrganizerStaffNavigation}>
+                    Mon staff
+                  </ProfileDropdownAction>
+                ) : null}
                 <ProfileDropdownAction
                   type="button"
                   onClick={() => {
@@ -534,6 +556,16 @@ export function Navbar() {
               <MobileMenuLink type="button" onClick={handleMyTicketsNavigation}>
                 Mes billets
               </MobileMenuLink>
+              {currentUser.canAccessStaffTools ? (
+                <MobileMenuLink type="button" onClick={handleStaffScanNavigation}>
+                  Scanner billets
+                </MobileMenuLink>
+              ) : null}
+              {currentUser.canManageStaff ? (
+                <MobileMenuLink type="button" onClick={handleOrganizerStaffNavigation}>
+                  Mon staff
+                </MobileMenuLink>
+              ) : null}
               <MobileMenuLink
                 type="button"
                 onClick={() => {
