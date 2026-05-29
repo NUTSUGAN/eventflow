@@ -73,4 +73,46 @@ class UserRepository extends ServiceEntityRepository
 
         return $user;
     }
+
+    /**
+     * @return list<User>
+     */
+    public function findForAdminList(?string $query = null, ?string $role = null): array
+    {
+        $queryBuilder = $this->createQueryBuilder('user')
+            ->leftJoin('user.organizerApplication', 'organizerApplication')
+            ->addSelect('organizerApplication')
+            ->orderBy('user.id', 'DESC')
+            ->setMaxResults(200)
+        ;
+
+        $normalizedQuery = null !== $query ? mb_strtolower(trim($query)) : '';
+
+        if ('' !== $normalizedQuery) {
+            $queryBuilder
+                ->andWhere(
+                    'LOWER(user.email) LIKE :query
+                    OR LOWER(user.firstName) LIKE :query
+                    OR LOWER(user.lastName) LIKE :query
+                    OR LOWER(CONCAT(user.firstName, \' \', user.lastName)) LIKE :query
+                    OR LOWER(CONCAT(user.lastName, \' \', user.firstName)) LIKE :query'
+                )
+                ->setParameter('query', '%'.$normalizedQuery.'%')
+            ;
+        }
+
+        if (User::ROLE_CLIENT === $role) {
+            $queryBuilder
+                ->andWhere('user.role IN (:clientRoles)')
+                ->setParameter('clientRoles', [User::ROLE_CLIENT, 'ROLE_USER'])
+            ;
+        } elseif (null !== $role) {
+            $queryBuilder
+                ->andWhere('user.role = :role')
+                ->setParameter('role', $role)
+            ;
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
 }

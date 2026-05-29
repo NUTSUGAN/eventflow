@@ -18,6 +18,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const ROLE_STAFF = 'ROLE_STAFF';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
 
+    public const ACCOUNT_STATUS_ACTIVE = 'active';
+    public const ACCOUNT_STATUS_DISABLED = 'disabled';
+    public const ACCOUNT_STATUS_BLOCKED = 'blocked';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_user')]
@@ -37,6 +41,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(name: 'role', length: 20)]
     private ?string $role = self::ROLE_CLIENT;
+
+    #[ORM\Column(name: 'account_status', length: 20, options: ['default' => self::ACCOUNT_STATUS_ACTIVE])]
+    private ?string $accountStatus = self::ACCOUNT_STATUS_ACTIVE;
 
     #[ORM\Column(name: 'profile_photo', length: 255, nullable: true)]
     private ?string $profilePhoto = null;
@@ -496,6 +503,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getAccountStatus(): string
+    {
+        return $this->accountStatus
+            ? $this->normalizeAccountStatus($this->accountStatus)
+            : self::ACCOUNT_STATUS_ACTIVE;
+    }
+
+    public function setAccountStatus(string $accountStatus): static
+    {
+        $this->accountStatus = $this->normalizeAccountStatus($accountStatus);
+
+        return $this;
+    }
+
+    public function canAuthenticate(): bool
+    {
+        return self::ACCOUNT_STATUS_ACTIVE === $this->getAccountStatus();
+    }
+
     /**
      * @return Collection<int, OrganizerStaffMember>
      */
@@ -658,6 +684,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $role = 'ROLE_'.$role;
         }
 
-        return $role;
+        if ('ROLE_USER' === $role) {
+            return self::ROLE_CLIENT;
+        }
+
+        return in_array($role, [
+            self::ROLE_CLIENT,
+            self::ROLE_ORGANIZER,
+            self::ROLE_STAFF,
+            self::ROLE_ADMIN,
+        ], true) ? $role : self::ROLE_CLIENT;
+    }
+
+    private function normalizeAccountStatus(string $accountStatus): string
+    {
+        $accountStatus = strtolower(trim($accountStatus));
+
+        return in_array($accountStatus, [
+            self::ACCOUNT_STATUS_ACTIVE,
+            self::ACCOUNT_STATUS_DISABLED,
+            self::ACCOUNT_STATUS_BLOCKED,
+        ], true) ? $accountStatus : self::ACCOUNT_STATUS_ACTIVE;
     }
 }

@@ -27,6 +27,28 @@ class UserTest extends TestCase
         self::assertSame(['ROLE_CLIENT', 'ROLE_USER'], $user->getRoles());
     }
 
+    public function testSymfonyRoleUserIsStoredAsClientBaseRole(): void
+    {
+        $user = (new User())->setRole('ROLE_USER');
+
+        self::assertSame('ROLE_CLIENT', $user->getRole());
+        self::assertSame('ROLE_CLIENT', $user->getBaseRole());
+        self::assertSame(['ROLE_CLIENT', 'ROLE_USER'], $user->getRoles());
+    }
+
+    public function testAccountStatusControlsAuthenticationEligibility(): void
+    {
+        $user = new User();
+
+        self::assertSame(User::ACCOUNT_STATUS_ACTIVE, $user->getAccountStatus());
+        self::assertTrue($user->canAuthenticate());
+
+        $user->setAccountStatus(User::ACCOUNT_STATUS_BLOCKED);
+
+        self::assertSame(User::ACCOUNT_STATUS_BLOCKED, $user->getAccountStatus());
+        self::assertFalse($user->canAuthenticate());
+    }
+
     public function testActiveStaffMembershipAddsEffectiveStaffRole(): void
     {
         $user = (new User())->setRole('client');

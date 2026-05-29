@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import {
@@ -22,9 +22,12 @@ import {
   AdminOrganizerApplicationsList,
   AdminOrganizerApplicationsMeta,
   AdminOrganizerApplicationsPrimaryButton,
+  AdminOrganizerApplicationsSearch,
   AdminOrganizerApplicationsSection,
   AdminOrganizerApplicationsSecondaryButton,
   AdminOrganizerApplicationsState,
+  AdminOrganizerApplicationsTab,
+  AdminOrganizerApplicationsTabs,
   AdminOrganizerApplicationsText,
   AdminOrganizerApplicationsTextarea,
   AdminOrganizerApplicationsTitle,
@@ -55,10 +58,17 @@ function getStatusLabel(status: AdminOrganizerApplication['status']): string {
   }
 }
 
+type ApplicationsTabId = 'pending' | 'processed'
+type ProcessedApplicationsFilterId = 'all' | 'rejected' | 'approved'
+
 export function AdminOrganizerApplicationsPage() {
   const navigate = useNavigate()
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
+  const [activeTab, setActiveTab] = useState<ApplicationsTabId>('pending')
+  const [processedFilter, setProcessedFilter] =
+    useState<ProcessedApplicationsFilterId>('all')
   const [applications, setApplications] = useState<AdminOrganizerApplication[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [reviewNotes, setReviewNotes] = useState<Record<number, string>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmittingId, setIsSubmittingId] = useState<number | null>(null)
@@ -126,9 +136,7 @@ export function AdminOrganizerApplicationsPage() {
 
       setApplications((current) =>
         current.map((item) =>
-          item.id === application.id
-            ? { ...item, ...response.application, applicant: item.applicant }
-            : item,
+          item.id === application.id ? response.application : item,
         ),
       )
       setStatusMessage(response.message)
@@ -151,9 +159,7 @@ export function AdminOrganizerApplicationsPage() {
 
       setApplications((current) =>
         current.map((item) =>
-          item.id === application.id
-            ? { ...item, ...response.application, applicant: item.applicant }
-            : item,
+          item.id === application.id ? response.application : item,
         ),
       )
       setStatusMessage(response.message)
@@ -166,6 +172,73 @@ export function AdminOrganizerApplicationsPage() {
     }
   }
 
+  const filteredApplications = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    return applications.filter((application) => {
+      const matchesTab = activeTab === 'pending'
+        ? application.status === 'PENDING'
+        : processedFilter === 'approved'
+          ? application.status === 'APPROVED'
+          : processedFilter === 'rejected'
+            ? application.status === 'REJECTED'
+            : application.status === 'APPROVED' || application.status === 'REJECTED'
+
+      if (!matchesTab) {
+        return false
+      }
+
+      if (query === '') {
+        return true
+      }
+
+      const searchableText = [
+        application.organizationName,
+        application.city,
+        application.motivation,
+        application.website,
+        application.instagramUrl,
+        application.tiktokUrl,
+        application.linkedinUrl,
+        application.otherLinks,
+        application.reviewNote,
+        application.applicant.fullName,
+        application.applicant.email,
+        application.applicant.role,
+        getStatusLabel(application.status),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      return searchableText.includes(query)
+    })
+  }, [activeTab, applications, processedFilter, searchQuery])
+
+  const pendingCount = useMemo(
+    () => applications.filter((application) => application.status === 'PENDING').length,
+    [applications],
+  )
+
+  const processedCount = useMemo(
+    () =>
+      applications.filter(
+        (application) =>
+          application.status === 'APPROVED' || application.status === 'REJECTED',
+      ).length,
+    [applications],
+  )
+
+  const approvedCount = useMemo(
+    () => applications.filter((application) => application.status === 'APPROVED').length,
+    [applications],
+  )
+
+  const rejectedCount = useMemo(
+    () => applications.filter((application) => application.status === 'REJECTED').length,
+    [applications],
+  )
+
   return (
     <AdminOrganizerApplicationsSection>
       <AdminOrganizerApplicationsHeader>
@@ -174,12 +247,66 @@ export function AdminOrganizerApplicationsPage() {
         <AdminOrganizerApplicationsText>
           Relis les justificatifs publics envoyes, ajoute un retour si besoin puis approuve ou refuse chaque demande. Une validation approuvee donne immediatement le role organisateur au compte.
         </AdminOrganizerApplicationsText>
+        <AdminOrganizerApplicationsActions>
+          <AdminOrganizerApplicationsSecondaryButton
+            type="button"
+            onClick={() => navigate('/admin')}
+          >
+            Revenir a la console admin
+          </AdminOrganizerApplicationsSecondaryButton>
+        </AdminOrganizerApplicationsActions>
         {statusMessage ? (
           <AdminOrganizerApplicationsState>{statusMessage}</AdminOrganizerApplicationsState>
         ) : null}
         {errorMessage ? (
           <AdminOrganizerApplicationsState>{errorMessage}</AdminOrganizerApplicationsState>
         ) : null}
+        <AdminOrganizerApplicationsTabs>
+          <AdminOrganizerApplicationsTab
+            type="button"
+            $active={activeTab === 'pending'}
+            onClick={() => setActiveTab('pending')}
+          >
+            En attente ({pendingCount})
+          </AdminOrganizerApplicationsTab>
+          <AdminOrganizerApplicationsTab
+            type="button"
+            $active={activeTab === 'processed'}
+            onClick={() => setActiveTab('processed')}
+          >
+            Traitees ({processedCount})
+          </AdminOrganizerApplicationsTab>
+        </AdminOrganizerApplicationsTabs>
+        {activeTab === 'processed' ? (
+          <AdminOrganizerApplicationsTabs>
+            <AdminOrganizerApplicationsTab
+              type="button"
+              $active={processedFilter === 'all'}
+              onClick={() => setProcessedFilter('all')}
+            >
+              Toutes ({processedCount})
+            </AdminOrganizerApplicationsTab>
+            <AdminOrganizerApplicationsTab
+              type="button"
+              $active={processedFilter === 'rejected'}
+              onClick={() => setProcessedFilter('rejected')}
+            >
+              Refusees ({rejectedCount})
+            </AdminOrganizerApplicationsTab>
+            <AdminOrganizerApplicationsTab
+              type="button"
+              $active={processedFilter === 'approved'}
+              onClick={() => setProcessedFilter('approved')}
+            >
+              Approuvees ({approvedCount})
+            </AdminOrganizerApplicationsTab>
+          </AdminOrganizerApplicationsTabs>
+        ) : null}
+        <AdminOrganizerApplicationsSearch
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Rechercher par organisation, ville, email, statut..."
+        />
       </AdminOrganizerApplicationsHeader>
 
       {isLoading ? (
@@ -194,9 +321,19 @@ export function AdminOrganizerApplicationsPage() {
         <AdminOrganizerApplicationsState>
           Aucune demande organisateur pour le moment.
         </AdminOrganizerApplicationsState>
+      ) : filteredApplications.length === 0 ? (
+        <AdminOrganizerApplicationsState>
+          {activeTab === 'pending'
+            ? 'Aucune demande en attente ne correspond a cette recherche.'
+            : processedFilter === 'approved'
+              ? 'Aucune demande approuvee ne correspond a cette recherche.'
+              : processedFilter === 'rejected'
+                ? 'Aucune demande refusee ne correspond a cette recherche.'
+                : 'Aucune demande traitee ne correspond a cette recherche.'}
+        </AdminOrganizerApplicationsState>
       ) : (
         <AdminOrganizerApplicationsList>
-          {applications.map((application) => (
+          {filteredApplications.map((application) => (
             <AdminOrganizerApplicationsCard key={application.id}>
               <div>
                 <AdminOrganizerApplicationsMeta>
@@ -208,12 +345,15 @@ export function AdminOrganizerApplicationsPage() {
                   <AdminOrganizerApplicationsBadge>
                     {application.city}
                   </AdminOrganizerApplicationsBadge>
+                  <AdminOrganizerApplicationsBadge>
+                    {application.applicant.role ?? 'ROLE_CLIENT'}
+                  </AdminOrganizerApplicationsBadge>
                 </AdminOrganizerApplicationsMeta>
                 <AdminOrganizerApplicationsCardTitle>
                   {application.organizationName}
                 </AdminOrganizerApplicationsCardTitle>
                 <AdminOrganizerApplicationsApplicant>
-                  {application.applicant.fullName} · {application.applicant.email}
+                  {application.applicant.fullName} - {application.applicant.email}
                 </AdminOrganizerApplicationsApplicant>
               </div>
 
@@ -261,7 +401,7 @@ export function AdminOrganizerApplicationsPage() {
                   disabled={isSubmittingId === application.id}
                   onClick={() => handleReject(application)}
                 >
-                  Refuser
+                  {application.status === 'APPROVED' ? 'Annuler le role' : 'Refuser'}
                 </AdminOrganizerApplicationsSecondaryButton>
               </AdminOrganizerApplicationsActions>
             </AdminOrganizerApplicationsCard>

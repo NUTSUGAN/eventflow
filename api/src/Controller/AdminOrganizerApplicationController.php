@@ -90,12 +90,6 @@ final class AdminOrganizerApplicationController extends AbstractController
             ], 404);
         }
 
-        if ($application->getStatus() === OrganizerApplication::STATUS_APPROVED) {
-            return $this->json([
-                'message' => 'Une demande deja approuvee ne peut pas etre refusee depuis cet endpoint.',
-            ], 409);
-        }
-
         $data = $request->toArray();
         $reviewNote = $this->normalizeNullableString($data['reviewNote'] ?? null);
 
@@ -105,13 +99,15 @@ final class AdminOrganizerApplicationController extends AbstractController
             ], 400);
         }
 
+        $wasApproved = OrganizerApplication::STATUS_APPROVED === $application->getStatus();
+
         $application
             ->setStatus(OrganizerApplication::STATUS_REJECTED)
             ->setReviewNote($reviewNote)
             ->setReviewedAt(new \DateTimeImmutable())
         ;
 
-        if ($user->getRole() === User::ROLE_ORGANIZER) {
+        if ($user->getBaseRole() !== User::ROLE_ADMIN) {
             $user->setRole(User::ROLE_CLIENT);
         }
 
@@ -122,7 +118,9 @@ final class AdminOrganizerApplicationController extends AbstractController
         $this->sendDecisionEmail($mailer, $user, $application, false);
 
         return $this->json([
-            'message' => 'La demande organisateur a ete refusee.',
+            'message' => $wasApproved
+                ? 'Le role organisateur a ete retire et le compte est repasse client.'
+                : 'La demande organisateur a ete refusee.',
             'application' => $this->serializeApplication($application),
         ]);
     }
@@ -211,7 +209,7 @@ final class AdminOrganizerApplicationController extends AbstractController
                 'id' => $user?->getId(),
                 'fullName' => $fullName,
                 'email' => $user?->getEmail(),
-                'role' => $user?->getRole(),
+                'role' => $user?->getBaseRole(),
                 'profilePhoto' => $user?->getProfilePhoto(),
             ],
         ];

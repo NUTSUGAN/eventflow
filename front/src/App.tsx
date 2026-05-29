@@ -4,7 +4,11 @@ import { SiteFooter } from './components/Footer/Footer'
 import { Navbar } from './components/Navbar/Navbar'
 import { CookieConsentBanner } from './components/CookieConsentBanner/CookieConsentBanner'
 import { AccountPage } from './pages/AccountPage/AccountPage'
+import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminOrganizerApplicationsPage } from './pages/AdminOrganizerApplicationsPage/AdminOrganizerApplicationsPage'
+import { AdminOrdersPage } from './pages/AdminOrdersPage/AdminOrdersPage'
+import { AdminTicketsPage } from './pages/AdminTicketsPage/AdminTicketsPage'
+import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
 import { AuthPage } from './pages/AuthPage/AuthPage'
 import { EventDetailPage } from './pages/EventDetailPage/EventDetailPage'
 import { ExplorerPage } from './pages/ExplorerPage/ExplorerPage'
@@ -42,6 +46,10 @@ function App() {
       <div className="app-content">
         <Routes>
           <Route path="/" element={<EventsListPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/tickets" element={<AdminTicketsPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route
             path="/admin/organizer-applications"
             element={<AdminOrganizerApplicationsPage />}

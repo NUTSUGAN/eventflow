@@ -40,4 +40,27 @@ class OrderRepository extends ServiceEntityRepository
 
         return $orders;
     }
+
+    /**
+     * @return list<Order>
+     */
+    public function findForAdminList(int $limit = 200): array
+    {
+        /** @var list<Order> $orders */
+        $orders = $this->createQueryBuilder('customerOrder')
+            ->innerJoin('customerOrder.client', 'client')->addSelect('client')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->leftJoin('customerOrder.tickets', 'tickets')->addSelect('tickets')
+            ->leftJoin('customerOrder.orderItems', 'orderItems')->addSelect('orderItems')
+            ->leftJoin('orderItems.ticketType', 'ticketType')->addSelect('ticketType')
+            ->leftJoin('ticketType.event', 'event')->addSelect('event')
+            ->orderBy('customerOrder.createdAt', 'DESC')
+            ->addOrderBy('customerOrder.id', 'DESC')
+            ->setMaxResults(max(1, min(500, $limit)))
+            ->getQuery()
+            ->getResult()
+        ;
+
+        return $orders;
+    }
 }

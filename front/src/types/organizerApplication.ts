@@ -34,6 +34,11 @@ export type OrganizerApplicationResponse = {
   application: OrganizerApplication
 }
 
+export type AdminOrganizerApplicationResponse = {
+  message: string
+  application: AdminOrganizerApplication
+}
+
 export type OrganizerApplicationStateResponse = {
   application: OrganizerApplication | null
 }

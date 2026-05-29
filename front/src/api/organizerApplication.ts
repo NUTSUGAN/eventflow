@@ -1,6 +1,7 @@
 import { apiClient } from './client'
 import type {
   AdminOrganizerApplication,
+  AdminOrganizerApplicationResponse,
   OrganizerApplicationDecisionPayload,
   OrganizerApplicationPayload,
   OrganizerApplicationResponse,
@@ -36,8 +37,8 @@ export async function getAdminOrganizerApplications(): Promise<
 export async function approveOrganizerApplication(
   applicationId: number,
   payload: OrganizerApplicationDecisionPayload,
-): Promise<OrganizerApplicationResponse> {
-  const response = await apiClient.post<OrganizerApplicationResponse>(
+): Promise<AdminOrganizerApplicationResponse> {
+  const response = await apiClient.post<AdminOrganizerApplicationResponse>(
     `/api/admin/organizer-applications/${applicationId}/approve`,
     payload,
   )
@@ -47,8 +48,8 @@ export async function approveOrganizerApplication(
 export async function rejectOrganizerApplication(
   applicationId: number,
   payload: OrganizerApplicationDecisionPayload,
-): Promise<OrganizerApplicationResponse> {
-  const response = await apiClient.post<OrganizerApplicationResponse>(
+): Promise<AdminOrganizerApplicationResponse> {
+  const response = await apiClient.post<AdminOrganizerApplicationResponse>(
     `/api/admin/organizer-applications/${applicationId}/reject`,
     payload,
   )

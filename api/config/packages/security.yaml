@@ -20,6 +20,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserAccountStatusChecker
 
             json_login:
                 check_path: /api/login
@@ -48,7 +49,7 @@ security:
         - { path: ^/api/events, roles: PUBLIC_ACCESS }
         - { path: ^/api/stripe/webhook$, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/organizers/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/admin/organizer-applications, roles: ROLE_ADMIN }
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api/orders, roles: ROLE_USER }
         - { path: ^/api/organizer/events, roles: ROLE_USER }
         - { path: ^/api/organizer/staff, roles: ROLE_USER }

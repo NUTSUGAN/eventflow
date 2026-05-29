@@ -35,6 +35,22 @@ class CheckinRepository extends ServiceEntityRepository
         return $checkin;
     }
 
+    public function findLatestForTicket(Ticket $ticket): ?Checkin
+    {
+        /** @var Checkin|null $checkin */
+        $checkin = $this->createQueryBuilder('checkin')
+            ->innerJoin('checkin.staffUser', 'staffUser')->addSelect('staffUser')
+            ->andWhere('checkin.ticket = :ticket')
+            ->setParameter('ticket', $ticket)
+            ->orderBy('checkin.scannedAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        return $checkin;
+    }
+
     /**
      * @return list<array{
      *   staffUserId: int|null,

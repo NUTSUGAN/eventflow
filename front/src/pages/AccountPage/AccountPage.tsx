@@ -304,9 +304,9 @@ export function AccountPage() {
               {user.role === 'ROLE_ADMIN' ? (
                 <AccountSecondaryButton
                   type="button"
-                  onClick={() => navigate('/admin/organizer-applications')}
+                  onClick={() => navigate('/admin')}
                 >
-                  Relire les demandes organisateur
+                  Ouvrir la console admin
                 </AccountSecondaryButton>
               ) : null}
               <AccountSecondaryButton type="button" onClick={handleLogout}>

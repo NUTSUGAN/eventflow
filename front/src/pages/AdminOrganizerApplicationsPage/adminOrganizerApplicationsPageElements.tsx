@@ -39,6 +39,43 @@ export const AdminOrganizerApplicationsState = styled.div`
   color: rgba(255, 239, 229, 0.84);
 `
 
+export const AdminOrganizerApplicationsTabs = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+`
+
+export const AdminOrganizerApplicationsTab = styled.button<{ $active: boolean }>`
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid
+    ${({ $active }) => ($active ? 'rgba(235, 148, 81, 0.38)' : 'rgba(255, 255, 255, 0.08)')};
+  background:
+    ${({ $active }) =>
+      $active ? 'rgba(235, 148, 81, 0.14)' : 'rgba(255, 255, 255, 0.03)'};
+  color: #fff8f2;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+`
+
+export const AdminOrganizerApplicationsSearch = styled.input`
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff8f2;
+  outline: none;
+
+  &:focus {
+    border-color: rgba(235, 148, 81, 0.88);
+    box-shadow: 0 0 0 3px rgba(235, 148, 81, 0.16);
+  }
+`
+
 export const AdminOrganizerApplicationsList = styled.section`
   display: grid;
   gap: 18px;

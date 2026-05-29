@@ -93,6 +93,7 @@ class AuthController extends AbstractController
         $user->setFirstName(trim((string) $data['firstName']));
         $user->setLastName(trim((string) $data['lastName']));
         $user->setRole(User::ROLE_CLIENT);
+        $user->setAccountStatus(User::ACCOUNT_STATUS_ACTIVE);
         $user->setTermsAcceptedAt($now);
         $user->setPrivacyAcceptedAt($now);
         $user->setCreatedAt($now);
@@ -268,6 +269,10 @@ class AuthController extends AbstractController
         if ($oauthAccount instanceof UserOauthAccount && $oauthAccount->getUser() instanceof User) {
             $user = $oauthAccount->getUser();
 
+            if (!$user->canAuthenticate()) {
+                return $this->redirectBlockedAccount($frontendAppUrl, $intent);
+            }
+
             if (null === $user->getProfilePhoto() && null !== $profilePhoto) {
                 $user->setProfilePhoto($profilePhoto);
                 $entityManager->flush();
@@ -293,6 +298,10 @@ class AuthController extends AbstractController
             $existingUser->getTermsAcceptedAt() instanceof \DateTimeImmutable &&
             $existingUser->getPrivacyAcceptedAt() instanceof \DateTimeImmutable
         ) {
+            if (!$existingUser->canAuthenticate()) {
+                return $this->redirectBlockedAccount($frontendAppUrl, $intent);
+            }
+
             if (null === $existingUser->getProfilePhoto() && null !== $profilePhoto) {
                 $existingUser->setProfilePhoto($profilePhoto);
             }
@@ -463,6 +472,12 @@ class AuthController extends AbstractController
         $entityManager->flush();
 
         $session->remove(self::GOOGLE_PENDING_SESSION_KEY);
+        if (!$user->canAuthenticate()) {
+            return $this->json([
+                'message' => 'Ce compte est desactive ou bloque. Contacte le support EventFlow.',
+            ], 403);
+        }
+
         $security->login($user);
 
         return $this->json([
@@ -778,6 +793,7 @@ class AuthController extends AbstractController
             'email' => $user->getEmail(),
             'role' => $user->getEffectiveRole(),
             'baseRole' => $user->getBaseRole(),
+            'accountStatus' => $user->getAccountStatus(),
             'roles' => array_values(array_filter(
                 $user->getRoles(),
                 static fn (string $role): bool => 'ROLE_USER' !== $role,
@@ -807,6 +823,17 @@ class AuthController extends AbstractController
         }
 
         return false;
+    }
+
+    private function redirectBlockedAccount(string $frontendAppUrl, string $intent): RedirectResponse
+    {
+        return $this->redirect(
+            $this->buildFrontendAuthUrl($frontendAppUrl, [
+                'mode' => 'login',
+                'intent' => $intent,
+                'google' => 'account_blocked',
+            ])
+        );
     }
 
     private function resolveFirstName(array $googleUserInfo): string

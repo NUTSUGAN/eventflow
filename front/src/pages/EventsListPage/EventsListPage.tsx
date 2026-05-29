@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getPublicEvents } from '../../api/events'
 import { FeatureSpotlight } from '../../components/FeatureSpotlight/FeatureSpotlight'
 import { EventCard } from '../../components/EventCard/EventCard'
@@ -18,6 +18,7 @@ import {
 } from './eventsListPageElements'
 
 export function EventsListPage() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [events, setEvents] = useState<EventSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -88,7 +89,7 @@ export function EventsListPage() {
           </CardsGrid>
 
           <ActionRow>
-            <MoreEventsButton type="button">PLUS D&apos;EVENEMENTS</MoreEventsButton>
+            <MoreEventsButton type="button" onClick={() => navigate('/explorer')}>PLUS D&apos;EVENEMENTS</MoreEventsButton>
           </ActionRow>
         </>
       ) : (

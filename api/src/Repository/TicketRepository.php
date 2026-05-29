@@ -86,4 +86,28 @@ class TicketRepository extends ServiceEntityRepository
 
         return $ticket;
     }
+
+    /**
+     * @return list<Ticket>
+     */
+    public function findForAdminAudit(int $limit = 250): array
+    {
+        /** @var list<Ticket> $tickets */
+        $tickets = $this->createQueryBuilder('ticket')
+            ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
+            ->innerJoin('customerOrder.client', 'client')->addSelect('client')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
+            ->innerJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->orderBy('ticket.issuedAt', 'DESC')
+            ->addOrderBy('ticket.id', 'DESC')
+            ->setMaxResults(max(1, min(500, $limit)))
+            ->getQuery()
+            ->getResult()
+        ;
+
+        return $tickets;
+    }
 }

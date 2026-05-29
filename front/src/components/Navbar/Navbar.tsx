@@ -503,10 +503,10 @@ export function Navbar() {
                     type="button"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
-                      navigate('/admin/organizer-applications')
+                      navigate('/admin')
                     }}
                   >
-                    Relire les demandes organisateur
+                    Console admin
                   </ProfileDropdownAction>
                 ) : null}
                 <ProfileDropdownAction type="button" onClick={handleLogout}>
@@ -580,10 +580,10 @@ export function Navbar() {
                   type="button"
                   onClick={() => {
                     setIsMobileMenuOpen(false)
-                    navigate('/admin/organizer-applications')
+                    navigate('/admin')
                   }}
                 >
-                  Relire les demandes organisateur
+                  Console admin
                 </MobileMenuLink>
               ) : null}
               <MobileMenuAuthButton type="button" onClick={handleLogout}>
