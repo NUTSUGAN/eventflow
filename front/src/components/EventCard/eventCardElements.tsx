@@ -1,25 +1,55 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
+type CardVariant = 'default' | 'explorer'
+
 export const EventLink = styled(Link)`
   text-decoration: none;
   color: inherit;
 `
 
-export const Card = styled.article`
-  padding: 24px;
+export const Card = styled.article<{ $variant?: CardVariant }>`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 0;
+  gap: ${({ $variant }) => ($variant === 'explorer' ? '0' : '8px')};
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: ${({ $variant }) => ($variant === 'explorer' ? '8px' : '0')};
+  border: ${({ $variant }) =>
+    $variant === 'explorer' ? '1px solid rgba(255, 255, 255, 0.08)' : '0'};
+  background:
+    ${({ $variant }) =>
+      $variant === 'explorer'
+        ? 'linear-gradient(180deg, rgba(38, 33, 31, 0.98) 0%, rgba(28, 24, 22, 0.98) 100%)'
+        : 'transparent'};
+  box-shadow:
+    ${({ $variant }) =>
+      $variant === 'explorer'
+        ? '0 18px 34px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.03)'
+        : 'none'};
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+
+  ${EventLink}:hover & {
+    transform: translateY(-4px);
+    border-color: ${({ $variant }) =>
+      $variant === 'explorer' ? 'rgba(248, 143, 82, 0.22)' : 'transparent'};
+    box-shadow:
+      ${({ $variant }) =>
+        $variant === 'explorer'
+          ? '0 24px 42px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04)'
+          : 'none'};
+  }
 `
 
-export const CardCover = styled.div<{ $imageUrl?: string }>`
+export const CardCover = styled.div<{ $imageUrl?: string; $variant?: CardVariant }>`
   position: relative;
   overflow: hidden;
   width: 100%;
   aspect-ratio: 1.68;
-  border-radius: 6px;
+  border-radius: ${({ $variant }) => ($variant === 'explorer' ? '0' : '6px')};
   background-image:
     ${({ $imageUrl }) =>
       $imageUrl
@@ -43,11 +73,27 @@ export const CardCover = styled.div<{ $imageUrl?: string }>`
       linear-gradient(160deg, rgba(255, 255, 255, 0.03), transparent 55%),
       linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.35) 100%);
   }
+`
 
-  ${EventLink}:hover & {
-    transform: translateY(-3px);
-    box-shadow: 0 22px 34px rgba(0, 0, 0, 0.34);
-  }
+export const CardContent = styled.div<{ $variant?: CardVariant }>`
+  padding: ${({ $variant }) => ($variant === 'explorer' ? '16px 16px 18px' : '0')};
+  display: grid;
+  gap: ${({ $variant }) => ($variant === 'explorer' ? '10px' : '8px')};
+`
+
+export const CardCategory = styled.span`
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 143, 82, 0.22);
+  background: rgba(248, 143, 82, 0.1);
+  color: #ffd8c4;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
 `
 
 export const CardTitle = styled.h2`
@@ -62,6 +108,13 @@ export const CardLocation = styled.p`
   margin: 0;
   color: var(--color-text-muted);
   font-size: 0.9rem;
+`
+
+export const CardDescription = styled.p`
+  margin: 0;
+  color: rgba(255, 244, 236, 0.76);
+  font-size: 0.94rem;
+  line-height: 1.55;
 `
 
 export const CardMetaRow = styled.footer`

@@ -1,7 +1,10 @@
 import type { EventSummary } from '../../types/event'
 import {
   Card,
+  CardCategory,
+  CardContent,
   CardCover,
+  CardDescription,
   CardLocation,
   CardMetaRow,
   CardTitle,
@@ -12,6 +15,7 @@ import {
 
 type EventCardProps = {
   event: EventSummary
+  variant?: 'default' | 'explorer'
 }
 
 const monthLabels = ['JAN', 'FEV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUL', 'AOU', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -41,19 +45,26 @@ function formatPrice(price: number | null, currency: string): string {
   }).format(price)
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, variant = 'default' }: EventCardProps) {
+  const isExplorerVariant = variant === 'explorer'
+
   return (
     <EventLink to={`/events/${event.id}`}>
-      <Card>
-        <CardCover $imageUrl={event.coverImageUrl ?? undefined} />
-        <CardTitle>{event.title}</CardTitle>
-        <CardLocation>
-          {event.city}, France
-        </CardLocation>
-        <CardMetaRow>
-          <CardWhen>{formatDate(event.startsAt)}</CardWhen>
-          <PriceTag>{formatPrice(event.minPrice, event.currency)}</PriceTag>
-        </CardMetaRow>
+      <Card $variant={variant}>
+        <CardCover
+          $imageUrl={event.coverImageUrl ?? undefined}
+          $variant={variant}
+        />
+        <CardContent $variant={variant}>
+          {isExplorerVariant ? <CardCategory>{event.category}</CardCategory> : null}
+          <CardTitle>{event.title}</CardTitle>
+          <CardLocation>{event.city}, France</CardLocation>
+          {isExplorerVariant ? <CardDescription>{event.shortDescription}</CardDescription> : null}
+          <CardMetaRow>
+            <CardWhen>{formatDate(event.startsAt)}</CardWhen>
+            <PriceTag>{formatPrice(event.minPrice, event.currency)}</PriceTag>
+          </CardMetaRow>
+        </CardContent>
       </Card>
     </EventLink>
   )

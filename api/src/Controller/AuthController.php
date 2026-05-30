@@ -19,6 +19,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -557,7 +558,7 @@ class AuthController extends AbstractController
         return $this->json($response, 200);
     }
 
-    #[Route('/api/me', name: 'api_me_update', methods: ['PATCH'])]
+    #[Route('/api/me', name: 'api_me_update', methods: ['PATCH', 'POST'])]
     public function updateMe(
         Request $request,
         NewsletterSubscriptionRepository $newsletterSubscriptionRepository,
@@ -571,7 +572,8 @@ class AuthController extends AbstractController
             ], 401);
         }
 
-        $data = $request->toArray();
+        $data = $this->getRequestData($request);
+        $profilePhotoFile = $request->files->get('profilePhotoFile');
 
         if (array_key_exists('firstName', $data)) {
             $firstName = trim((string) $data['firstName']);
@@ -597,8 +599,40 @@ class AuthController extends AbstractController
             $user->setLastName($lastName);
         }
 
-        if (array_key_exists('profilePhoto', $data)) {
+        if ($profilePhotoFile instanceof UploadedFile) {
+            try {
+                $newProfilePhotoPath = $this->uploadProfileImage($profilePhotoFile);
+                $this->removeUploadedProfilePhoto($user->getProfilePhoto());
+                $user->setProfilePhoto($newProfilePhotoPath);
+            } catch (\RuntimeException $exception) {
+                return $this->json([
+                    'message' => $exception->getMessage(),
+                ], 400);
+            }
+        } elseif (
+            array_key_exists('profilePhotoDataUrl', $data) &&
+            is_string($data['profilePhotoDataUrl']) &&
+            trim($data['profilePhotoDataUrl']) !== ''
+        ) {
+            try {
+                $newProfilePhotoPath = $this->uploadProfileImageFromDataUrl((string) $data['profilePhotoDataUrl']);
+                $this->removeUploadedProfilePhoto($user->getProfilePhoto());
+                $user->setProfilePhoto($newProfilePhotoPath);
+            } catch (\RuntimeException $exception) {
+                return $this->json([
+                    'message' => $exception->getMessage(),
+                ], 400);
+            }
+        } elseif ($this->toBoolean($data['removeProfilePhoto'] ?? false)) {
+            $this->removeUploadedProfilePhoto($user->getProfilePhoto());
+            $user->setProfilePhoto(null);
+        } elseif (array_key_exists('profilePhoto', $data)) {
             $profilePhoto = $this->normalizeNullableString($data['profilePhoto'] ?? null);
+
+            if ($profilePhoto !== $user->getProfilePhoto()) {
+                $this->removeUploadedProfilePhoto($user->getProfilePhoto());
+            }
+
             $user->setProfilePhoto($profilePhoto);
         }
 
@@ -823,6 +857,100 @@ class AuthController extends AbstractController
         }
 
         return false;
+    }
+
+    private function getRequestData(Request $request): array
+    {
+        $contentType = (string) $request->headers->get('Content-Type', '');
+
+        if (str_contains($contentType, 'application/json')) {
+            try {
+                return $request->toArray();
+            } catch (\Throwable) {
+                return [];
+            }
+        }
+
+        return $request->request->all();
+    }
+
+    private function uploadProfileImage(UploadedFile $file): string
+    {
+        $mimeType = $file->getMimeType() ?? '';
+
+        if (!str_starts_with($mimeType, 'image/')) {
+            throw new \RuntimeException('Le fichier envoye doit etre une image.');
+        }
+
+        $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/profiles';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeName = preg_replace('/[^A-Za-z0-9_-]/', '-', $originalName) ?: 'profile';
+        $extension = $file->guessExtension() ?: 'bin';
+        $filename = uniqid('profile_', true).'-'.$safeName.'.'.$extension;
+
+        $file->move($uploadDir, $filename);
+
+        return '/uploads/profiles/'.$filename;
+    }
+
+    private function uploadProfileImageFromDataUrl(string $dataUrl): string
+    {
+        if (!preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/', $dataUrl, $matches)) {
+            throw new \RuntimeException('Le format de la photo de profil est invalide.');
+        }
+
+        $mimeType = strtolower((string) ($matches[1] ?? ''));
+
+        if (!str_starts_with($mimeType, 'image/')) {
+            throw new \RuntimeException('La photo de profil doit etre une image.');
+        }
+
+        $rawData = base64_decode((string) ($matches[2] ?? ''), true);
+
+        if (false === $rawData || '' === $rawData) {
+            throw new \RuntimeException('Impossible de decoder la photo de profil.');
+        }
+
+        $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/profiles';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $extension = match ($mimeType) {
+            'image/jpeg', 'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => 'bin',
+        };
+
+        $filename = uniqid('profile_', true).'-upload.'.$extension;
+        $targetPath = $uploadDir.'/'.$filename;
+
+        if (false === file_put_contents($targetPath, $rawData)) {
+            throw new \RuntimeException('Impossible denregistrer la photo de profil.');
+        }
+
+        return '/uploads/profiles/'.$filename;
+    }
+
+    private function removeUploadedProfilePhoto(?string $storedPath): void
+    {
+        if (!is_string($storedPath) || !str_starts_with($storedPath, '/uploads/profiles/')) {
+            return;
+        }
+
+        $fullPath = $this->getParameter('kernel.project_dir').'/public'.$storedPath;
+
+        if (is_file($fullPath)) {
+            unlink($fullPath);
+        }
     }
 
     private function redirectBlockedAccount(string $frontendAppUrl, string $intent): RedirectResponse

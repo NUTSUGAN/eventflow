@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Event;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -25,7 +26,9 @@ class EventRepository extends ServiceEntityRepository
         ?string $type = null,
         ?string $city = null,
         ?\DateTimeImmutable $date = null,
-        int $limit = 18
+        int $limit = 18,
+        int $offset = 0,
+        string $scope = 'upcoming'
     ): array {
         $queryBuilder = $this->createQueryBuilder('event')
             ->leftJoin('event.category', 'category')->addSelect('category')
@@ -33,11 +36,214 @@ class EventRepository extends ServiceEntityRepository
             ->leftJoin('event.ticketTypes', 'ticketType', 'WITH', 'ticketType.isActive = true')->addSelect('ticketType')
             ->andWhere('LOWER(event.status) = :publishedStatus')
             ->setParameter('publishedStatus', 'published')
-            ->orderBy('event.startDatetime', 'ASC')
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, $scope);
+        $this->applyPublicListFilters($queryBuilder, $search, $type, $city, $date);
+
+        if ($this->isArchiveScope($scope)) {
+            $queryBuilder
+                ->orderBy('event.endDatetime', 'DESC')
+                ->addOrderBy('event.startDatetime', 'DESC')
+            ;
+        } else {
+            $queryBuilder->orderBy('event.startDatetime', 'ASC');
+        }
+
+        $queryBuilder
             ->addOrderBy('ticketType.price', 'ASC')
             ->addOrderBy('ticketType.id', 'ASC')
         ;
 
+        if ($limit > 0) {
+            $queryBuilder->setMaxResults($limit);
+        }
+
+        if ($offset > 0) {
+            $queryBuilder->setFirstResult($offset);
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function countPublicList(
+        ?string $search = null,
+        ?string $type = null,
+        ?string $city = null,
+        ?\DateTimeImmutable $date = null,
+        string $scope = 'upcoming'
+    ): int {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->select('COUNT(DISTINCT event.id)')
+            ->leftJoin('event.category', 'category')
+            ->leftJoin('event.location', 'location')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('publishedStatus', 'published')
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, $scope);
+        $this->applyPublicListFilters($queryBuilder, $search, $type, $city, $date);
+
+        return (int) $queryBuilder
+            ->getQuery()
+            ->getSingleScalarResult()
+        ;
+    }
+
+    public function findOneForPublicDetail(int $id): ?Event
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->leftJoin('event.category', 'category')->addSelect('category')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('event.id = :id')
+            ->setParameter('id', $id)
+        ;
+
+        return $queryBuilder
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    /**
+     * @return list<Event>
+     */
+    public function findPublicSuggestionsByTitle(string $query, int $limit = 5): array
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->leftJoin('event.category', 'category')->addSelect('category')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->andWhere('LOWER(event.title) LIKE :query')
+            ->setParameter('publishedStatus', 'published')
+            ->setParameter('query', '%'.mb_strtolower($query).'%')
+            ->orderBy('event.startDatetime', 'ASC')
+            ->setMaxResults(max(1, min(10, $limit)))
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * @return list<Event>
+     */
+    public function findPublishedByOrganizer(int $organizerId, int $limit = 12): array
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->leftJoin('event.category', 'category')->addSelect('category')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->leftJoin('event.ticketTypes', 'ticketType', 'WITH', 'ticketType.isActive = true')->addSelect('ticketType')
+            ->andWhere('event.organizer = :organizerId')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('organizerId', $organizerId)
+            ->setParameter('publishedStatus', 'published')
+            ->orderBy('event.startDatetime', 'ASC')
+            ->addOrderBy('ticketType.price', 'ASC')
+            ->addOrderBy('ticketType.id', 'ASC')
+            ->setMaxResults(max(1, min(24, $limit)))
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function countPublishedByOrganizer(int $organizerId): int
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->select('COUNT(event.id)')
+            ->andWhere('event.organizer = :organizerId')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('organizerId', $organizerId)
+            ->setParameter('publishedStatus', 'published')
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
+
+        return (int) $queryBuilder
+            ->getQuery()
+            ->getSingleScalarResult()
+        ;
+    }
+
+    /**
+     * @return list<array{id: int, name: string}>
+     */
+    public function findPublicCategoryFilters(): array
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->select('DISTINCT category.id AS id, category.name AS name')
+            ->innerJoin('event.category', 'category')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->andWhere('category.name IS NOT NULL')
+            ->andWhere("category.name <> ''")
+            ->setParameter('publishedStatus', 'published')
+            ->orderBy('category.name', 'ASC')
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
+
+        $rows = $queryBuilder
+            ->getQuery()
+            ->getArrayResult()
+        ;
+
+        return array_values(array_map(
+            static fn (array $row): array => [
+                'id' => (int) $row['id'],
+                'name' => (string) $row['name'],
+            ],
+            $rows
+        ));
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function findPublicCityFilters(): array
+    {
+        $queryBuilder = $this->createQueryBuilder('event')
+            ->select('DISTINCT location.city AS city')
+            ->innerJoin('event.location', 'location')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->andWhere('location.city IS NOT NULL')
+            ->andWhere("location.city <> ''")
+            ->setParameter('publishedStatus', 'published')
+            ->orderBy('location.city', 'ASC')
+        ;
+
+        $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
+
+        $rows = $queryBuilder
+            ->getQuery()
+            ->getArrayResult()
+        ;
+
+        return array_values(array_map(
+            static fn (array $row): string => (string) $row['city'],
+            $rows
+        ));
+    }
+
+    private function applyPublicListFilters(
+        QueryBuilder $queryBuilder,
+        ?string $search,
+        ?string $type,
+        ?string $city,
+        ?\DateTimeImmutable $date
+    ): void {
         if (null !== $search && '' !== $search) {
             $queryBuilder
                 ->andWhere(
@@ -82,134 +288,34 @@ class EventRepository extends ServiceEntityRepository
                 ->setParameter('endOfDay', $endOfDay)
             ;
         }
+    }
 
-        if ($limit > 0) {
-            $queryBuilder->setMaxResults($limit);
+    private function applyPublicVisibilityScope(QueryBuilder $queryBuilder, string $scope): void
+    {
+        $queryBuilder->setParameter('publicReferenceNow', new \DateTimeImmutable());
+
+        if ($this->isArchiveScope($scope)) {
+            $queryBuilder->andWhere(
+                '(
+                    (event.endDatetime IS NOT NULL AND event.endDatetime < :publicReferenceNow)
+                    OR (event.endDatetime IS NULL AND event.startDatetime IS NOT NULL AND event.startDatetime < :publicReferenceNow)
+                )'
+            );
+
+            return;
         }
 
-        return $queryBuilder
-            ->getQuery()
-            ->getResult()
-        ;
+        $queryBuilder->andWhere(
+            '(
+                (event.endDatetime IS NOT NULL AND event.endDatetime >= :publicReferenceNow)
+                OR (event.endDatetime IS NULL AND event.startDatetime IS NOT NULL AND event.startDatetime >= :publicReferenceNow)
+            )'
+        );
     }
 
-    public function findOneForPublicDetail(int $id): ?Event
+    private function isArchiveScope(string $scope): bool
     {
-        $queryBuilder = $this->createQueryBuilder('event')
-            ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
-            ->leftJoin('event.category', 'category')->addSelect('category')
-            ->leftJoin('event.location', 'location')->addSelect('location')
-            ->andWhere('event.id = :id')
-            ->setParameter('id', $id)
-        ;
-
-        return $queryBuilder
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-
-    /**
-     * @return list<Event>
-     */
-    public function findPublicSuggestionsByTitle(string $query, int $limit = 5): array
-    {
-        return $this->createQueryBuilder('event')
-            ->leftJoin('event.category', 'category')->addSelect('category')
-            ->leftJoin('event.location', 'location')->addSelect('location')
-            ->andWhere('LOWER(event.status) = :publishedStatus')
-            ->andWhere('LOWER(event.title) LIKE :query')
-            ->setParameter('publishedStatus', 'published')
-            ->setParameter('query', '%'.mb_strtolower($query).'%')
-            ->orderBy('event.startDatetime', 'ASC')
-            ->setMaxResults(max(1, min(10, $limit)))
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
-     * @return list<Event>
-     */
-    public function findPublishedByOrganizer(int $organizerId, int $limit = 12): array
-    {
-        return $this->createQueryBuilder('event')
-            ->leftJoin('event.category', 'category')->addSelect('category')
-            ->leftJoin('event.location', 'location')->addSelect('location')
-            ->leftJoin('event.ticketTypes', 'ticketType', 'WITH', 'ticketType.isActive = true')->addSelect('ticketType')
-            ->andWhere('event.organizer = :organizerId')
-            ->andWhere('LOWER(event.status) = :publishedStatus')
-            ->setParameter('organizerId', $organizerId)
-            ->setParameter('publishedStatus', 'published')
-            ->orderBy('event.startDatetime', 'ASC')
-            ->addOrderBy('ticketType.price', 'ASC')
-            ->addOrderBy('ticketType.id', 'ASC')
-            ->setMaxResults(max(1, min(24, $limit)))
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    public function countPublishedByOrganizer(int $organizerId): int
-    {
-        return (int) $this->createQueryBuilder('event')
-            ->select('COUNT(event.id)')
-            ->andWhere('event.organizer = :organizerId')
-            ->andWhere('LOWER(event.status) = :publishedStatus')
-            ->setParameter('organizerId', $organizerId)
-            ->setParameter('publishedStatus', 'published')
-            ->getQuery()
-            ->getSingleScalarResult()
-        ;
-    }
-
-    /**
-     * @return list<array{id: int, name: string}>
-     */
-    public function findPublicCategoryFilters(): array
-    {
-        $rows = $this->createQueryBuilder('event')
-            ->select('DISTINCT category.id AS id, category.name AS name')
-            ->innerJoin('event.category', 'category')
-            ->andWhere('LOWER(event.status) = :publishedStatus')
-            ->andWhere('category.name IS NOT NULL')
-            ->andWhere("category.name <> ''")
-            ->setParameter('publishedStatus', 'published')
-            ->orderBy('category.name', 'ASC')
-            ->getQuery()
-            ->getArrayResult()
-        ;
-
-        return array_values(array_map(
-            static fn (array $row): array => [
-                'id' => (int) $row['id'],
-                'name' => (string) $row['name'],
-            ],
-            $rows
-        ));
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function findPublicCityFilters(): array
-    {
-        $rows = $this->createQueryBuilder('event')
-            ->select('DISTINCT location.city AS city')
-            ->innerJoin('event.location', 'location')
-            ->andWhere('LOWER(event.status) = :publishedStatus')
-            ->andWhere('location.city IS NOT NULL')
-            ->andWhere("location.city <> ''")
-            ->setParameter('publishedStatus', 'published')
-            ->orderBy('location.city', 'ASC')
-            ->getQuery()
-            ->getArrayResult()
-        ;
-
-        return array_values(array_map(
-            static fn (array $row): string => (string) $row['city'],
-            $rows
-        ));
+        return 'archive' === mb_strtolower(trim($scope));
     }
 
     /**

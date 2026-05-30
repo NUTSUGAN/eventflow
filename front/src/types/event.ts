@@ -31,6 +31,16 @@ export type EventFiltersResponse = {
   cities: string[]
 }
 
+export type PublicEventsResponse = {
+  items: EventSummary[]
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+}
+
 export type EventCategory = {
   id: number | null
   name: string | null
@@ -139,4 +149,13 @@ export type OrganizerProfile = {
   organizer: OrganizerProfileOrganizer
   subscription: EventSubscription
   events: EventSummary[]
+}
+
+export type EventReportPayload = {
+  reason: string
+  details: string
+}
+
+export type EventReportResponse = {
+  message: string
 }

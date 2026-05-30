@@ -2,10 +2,12 @@ import { apiClient, getBackendPublicUrl } from './client'
 import type {
   AuthActionResponse,
   AuthUser,
+  ConfirmEmailChangePayload,
   ForgotPasswordPayload,
   GoogleFinalizePayload,
   GooglePendingAccount,
   LoginPayload,
+  RequestEmailChangePayload,
   RegisterPayload,
   ResetPasswordPayload,
   UpdateProfilePayload,
@@ -13,6 +15,42 @@ import type {
 
 let cachedCurrentUser: AuthUser | null | undefined
 let currentUserRequest: Promise<AuthUser | null> | null = null
+
+function resolveProfilePhotoUrl(profilePhoto: string | null): string | null {
+  if (!profilePhoto) {
+    return null
+  }
+
+  if (profilePhoto.startsWith('http://') || profilePhoto.startsWith('https://')) {
+    return profilePhoto
+  }
+
+  const normalizedPath = profilePhoto.startsWith('/')
+    ? profilePhoto
+    : `/${profilePhoto}`
+
+  return `${getBackendPublicUrl()}${normalizedPath}`
+}
+
+function normalizeAuthUser(user: AuthUser): AuthUser {
+  return {
+    ...user,
+    profilePhoto: resolveProfilePhotoUrl(user.profilePhoto),
+  }
+}
+
+function normalizeAuthActionResponse(
+  response: AuthActionResponse,
+): AuthActionResponse {
+  if (!response.user) {
+    return response
+  }
+
+  return {
+    ...response,
+    user: normalizeAuthUser(response.user),
+  }
+}
 
 function setCachedCurrentUser(user: AuthUser | null | undefined) {
   cachedCurrentUser = user
@@ -39,8 +77,9 @@ async function loadCurrentUser(force = false): Promise<AuthUser | null> {
   currentUserRequest = apiClient
     .get<AuthUser>('/api/me')
     .then((response) => {
-      setCachedCurrentUser(response.data)
-      return response.data
+      const normalizedUser = normalizeAuthUser(response.data)
+      setCachedCurrentUser(normalizedUser)
+      return normalizedUser
     })
     .catch((error: unknown) => {
       if (isUnauthorizedError(error)) {
@@ -80,7 +119,7 @@ export async function registerUser(
   const response = await apiClient.post<AuthActionResponse>('/api/register', payload)
   currentUserRequest = null
   setCachedCurrentUser(undefined)
-  return response.data
+  return normalizeAuthActionResponse(response.data)
 }
 
 export function readCachedCurrentUser(): AuthUser | null | undefined {
@@ -101,13 +140,14 @@ export async function updateCurrentUser(
   payload: UpdateProfilePayload,
 ): Promise<AuthActionResponse> {
   const response = await apiClient.patch<AuthActionResponse>('/api/me', payload)
+  const normalizedResponse = normalizeAuthActionResponse(response.data)
 
-  if (response.data.user) {
-    setCachedCurrentUser(response.data.user)
+  if (normalizedResponse.user) {
+    setCachedCurrentUser(normalizedResponse.user)
   }
   currentUserRequest = null
 
-  return response.data
+  return normalizedResponse
 }
 
 export async function getPendingGoogleAccount(): Promise<GooglePendingAccount> {
@@ -122,15 +162,16 @@ export async function finalizeGoogleAuth(
     '/api/auth/google/finalize',
     payload,
   )
+  const normalizedResponse = normalizeAuthActionResponse(response.data)
 
-  if (response.data.user) {
-    setCachedCurrentUser(response.data.user)
+  if (normalizedResponse.user) {
+    setCachedCurrentUser(normalizedResponse.user)
   } else {
     setCachedCurrentUser(undefined)
   }
   currentUserRequest = null
 
-  return response.data
+  return normalizedResponse
 }
 
 export async function requestPasswordReset(
@@ -144,6 +185,31 @@ export async function resetPassword(
   payload: ResetPasswordPayload,
 ): Promise<AuthActionResponse> {
   const response = await apiClient.post<AuthActionResponse>('/api/password/reset', payload)
+  return response.data
+}
+
+export async function requestEmailChange(
+  payload: RequestEmailChangePayload,
+): Promise<AuthActionResponse> {
+  const response = await apiClient.post<AuthActionResponse>(
+    '/api/me/email-change',
+    payload,
+  )
+
+  return response.data
+}
+
+export async function confirmEmailChange(
+  payload: ConfirmEmailChangePayload,
+): Promise<AuthActionResponse> {
+  const response = await apiClient.post<AuthActionResponse>(
+    '/api/email-change/confirm',
+    payload,
+  )
+
+  currentUserRequest = null
+  setCachedCurrentUser(undefined)
+
   return response.data
 }
 

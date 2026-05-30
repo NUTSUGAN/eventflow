@@ -48,20 +48,46 @@ class EventController extends AbstractController
         $typeFilter = trim((string) $request->query->get('type', $request->query->get('category', '')));
         $cityFilter = trim((string) $request->query->get('city', ''));
         $searchFilter = trim((string) $request->query->get('search', ''));
+        $scopeFilter = trim((string) $request->query->get('scope', 'upcoming'));
         $limit = max(1, min(24, $request->query->getInt('limit', 18)));
+        $requestedPage = max(1, min(500, $request->query->getInt('page', 1)));
+        $normalizedSearchFilter = '' !== $searchFilter ? $searchFilter : null;
+        $normalizedTypeFilter = '' !== $typeFilter ? $typeFilter : null;
+        $normalizedCityFilter = '' !== $cityFilter ? $cityFilter : null;
+        $normalizedScopeFilter = 'archive' === mb_strtolower($scopeFilter) ? 'archive' : 'upcoming';
+        $total = $eventRepository->countPublicList(
+            $normalizedSearchFilter,
+            $normalizedTypeFilter,
+            $normalizedCityFilter,
+            $dateFilter,
+            $normalizedScopeFilter
+        );
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($requestedPage, $totalPages);
+        $offset = ($page - 1) * $limit;
 
         $events = $eventRepository->findPublicList(
-            '' !== $searchFilter ? $searchFilter : null,
-            '' !== $typeFilter ? $typeFilter : null,
-            '' !== $cityFilter ? $cityFilter : null,
+            $normalizedSearchFilter,
+            $normalizedTypeFilter,
+            $normalizedCityFilter,
             $dateFilter,
-            $limit
+            $limit,
+            $offset,
+            $normalizedScopeFilter
         );
 
-        return $this->json(array_map(
-            fn (Event $event): array => $this->serializeEventSummary($request, $event),
-            $events
-        ));
+        return $this->json([
+            'items' => array_map(
+                fn (Event $event): array => $this->serializeEventSummary($request, $event),
+                $events
+            ),
+            'page' => $page,
+            'pageSize' => $limit,
+            'total' => $total,
+            'totalPages' => $totalPages,
+            'hasPreviousPage' => $page > 1,
+            'hasNextPage' => $page < $totalPages,
+        ]);
     }
 
     #[Route('/api/events/{id}', name: 'api_event_detail', requirements: ['id' => '\d+'], methods: ['GET'])]

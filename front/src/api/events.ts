@@ -2,10 +2,12 @@ import { apiClient } from './client'
 import type {
   EventDetail,
   EventFiltersResponse,
+  EventReportPayload,
+  EventReportResponse,
   OrganizerProfile,
   SearchSuggestionsResponse,
-  EventSummary,
   OrganizerFollowResponse,
+  PublicEventsResponse,
 } from '../types/event'
 
 type PublicEventFilters = {
@@ -13,13 +15,15 @@ type PublicEventFilters = {
   type?: string
   city?: string
   date?: string
+  scope?: 'upcoming' | 'archive'
   limit?: number
+  page?: number
 }
 
 export async function getPublicEvents(
   filters: PublicEventFilters = {},
-): Promise<EventSummary[]> {
-  const response = await apiClient.get<EventSummary[]>('/api/events', {
+): Promise<PublicEventsResponse> {
+  const response = await apiClient.get<PublicEventsResponse>('/api/events', {
     params: filters,
   })
   return response.data
@@ -32,6 +36,18 @@ export async function getPublicEventFilters(): Promise<EventFiltersResponse> {
 
 export async function getPublicEventById(eventId: string): Promise<EventDetail> {
   const response = await apiClient.get<EventDetail>(`/api/events/${eventId}`)
+  return response.data
+}
+
+export async function reportPublicEvent(
+  eventId: number,
+  payload: EventReportPayload,
+): Promise<EventReportResponse> {
+  const response = await apiClient.post<EventReportResponse>(
+    `/api/events/${eventId}/report`,
+    payload,
+  )
+
   return response.data
 }
 

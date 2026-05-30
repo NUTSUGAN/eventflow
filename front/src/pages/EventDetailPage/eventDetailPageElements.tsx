@@ -142,6 +142,7 @@ export const DetailGrid = styled.section`
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.9fr);
   gap: 28px;
+  align-items: start;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -343,6 +344,18 @@ export const DetailOrganizerActions = styled.div`
   gap: 12px;
 `
 
+export const DetailReportButton = styled.button`
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 143, 82, 0.38);
+  background: rgba(248, 143, 82, 0.14);
+  color: #fff1e7;
+  font-family: var(--font-heading);
+  font-size: 0.94rem;
+  cursor: pointer;
+`
+
 export const FollowButton = styled.button<{ $active: boolean }>`
   min-height: 50px;
   padding: 0 18px;
@@ -394,6 +407,122 @@ export const FollowIcon = styled.svg`
   width: 16px;
   height: 16px;
   color: var(--color-secondary);
+`
+
+export const DetailReportCard = styled.div`
+  display: grid;
+  gap: 14px;
+  margin-top: 6px;
+  padding: 18px;
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 143, 82, 0.08) 0%,
+    rgba(34, 31, 29, 0.96) 100%
+  );
+  border: 1px solid rgba(248, 143, 82, 0.16);
+`
+
+export const DetailField = styled.label`
+  display: grid;
+  gap: 8px;
+`
+
+export const DetailFieldLabel = styled.span`
+  color: var(--color-text-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+`
+
+export const DetailReportSelect = styled.select`
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.96rem;
+  appearance: none;
+  color-scheme: dark;
+`
+
+export const DetailReportTextarea = styled.textarea`
+  width: 100%;
+  min-height: 132px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.96rem;
+  line-height: 1.6;
+  resize: vertical;
+`
+
+export const DetailReasonGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const DetailReasonButton = styled.button<{ $active: boolean }>`
+  min-height: 50px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid
+    ${({ $active }) =>
+      $active ? 'rgba(248, 143, 82, 0.54)' : 'rgba(255, 255, 255, 0.08)'};
+  background:
+    ${({ $active }) =>
+      $active
+        ? 'linear-gradient(180deg, rgba(248, 143, 82, 0.2) 0%, rgba(96, 49, 31, 0.54) 100%)'
+        : 'rgba(255, 255, 255, 0.03)'};
+  color: ${({ $active }) => ($active ? '#fff4eb' : 'rgba(255, 241, 231, 0.82)')};
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(248, 143, 82, 0.34);
+  }
+`
+
+export const DetailInlineMessage = styled.div<{ $tone?: 'success' | 'danger' }>`
+  padding: 12px 14px;
+  border-radius: 12px;
+  background:
+    ${({ $tone }) =>
+      'danger' === $tone
+        ? 'rgba(138, 55, 55, 0.24)'
+        : 'rgba(86, 154, 91, 0.14)'};
+  border: 1px solid
+    ${({ $tone }) =>
+      'danger' === $tone
+        ? 'rgba(201, 92, 92, 0.34)'
+        : 'rgba(109, 184, 116, 0.28)'};
+  color: ${({ $tone }) => ('danger' === $tone ? '#ffd6d1' : '#dbf3dc')};
+  font-size: 0.94rem;
+  line-height: 1.6;
+`
+
+export const DetailActionRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 `
 
 export const DetailMapCard = styled.div`

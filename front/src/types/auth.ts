@@ -38,7 +38,17 @@ export type UpdateProfilePayload = {
   firstName?: string
   lastName?: string
   profilePhoto?: string | null
+  profilePhotoDataUrl?: string | null
+  removeProfilePhoto?: boolean
   subscribeToNewsletter?: boolean
+}
+
+export type RequestEmailChangePayload = {
+  newEmail: string
+}
+
+export type ConfirmEmailChangePayload = {
+  token: string
 }
 
 export type RegisterPayload = {

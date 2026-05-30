@@ -39,7 +39,7 @@ export function EventsListPage() {
         })
 
         if (isMounted) {
-          setEvents(data)
+          setEvents(data.items)
         }
       } catch {
         if (isMounted) {

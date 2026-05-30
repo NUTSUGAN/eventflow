@@ -204,25 +204,25 @@ export function MyTicketsPage() {
         <MyTicketsStateCard>
           <MyTicketsStateTitle>Acces indisponible</MyTicketsStateTitle>
           <MyTicketsStateText>{errorMessage}</MyTicketsStateText>
-            <MyTicketsActions>
-              {requiresAuth ? (
-                <MyTicketsPrimaryButton
-                  type="button"
-                  onClick={() => navigate('/auth?mode=login')}
-                >
-                  Se connecter
-                </MyTicketsPrimaryButton>
-              ) : (
-                <MyTicketsPrimaryButton
-                  type="button"
-                  onClick={() => setReloadSeed((value) => value + 1)}
-                >
-                  Recharger mes billets
-                </MyTicketsPrimaryButton>
-              )}
-              <MyTicketsSecondaryButton
+          <MyTicketsActions>
+            {requiresAuth ? (
+              <MyTicketsPrimaryButton
                 type="button"
-                onClick={() => navigate('/explorer')}
+                onClick={() => navigate('/auth?mode=login')}
+              >
+                Se connecter
+              </MyTicketsPrimaryButton>
+            ) : (
+              <MyTicketsPrimaryButton
+                type="button"
+                onClick={() => setReloadSeed((value) => value + 1)}
+              >
+                Recharger mes billets
+              </MyTicketsPrimaryButton>
+            )}
+            <MyTicketsSecondaryButton
+              type="button"
+              onClick={() => navigate('/explorer')}
             >
               Retour a Explorer
             </MyTicketsSecondaryButton>
@@ -236,7 +236,7 @@ export function MyTicketsPage() {
                 ? "Tu n'as pas de billets a venir"
                 : activeTab === 'active'
                   ? "Aucun billet en attente d'utilisation"
-                  : "Aucun billet passe pour le moment"}
+                  : 'Aucun billet passe pour le moment'}
             </MyTicketsStateTitle>
             <MyTicketsStateText>
               On affichera ici les billets lies a tes commandes Stripe confirmees.

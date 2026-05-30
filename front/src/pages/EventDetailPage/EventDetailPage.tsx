@@ -4,14 +4,18 @@ import {
   followOrganizer,
   getPublicEventById,
   getPublicEvents,
+  reportPublicEvent,
   unfollowOrganizer,
 } from '../../api/events'
 import type { EventDetail, EventSummary } from '../../types/event'
 import {
+  DetailActionRow,
   AuthPromptButton,
   DetailBody,
   DetailCaption,
   DetailEmptyText,
+  DetailField,
+  DetailFieldLabel,
   DetailGrid,
   DetailHero,
   DetailHeroContent,
@@ -32,12 +36,17 @@ import {
   DetailOrganizerAvatar,
   DetailOrganizerCard,
   DetailOrganizerIdentity,
+  DetailInlineMessage,
   DetailOrganizerName,
   DetailOrganizerNote,
   DetailPanel,
   DetailPanelHeader,
   DetailPanelTitle,
   DetailRelatedGrid,
+  DetailReportCard,
+  DetailReasonButton,
+  DetailReasonGrid,
+  DetailReportTextarea,
   DetailSection,
   DetailStateBox,
   DetailText,
@@ -50,6 +59,7 @@ import {
   DetailTicketPrice,
   TicketReserveButton,
   TicketReserveHint,
+  DetailReportButton,
   DetailTicketText,
   FollowButton,
   FollowIcon,
@@ -212,6 +222,15 @@ function normalizeStatusValue(status: string): string {
     : 'draft'
 }
 
+const eventReportReasonOptions = [
+  { value: 'Fraude ou arnaque', label: 'Fraude ou arnaque' },
+  { value: 'Contenu interdit', label: 'Contenu interdit' },
+  { value: 'Mauvaise categorie', label: 'Mauvaise categorie' },
+  { value: 'Informations trompeuses', label: 'Informations trompeuses' },
+  { value: 'Image ou visuel inapproprie', label: 'Image ou visuel inapproprie' },
+  { value: 'Autre raison', label: 'Autre raison' },
+]
+
 export function EventDetailPage() {
   const navigate = useNavigate()
   const { eventId } = useParams()
@@ -219,6 +238,12 @@ export function EventDetailPage() {
   const [relatedEvents, setRelatedEvents] = useState<EventSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
+  const [isReportSubmitting, setIsReportSubmitting] = useState(false)
+  const [isReportOpen, setIsReportOpen] = useState(false)
+  const [reportReason, setReportReason] = useState(eventReportReasonOptions[0]?.value ?? 'autre')
+  const [reportDetails, setReportDetails] = useState('')
+  const [reportMessage, setReportMessage] = useState<string | null>(null)
+  const [reportErrorMessage, setReportErrorMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -281,7 +306,7 @@ export function EventDetailPage() {
 
         if (isMounted) {
           setRelatedEvents(
-            data.filter((candidate) => candidate.id !== event.id).slice(0, 3),
+            data.items.filter((candidate) => candidate.id !== event.id).slice(0, 3),
           )
         }
       } catch {
@@ -397,6 +422,46 @@ export function EventDetailPage() {
     navigate(
       `/orders/prepare?eventId=${event.id}&ticketTypeId=${selectedTicketTypeId}`,
     )
+  }
+
+  async function handleReportSubmit() {
+    if (!event || isReportSubmitting) {
+      return
+    }
+
+    setIsReportSubmitting(true)
+    setReportErrorMessage(null)
+    setReportMessage(null)
+
+    try {
+      const response = await reportPublicEvent(event.id, {
+        reason: reportReason,
+        details: reportDetails.trim(),
+      })
+
+      setReportMessage(response.message)
+      setReportDetails('')
+      setReportReason(eventReportReasonOptions[0]?.value ?? 'Fraude ou arnaque')
+    } catch (error) {
+      const status =
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error
+          ? (error as { response?: { status?: number; data?: { message?: string } } }).response
+          : undefined
+
+      if (status?.status === 401) {
+        handleAuthPrompt()
+        setReportErrorMessage('Connecte-toi pour envoyer un signalement a l equipe EventFlow.')
+      } else {
+        setReportErrorMessage(
+          status?.data?.message ??
+            "Impossible d'envoyer ton signalement pour le moment.",
+        )
+      }
+    } finally {
+      setIsReportSubmitting(false)
+    }
   }
 
   if (isLoading) {
@@ -644,6 +709,97 @@ export function EventDetailPage() {
               </DetailEmptyText>
             )}
           </DetailPanel>
+
+          {!event.subscription.isOwnOrganizer ? (
+            <DetailPanel>
+              <DetailPanelHeader>
+                <div>
+                  <DetailPanelTitle>Signaler cet evenement</DetailPanelTitle>
+                  <DetailCaption>
+                    Tu peux signaler cette fiche si elle te semble frauduleuse ou incorrecte.
+                  </DetailCaption>
+                </div>
+
+                <DetailReportButton
+                  type="button"
+                  onClick={() => setIsReportOpen((current) => !current)}
+                >
+                  {isReportOpen ? 'Fermer le signalement' : 'Signaler cet evenement'}
+                </DetailReportButton>
+              </DetailPanelHeader>
+
+              {reportMessage ? (
+                <DetailInlineMessage>{reportMessage}</DetailInlineMessage>
+              ) : null}
+
+              {reportErrorMessage && !isReportOpen ? (
+                <DetailInlineMessage $tone="danger">
+                  {reportErrorMessage}
+                </DetailInlineMessage>
+              ) : null}
+
+              {isReportOpen ? (
+                <DetailReportCard>
+                  <DetailText>
+                    Tu signales ici l&apos;evenement. L&apos;organisateur n&apos;est ajoute
+                    qu&apos;en contexte pour aider l&apos;equipe EventFlow a traiter ton retour.
+                  </DetailText>
+
+                  <DetailField>
+                    <DetailFieldLabel>Motif</DetailFieldLabel>
+                    <DetailReasonGrid>
+                      {eventReportReasonOptions.map((option) => (
+                        <DetailReasonButton
+                          key={option.value}
+                          type="button"
+                          $active={reportReason === option.value}
+                          onClick={() => setReportReason(option.value)}
+                        >
+                          {option.label}
+                        </DetailReasonButton>
+                      ))}
+                    </DetailReasonGrid>
+                  </DetailField>
+
+                  <DetailField>
+                    <DetailFieldLabel>Explique-nous pourquoi</DetailFieldLabel>
+                    <DetailReportTextarea
+                      value={reportDetails}
+                      onChange={(event) => setReportDetails(event.target.value)}
+                      placeholder="Ajoute ici le contexte utile pour l'equipe admin."
+                      maxLength={1500}
+                    />
+                  </DetailField>
+
+                  {event.subscription.requiresAuth ? (
+                    <DetailInlineMessage $tone="danger">
+                      Connecte-toi pour envoyer un signalement a l&apos;equipe EventFlow.
+                    </DetailInlineMessage>
+                  ) : null}
+
+                  {reportErrorMessage ? (
+                    <DetailInlineMessage $tone="danger">
+                      {reportErrorMessage}
+                    </DetailInlineMessage>
+                  ) : null}
+
+                  <DetailActionRow>
+                    <TicketReserveButton
+                      type="button"
+                      onClick={handleReportSubmit}
+                      disabled={isReportSubmitting}
+                    >
+                      {isReportSubmitting ? 'Envoi en cours...' : 'Envoyer le signalement'}
+                    </TicketReserveButton>
+
+                    <TicketReserveHint>
+                      L&apos;equipe EventFlow recevra ton motif et tes details.
+                    </TicketReserveHint>
+                  </DetailActionRow>
+                </DetailReportCard>
+              ) : null}
+            </DetailPanel>
+          ) : null}
         </aside>
       </DetailGrid>
 

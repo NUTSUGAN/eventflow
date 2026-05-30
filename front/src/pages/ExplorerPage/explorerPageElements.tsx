@@ -63,7 +63,9 @@ export const FilterToolbar = styled.section`
   border-radius: 18px;
   background: rgba(34, 31, 29, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--shadow-soft);
+  box-shadow:
+    0 22px 44px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
   @media (max-width: 920px) {
     grid-template-columns: 1fr;
@@ -91,8 +93,11 @@ const filterFieldStyles = css`
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
   color: var(--color-text);
+  color-scheme: dark;
+  font-weight: 600;
   outline: 0;
   transition:
+    background-color 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 
@@ -106,11 +111,32 @@ export const FilterSelect = styled.select`
   ${filterFieldStyles}
   appearance: none;
   cursor: pointer;
+  padding-right: 46px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23f4d6c5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px 16px;
+
+  option {
+    background: #241f1d;
+    color: #f5ede7;
+  }
+`
+
+export const FilterTextInput = styled.input`
+  ${filterFieldStyles}
 `
 
 export const FilterDateInput = styled.input`
   ${filterFieldStyles}
-`;
+  padding-right: 18px;
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.88) sepia(0.14) saturate(0.7) hue-rotate(330deg);
+    opacity: 0.92;
+  }
+`
 
 export const FilterMetaRow = styled.div`
   margin-bottom: 26px;
@@ -147,31 +173,79 @@ export const FilterResetButton = styled.button`
 `
 
 export const ExplorerCardsGrid = styled.section`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
 
-  & > * {
-    flex: 0 1 calc((100% - 48px) / 3);
-    min-width: 280px;
-    max-width: 420px;
-  }
-
   @media (max-width: 1040px) {
-    & > * {
-      flex-basis: calc((100% - 24px) / 2);
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @media (max-width: 700px) {
     gap: 22px;
-
-    & > * {
-      flex-basis: 100%;
-      max-width: 100%;
-    }
+    grid-template-columns: 1fr;
   }
+`
+
+export const PaginationRow = styled.div`
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+`
+
+export const PaginationSummary = styled.p`
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.94rem;
+`
+
+export const PaginationControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`
+
+export const PaginationButton = styled.button<{ $active?: boolean }>`
+  min-width: 42px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid
+    ${({ $active }) =>
+      $active ? 'rgba(248, 143, 82, 0.52)' : 'rgba(255, 255, 255, 0.1)'};
+  background:
+    ${({ $active }) =>
+      $active ? 'rgba(248, 143, 82, 0.18)' : 'rgba(255, 255, 255, 0.04)'};
+  color: ${({ $active }) => ($active ? '#fff1e7' : 'var(--color-text)')};
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: rgba(248, 143, 82, 0.34);
+    background: rgba(248, 143, 82, 0.12);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+  }
+`
+
+export const PaginationEllipsis = styled.span`
+  min-width: 18px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-weight: 700;
 `
 
 const StateText = styled.p`
@@ -185,4 +259,41 @@ export const ExplorerStateText = styled(StateText)``;
 
 export const ExplorerErrorText = styled(StateText)`
   color: #ffb4a2;
+`
+
+export const ExplorerArchiveDock = styled.div`
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+`
+
+export const ExplorerArchiveButton = styled.button`
+  min-height: 56px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 143, 82, 0.28);
+  background: rgba(248, 143, 82, 0.08);
+  color: #fff1e7;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(248, 143, 82, 0.16);
+    border-color: rgba(248, 143, 82, 0.42);
+  }
+`
+
+export const ExplorerArchiveIcon = styled.svg`
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 205, 174, 0.96);
 `

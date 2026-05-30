@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import {
-  getPublicEventFilters,
-  getPublicEvents,
-} from '../../api/events'
+import { getPublicEvents } from '../../api/events'
 import { FeatureSpotlight } from '../../components/FeatureSpotlight/FeatureSpotlight'
 import { EventCard } from '../../components/EventCard/EventCard'
-import type { EventFiltersResponse, EventSummary, PublicEventsResponse } from '../../types/event'
+import type { EventSummary, PublicEventsResponse } from '../../types/event'
 import {
-  ExplorerArchiveButton,
-  ExplorerArchiveDock,
-  ExplorerArchiveIcon,
   ExplorerCardsGrid,
   ExplorerErrorText,
   ExplorerEyebrow,
@@ -19,13 +13,12 @@ import {
   ExplorerSection,
   ExplorerStateText,
   ExplorerTitle,
-  FilterDateInput,
   FilterGroup,
   FilterLabel,
   FilterMetaRow,
   FilterResetButton,
-  FilterSelect,
   FilterSummary,
+  FilterTextInput,
   FilterToolbar,
   PaginationButton,
   PaginationControls,
@@ -33,17 +26,12 @@ import {
   PaginationRow,
   PaginationSummary,
   SearchBadge,
-} from './explorerPageElements'
-
-const emptyFilterOptions: EventFiltersResponse = {
-  categories: [],
-  cities: [],
-}
+} from '../ExplorerPage/explorerPageElements'
 
 const emptyPublicEventsResponse: PublicEventsResponse = {
   items: [],
   page: 1,
-  pageSize: 18,
+  pageSize: 12,
   total: 0,
   totalPages: 1,
   hasPreviousPage: false,
@@ -52,13 +40,13 @@ const emptyPublicEventsResponse: PublicEventsResponse = {
 
 function formatResultsCount(visibleCount: number, totalCount: number): string {
   if (totalCount <= 0) {
-    return 'Aucun evenement trouve'
+    return 'Aucun evenement archive trouve'
   }
 
   const visibleLabel =
     visibleCount > 1 ? `${visibleCount} evenements affiches` : `${visibleCount} evenement affiche`
   const totalLabel =
-    totalCount > 1 ? `${totalCount} evenements au total` : `${totalCount} evenement au total`
+    totalCount > 1 ? `${totalCount} evenements archives` : `${totalCount} evenement archive`
 
   return `${visibleLabel} sur ${totalLabel}`
 }
@@ -95,69 +83,30 @@ function buildPaginationTokens(currentPage: number, totalPages: number): Array<n
   return tokens
 }
 
-export function ExplorerPage() {
+export function PastEventsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [events, setEvents] = useState<EventSummary[]>([])
-  const [pagination, setPagination] =
-    useState<PublicEventsResponse>(emptyPublicEventsResponse)
-  const [filterOptions, setFilterOptions] =
-    useState<EventFiltersResponse>(emptyFilterOptions)
+  const [pagination, setPagination] = useState<PublicEventsResponse>(emptyPublicEventsResponse)
   const [isLoading, setIsLoading] = useState(true)
-  const [isFiltersLoading, setIsFiltersLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const searchQuery = searchParams.get('search')?.trim() ?? ''
-  const typeFilter = searchParams.get('type')?.trim() ?? ''
-  const cityFilter = searchParams.get('city')?.trim() ?? ''
-  const dateFilter = searchParams.get('date')?.trim() ?? ''
   const currentPage = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1)
 
   useEffect(() => {
     let isMounted = true
 
-    async function loadFilterOptions() {
-      setIsFiltersLoading(true)
-
-      try {
-        const data = await getPublicEventFilters()
-
-        if (isMounted) {
-          setFilterOptions(data)
-        }
-      } catch {
-        if (isMounted) {
-          setFilterOptions(emptyFilterOptions)
-        }
-      } finally {
-        if (isMounted) {
-          setIsFiltersLoading(false)
-        }
-      }
-    }
-
-    void loadFilterOptions()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  useEffect(() => {
-    let isMounted = true
-
-    async function loadEvents() {
+    async function loadArchivedEvents() {
       setIsLoading(true)
       setErrorMessage(null)
 
       try {
         const data = await getPublicEvents({
-          limit: 18,
+          scope: 'archive',
+          limit: 9,
           page: currentPage,
           search: searchQuery || undefined,
-          type: typeFilter || undefined,
-          city: cityFilter || undefined,
-          date: dateFilter || undefined,
         })
 
         if (isMounted) {
@@ -169,7 +118,7 @@ export function ExplorerPage() {
           setEvents([])
           setPagination(emptyPublicEventsResponse)
           setErrorMessage(
-            "Impossible de charger les evenements de l'explorer pour le moment.",
+            "Impossible de charger la corbeille publique pour le moment.",
           )
         }
       } finally {
@@ -179,20 +128,20 @@ export function ExplorerPage() {
       }
     }
 
-    void loadEvents()
+    void loadArchivedEvents()
 
     return () => {
       isMounted = false
     }
-  }, [currentPage, searchQuery, typeFilter, cityFilter, dateFilter])
+  }, [currentPage, searchQuery])
 
-  function updateFilter(key: 'type' | 'city' | 'date', value: string) {
+  function updateSearch(value: string) {
     const nextParams = new URLSearchParams(searchParams)
 
     if (value.trim() === '') {
-      nextParams.delete(key)
+      nextParams.delete('search')
     } else {
-      nextParams.set(key, value)
+      nextParams.set('search', value)
     }
 
     nextParams.delete('page')
@@ -212,18 +161,10 @@ export function ExplorerPage() {
     setSearchParams(nextParams)
   }
 
-  function resetFilters() {
-    const nextParams = new URLSearchParams()
-
-    if (searchQuery) {
-      nextParams.set('search', searchQuery)
-    }
-
-    setSearchParams(nextParams)
+  function resetSearch() {
+    setSearchParams(new URLSearchParams())
   }
 
-  const hasActiveFilters =
-    searchQuery !== '' || typeFilter !== '' || cityFilter !== '' || dateFilter !== ''
   const paginationTokens = useMemo(
     () => buildPaginationTokens(currentPage, pagination.totalPages),
     [currentPage, pagination.totalPages],
@@ -232,57 +173,23 @@ export function ExplorerPage() {
   return (
     <ExplorerSection>
       <ExplorerHeader>
-        <ExplorerEyebrow>Explorer</ExplorerEyebrow>
-        <ExplorerTitle>Decouvre les evenements publies</ExplorerTitle>
+        <ExplorerEyebrow>Corbeille publique</ExplorerEyebrow>
+        <ExplorerTitle>Evenements passes</ExplorerTitle>
         <ExplorerLead>
-          Filtre par type, ville et date pour retrouver rapidement l&apos;evenement
-          qui t&apos;interesse.
+          Les evenements termines quittent l&apos;Explorer et restent visibles ici,
+          pour montrer ce que les clients ont manque et garder une trace publique des sorties passees.
         </ExplorerLead>
-        {searchQuery ? <SearchBadge>Recherche active : {searchQuery}</SearchBadge> : null}
+        {searchQuery ? <SearchBadge>Recherche archivee : {searchQuery}</SearchBadge> : null}
       </ExplorerHeader>
 
       <FilterToolbar>
         <FilterGroup>
-          <FilterLabel>Type d&apos;evenement</FilterLabel>
-          <FilterSelect
-            id="explorer-type"
-            value={typeFilter}
-            onChange={(event) => updateFilter('type', event.target.value)}
-            disabled={isFiltersLoading}
-          >
-            <option value="">Tous les types</option>
-            {filterOptions.categories.map((category) => (
-              <option key={category.id} value={String(category.id)}>
-                {category.name}
-              </option>
-            ))}
-          </FilterSelect>
-        </FilterGroup>
-
-        <FilterGroup>
-          <FilterLabel>Ville</FilterLabel>
-          <FilterSelect
-            id="explorer-city"
-            value={cityFilter}
-            onChange={(event) => updateFilter('city', event.target.value)}
-            disabled={isFiltersLoading}
-          >
-            <option value="">Toutes les villes</option>
-            {filterOptions.cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </FilterSelect>
-        </FilterGroup>
-
-        <FilterGroup>
-          <FilterLabel>Date</FilterLabel>
-          <FilterDateInput
-            id="explorer-date"
-            type="date"
-            value={dateFilter}
-            onChange={(event) => updateFilter('date', event.target.value)}
+          <FilterLabel>Rechercher un evenement passe</FilterLabel>
+          <FilterTextInput
+            type="text"
+            value={searchQuery}
+            onChange={(event) => updateSearch(event.target.value)}
+            placeholder="Titre, ville ou categorie..."
           />
         </FilterGroup>
       </FilterToolbar>
@@ -290,30 +197,35 @@ export function ExplorerPage() {
       <FilterMetaRow>
         <FilterSummary>
           {isLoading
-            ? 'Chargement des resultats...'
+            ? 'Chargement des archives publiques...'
             : formatResultsCount(events.length, pagination.total)}
         </FilterSummary>
 
-        {hasActiveFilters ? (
-          <FilterResetButton type="button" onClick={resetFilters}>
-            Reinitialiser les filtres
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {searchQuery ? (
+            <FilterResetButton type="button" onClick={resetSearch}>
+              Reinitialiser la recherche
+            </FilterResetButton>
+          ) : null}
+          <FilterResetButton type="button" onClick={() => navigate('/explorer')}>
+            Retour a Explorer
           </FilterResetButton>
-        ) : null}
+        </div>
       </FilterMetaRow>
 
       {isLoading ? (
-        <ExplorerStateText>Chargement des evenements de l&apos;explorer...</ExplorerStateText>
+        <ExplorerStateText>Chargement des evenements passes...</ExplorerStateText>
       ) : errorMessage ? (
         <ExplorerErrorText>{errorMessage}</ExplorerErrorText>
       ) : events.length > 0 ? (
         <ExplorerCardsGrid>
           {events.map((event) => (
-            <EventCard key={event.id} event={event} variant="explorer" />
+            <EventCard key={event.id} event={event} />
           ))}
         </ExplorerCardsGrid>
       ) : (
         <ExplorerStateText>
-          Aucun evenement publie ne correspond a ces filtres pour le moment.
+          Aucun evenement archive ne correspond a cette recherche pour le moment.
         </ExplorerStateText>
       )}
 
@@ -360,18 +272,6 @@ export function ExplorerPage() {
           </PaginationControls>
         </PaginationRow>
       ) : null}
-
-      <ExplorerArchiveDock>
-        <ExplorerArchiveButton type="button" onClick={() => navigate('/corbeille')}>
-          <ExplorerArchiveIcon viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M9 3.75h6l.75 1.5h3a.75.75 0 0 1 0 1.5H5.25a.75.75 0 0 1 0-1.5h3L9 3.75Zm-.75 6a.75.75 0 0 1 .75.75v6.75a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Zm4.5 0a.75.75 0 0 1 .75.75v6.75a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Zm4.5 0a.75.75 0 0 1 .75.75v6.75a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75ZM6 8.25h12l-.8 10.14a1.5 1.5 0 0 1-1.49 1.36H8.29A1.5 1.5 0 0 1 6.8 18.39L6 8.25Z"
-              fill="currentColor"
-            />
-          </ExplorerArchiveIcon>
-          Voir la corbeille publique des evenements passes
-        </ExplorerArchiveButton>
-      </ExplorerArchiveDock>
 
       <FeatureSpotlight />
     </ExplorerSection>

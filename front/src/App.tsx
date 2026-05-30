@@ -4,6 +4,7 @@ import { SiteFooter } from './components/Footer/Footer'
 import { Navbar } from './components/Navbar/Navbar'
 import { CookieConsentBanner } from './components/CookieConsentBanner/CookieConsentBanner'
 import { AccountPage } from './pages/AccountPage/AccountPage'
+import { AccountEmailChangeConfirmPage } from './pages/AccountPage/AccountEmailChangeConfirmPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminOrganizerApplicationsPage } from './pages/AdminOrganizerApplicationsPage/AdminOrganizerApplicationsPage'
 import { AdminOrdersPage } from './pages/AdminOrdersPage/AdminOrdersPage'
@@ -24,6 +25,7 @@ import { OrganizerEventDetailPage } from './pages/OrganizerEventDetailPage/Organ
 import { OrganizerEventsPage } from './pages/OrganizerEventsPage/OrganizerEventsPage'
 import { OrganizerStaffPage } from './pages/OrganizerStaffPage/OrganizerStaffPage'
 import { OrganizerProfilePage } from './pages/OrganizerProfilePage/OrganizerProfilePage'
+import { PastEventsPage } from './pages/PastEventsPage/PastEventsPage'
 import { StaffScanPage } from './pages/StaffScanPage/StaffScanPage'
 import { TicketDetailPage } from './pages/TicketDetailPage/TicketDetailPage'
 import './App.css'
@@ -55,6 +57,10 @@ function App() {
             element={<AdminOrganizerApplicationsPage />}
           />
           <Route path="/account" element={<AccountPage />} />
+          <Route
+            path="/account/email-change/confirm"
+            element={<AccountEmailChangeConfirmPage />}
+          />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/explorer" element={<ExplorerPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
@@ -63,6 +69,7 @@ function App() {
           <Route path="/checkout/success" element={<OrderCheckoutPage />} />
           <Route path="/checkout/cancel" element={<OrderCheckoutPage />} />
           <Route path="/mes-billets" element={<MyTicketsPage />} />
+          <Route path="/corbeille" element={<PastEventsPage />} />
           <Route path="/mes-billets/:ticketId" element={<TicketDetailPage />} />
           <Route path="/organizer-access" element={<OrganizerAccessPage />} />
           <Route
