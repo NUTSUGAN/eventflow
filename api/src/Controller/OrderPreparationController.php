@@ -23,6 +23,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/orders')]
 final class OrderPreparationController extends AbstractController
 {
+    private const PUBLIC_TIMEZONE = 'Europe/Paris';
+
     #[Route('/prepare', name: 'api_order_prepare', methods: ['POST'])]
     public function prepare(
         Request $request,
@@ -202,6 +204,29 @@ final class OrderPreparationController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
+    #[Route('/pending', name: 'api_order_pending_index', methods: ['GET'])]
+    public function pending(
+        OrderRepository $orderRepository,
+        StripePaymentService $stripePaymentService,
+    ): JsonResponse {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->json([
+                'message' => 'Non authentifie.',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $orders = $orderRepository->findPendingPaymentOrdersForUser($user);
+
+        return $this->json([
+            'orders' => array_map(
+                fn (Order $order): array => $this->serializeOrder($order, $stripePaymentService),
+                $orders,
+            ),
+        ]);
+    }
+
     #[Route('/{orderId<\d+>}', name: 'api_order_show', methods: ['GET'])]
     public function show(
         int $orderId,
@@ -322,6 +347,7 @@ final class OrderPreparationController extends AbstractController
     private function serializeOrder(Order $order, StripePaymentService $stripePaymentService): array
     {
         $event = $this->getOrderEvent($order);
+        $location = $event?->getLocation();
         $items = [];
 
         foreach ($order->getOrderItems() as $orderItem) {
@@ -351,6 +377,10 @@ final class OrderPreparationController extends AbstractController
             'event' => [
                 'id' => $event?->getId(),
                 'title' => $event?->getTitle(),
+                'startsAt' => $this->formatDateTimeForFrontend($event?->getStartDatetime()),
+                'endsAt' => $this->formatDateTimeForFrontend($event?->getEndDatetime()),
+                'city' => $location?->getCity(),
+                'venue' => $location?->getAddress() ?? $location?->getCity(),
             ],
             'items' => $items,
             'payment' => $this->serializePayment($order->getPayment()),
@@ -369,6 +399,17 @@ final class OrderPreparationController extends AbstractController
         }
 
         return null;
+    }
+
+    private function formatDateTimeForFrontend(?\DateTimeImmutable $dateTime): ?string
+    {
+        if (!$dateTime instanceof \DateTimeImmutable) {
+            return null;
+        }
+
+        return $dateTime
+            ->setTimezone(new \DateTimeZone(self::PUBLIC_TIMEZONE))
+            ->format(DATE_ATOM);
     }
 
     /**

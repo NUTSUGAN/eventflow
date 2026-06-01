@@ -28,6 +28,20 @@ export type OrganizerEventScanStats = {
   }>
 }
 
+export type OrganizerEventSalesSummary = {
+  revenueTotal: string | number
+  paidOrders: number
+  ticketsSold: number
+  currency: string
+}
+
+export type OrganizerEventScanSummary = {
+  total: number
+  valid: number
+  invalid: number
+  alreadyUsed: number
+}
+
 export type OrganizerEventSummary = {
   id: number
   title: string
@@ -37,6 +51,7 @@ export type OrganizerEventSummary = {
   capacity: number | null
   thumbnailPhoto: string | null
   coverPhoto: string | null
+  eventVideo: string | null
   status: string
   createdAt: string | null
   ticketTypesCount: number
@@ -53,7 +68,51 @@ export type OrganizerEventSummary = {
     latitude: string | null
     longitude: string | null
   }
+  sales?: OrganizerEventSalesSummary
+  scans?: OrganizerEventScanSummary
   scanStats?: OrganizerEventScanStats
+}
+
+export type OrganizerDashboardStats = {
+  revenue: {
+    total: string | number
+    currency: string
+  }
+  orders: {
+    paid: number
+  }
+  subscribers: {
+    total: number
+  }
+  tickets: {
+    sold: number
+  }
+  scans: {
+    total: number
+    valid: number
+    invalid: number
+    alreadyUsed: number
+  }
+  events: {
+    total: number
+    published: number
+    draft: number
+    cancelled: number
+    upcoming: number
+  }
+  staff: {
+    active: number
+  }
+}
+
+export type OrganizerDashboardEventSummary = OrganizerEventSummary & {
+  sales: OrganizerEventSalesSummary
+  scans: OrganizerEventScanSummary
+}
+
+export type OrganizerDashboardResponse = {
+  stats: OrganizerDashboardStats
+  events: OrganizerDashboardEventSummary[]
 }
 
 export type OrganizerEventCreateResponse = {

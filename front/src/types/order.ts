@@ -26,6 +26,10 @@ export type PreparedOrder = {
   event: {
     id: number | null
     title: string | null
+    startsAt?: string | null
+    endsAt?: string | null
+    city?: string | null
+    venue?: string | null
   }
   items: PreparedOrderItem[]
   payment: OrderPayment | null
@@ -48,6 +52,10 @@ export type OrderPayment = {
 
 export type OrderSummaryResponse = {
   order: PreparedOrder
+}
+
+export type PendingOrdersResponse = {
+  orders: PreparedOrder[]
 }
 
 export type OrderCheckoutSessionResponse = {

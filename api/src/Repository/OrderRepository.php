@@ -44,6 +44,33 @@ class OrderRepository extends ServiceEntityRepository
     /**
      * @return list<Order>
      */
+    public function findPendingPaymentOrdersForUser(User $user): array
+    {
+        /** @var list<Order> $orders */
+        $orders = $this->createQueryBuilder('customerOrder')
+            ->leftJoin('customerOrder.payment', 'payment')->addSelect('payment')
+            ->leftJoin('customerOrder.orderItems', 'orderItems')->addSelect('orderItems')
+            ->leftJoin('orderItems.ticketType', 'ticketType')->addSelect('ticketType')
+            ->leftJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('customerOrder.client = :user')
+            ->andWhere('customerOrder.status IN (:statuses)')
+            ->setParameter('user', $user)
+            ->setParameter('statuses', [
+                Order::STATUS_PENDING_PAYMENT,
+                Order::STATUS_EXPIRED,
+            ])
+            ->orderBy('customerOrder.createdAt', 'DESC')
+            ->addOrderBy('customerOrder.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $orders;
+    }
+
+    /**
+     * @return list<Order>
+     */
     public function findForAdminList(int $limit = 200): array
     {
         /** @var list<Order> $orders */

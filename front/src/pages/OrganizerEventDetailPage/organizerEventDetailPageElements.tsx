@@ -92,6 +92,76 @@ export const OrganizerEventDetailStatusBadge = styled.span<{ $published: boolean
   font-weight: 700;
 `
 
+export const OrganizerEventDetailTabs = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+`
+
+export const OrganizerEventDetailTabButton = styled.button<{ $active: boolean }>`
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 13px;
+  border: 1px solid
+    ${({ $active }) =>
+      $active ? 'rgba(235, 148, 81, 0.42)' : 'rgba(255, 255, 255, 0.08)'};
+  background: ${({ $active }) =>
+    $active
+      ? 'linear-gradient(135deg, rgba(235, 148, 81, 0.28), rgba(121, 65, 39, 0.34))'
+      : 'rgba(255, 255, 255, 0.035)'};
+  color: ${({ $active }) => ($active ? '#fff7ef' : 'rgba(255, 243, 229, 0.82)')};
+  font-size: 0.94rem;
+  font-weight: 800;
+  cursor: pointer;
+`
+
+export const OrganizerEventDetailOverviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+
+  @media (max-width: 980px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const OrganizerEventDetailOverviewStat = styled.article`
+  display: grid;
+  gap: 8px;
+  min-height: 124px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+`
+
+export const OrganizerEventDetailOverviewStatLabel = styled.span`
+  color: rgba(255, 237, 222, 0.68);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+`
+
+export const OrganizerEventDetailOverviewStatValue = styled.span`
+  color: #fffaf4;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 900;
+`
+
+export const OrganizerEventDetailOverviewStatHint = styled.span`
+  color: rgba(255, 237, 222, 0.66);
+  font-size: 0.85rem;
+  line-height: 1.45;
+`
+
 export const OrganizerEventDetailInfoPanel = styled.div`
   display: grid;
   gap: 14px;
@@ -231,6 +301,16 @@ export const OrganizerEventDetailMediaPreview = styled.div<{ $imageUrl?: string 
       $imageUrl
         ? `url("${$imageUrl}") center/cover no-repeat`
         : 'linear-gradient(135deg, rgba(235, 148, 81, 0.26), rgba(110, 78, 58, 0.12))'};
+`
+
+export const OrganizerEventDetailVideoPreview = styled.video`
+  width: 100%;
+  min-height: 180px;
+  max-height: 280px;
+  border-radius: 18px;
+  background: #120f0d;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 `
 
 export const OrganizerEventDetailState = styled.div`

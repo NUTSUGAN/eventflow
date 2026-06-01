@@ -66,7 +66,8 @@ final class StaffCheckinService
             throw new \DomainException('Le QR scanne est vide.');
         }
 
-        $ticket = $this->ticketRepository->findOneForCheckinByQrToken($normalizedToken);
+        [$ticket, $matchedToken] = $this->findTicketFromScanPayload($normalizedToken);
+        $storedScannedToken = $matchedToken ?? $normalizedToken;
 
         if (
             !$ticket instanceof Ticket
@@ -75,7 +76,7 @@ final class StaffCheckinService
             $checkin = $this->createCheckin(
                 event: $event,
                 staffUser: $staffUser,
-                scannedToken: $normalizedToken,
+                scannedToken: $storedScannedToken,
                 result: Checkin::RESULT_INVALID,
             );
 
@@ -91,7 +92,7 @@ final class StaffCheckinService
             $checkin = $this->createCheckin(
                 event: $event,
                 staffUser: $staffUser,
-                scannedToken: $normalizedToken,
+                scannedToken: $storedScannedToken,
                 result: Checkin::RESULT_INVALID,
                 ticket: $ticket,
             );
@@ -108,7 +109,7 @@ final class StaffCheckinService
             $checkin = $this->createCheckin(
                 event: $event,
                 staffUser: $staffUser,
-                scannedToken: $normalizedToken,
+                scannedToken: $storedScannedToken,
                 result: Checkin::RESULT_ALREADY_USED,
                 ticket: $ticket,
             );
@@ -127,7 +128,7 @@ final class StaffCheckinService
         $checkin = $this->createCheckin(
             event: $event,
             staffUser: $staffUser,
-            scannedToken: $normalizedToken,
+            scannedToken: $storedScannedToken,
             result: Checkin::RESULT_VALID,
             ticket: $ticket,
             flushTicket: true,
@@ -139,6 +140,77 @@ final class StaffCheckinService
             'checkin' => $this->serializeCheckin($checkin),
             'ticket' => $this->serializeTicket($ticket, $checkin->getScannedAt()),
         ];
+    }
+
+    /**
+     * @return array{0: Ticket|null, 1: string|null}
+     */
+    private function findTicketFromScanPayload(string $scanPayload): array
+    {
+        foreach ($this->buildScanTokenCandidates($scanPayload) as $candidateToken) {
+            $ticket = $this->ticketRepository->findOneForCheckinByQrToken($candidateToken);
+
+            if ($ticket instanceof Ticket) {
+                return [$ticket, $candidateToken];
+            }
+        }
+
+        return [null, null];
+    }
+
+    /**
+     * A keyboard-wedge scanner can be configured as QWERTY while Windows is in
+     * AZERTY. In that case the hex qrToken arrives with French keyboard symbols.
+     *
+     * @return list<string>
+     */
+    private function buildScanTokenCandidates(string $scanPayload): array
+    {
+        $rawToken = trim($scanPayload);
+
+        if ('' === $rawToken) {
+            return [];
+        }
+
+        $candidates = [];
+        $this->addTokenCandidate($candidates, $rawToken);
+
+        $azertyFixedToken = strtr($rawToken, [
+            '&' => '1',
+            'é' => '2',
+            '"' => '3',
+            '\'' => '4',
+            '(' => '5',
+            '-' => '6',
+            'è' => '7',
+            '_' => '8',
+            'ç' => '9',
+            'à' => '0',
+            'q' => 'a',
+            'Q' => 'A',
+        ]);
+
+        $this->addTokenCandidate($candidates, $azertyFixedToken);
+
+        return $candidates;
+    }
+
+    /**
+     * @param list<string> $candidates
+     */
+    private function addTokenCandidate(array &$candidates, string $candidate): void
+    {
+        $candidate = trim($candidate);
+
+        if ('' === $candidate) {
+            return;
+        }
+
+        foreach ([$candidate, strtolower($candidate)] as $token) {
+            if (!in_array($token, $candidates, true)) {
+                $candidates[] = $token;
+            }
+        }
     }
 
     /**

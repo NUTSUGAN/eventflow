@@ -1,6 +1,7 @@
 import { apiClient } from './client'
 import type {
   OrderCheckoutSessionResponse,
+  PendingOrdersResponse,
   OrderPreparationPayload,
   OrderPreparationResponse,
   OrderSummaryResponse,
@@ -19,6 +20,12 @@ export async function prepareOrder(
 
 export async function getOrder(orderId: number): Promise<OrderSummaryResponse> {
   const response = await apiClient.get<OrderSummaryResponse>(`/api/orders/${orderId}`)
+
+  return response.data
+}
+
+export async function getPendingOrders(): Promise<PendingOrdersResponse> {
+  const response = await apiClient.get<PendingOrdersResponse>('/api/orders/pending')
 
   return response.data
 }

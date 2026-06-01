@@ -233,12 +233,83 @@ export const MyTicketsSecondaryButton = styled.button`
   cursor: pointer;
 `
 
+export const MyTicketsDangerButton = styled.button`
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 135, 114, 0.28);
+  background: rgba(112, 37, 31, 0.22);
+  color: #ffd5ca;
+  font-weight: 700;
+  cursor: pointer;
+`
+
 export const MyTicketsStatusMessage = styled.div`
   padding: 14px 16px;
   border-radius: 14px;
   background: rgba(86, 154, 91, 0.14);
   border: 1px solid rgba(109, 184, 116, 0.28);
   color: #dbf3dc;
+`
+
+export const MyTicketsPendingList = styled.div`
+  display: grid;
+  gap: 16px;
+`
+
+export const MyTicketsPendingCard = styled.article`
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(45, 34, 28, 0.94), rgba(29, 25, 22, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.2);
+`
+
+export const MyTicketsPendingHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+
+  @media (max-width: 680px) {
+    display: grid;
+  }
+`
+
+export const MyTicketsPendingTitleGroup = styled.div`
+  display: grid;
+  gap: 6px;
+`
+
+export const MyTicketsPendingTitle = styled.h2`
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+`
+
+export const MyTicketsPendingText = styled.p`
+  margin: 0;
+  color: rgba(255, 237, 222, 0.72);
+  line-height: 1.65;
+`
+
+export const MyTicketsPendingItems = styled.ul`
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+`
+
+export const MyTicketsPendingItem = styled.li`
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 247, 242, 0.88);
+  font-weight: 700;
 `
 
 export const TicketDetailShell = styled.main`

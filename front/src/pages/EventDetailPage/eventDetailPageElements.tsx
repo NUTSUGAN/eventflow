@@ -39,6 +39,26 @@ export const DetailHeroCover = styled.div<{ $imageUrl: string }>`
   }
 `
 
+export const DetailEventVideoPanel = styled.section`
+  display: grid;
+  gap: 16px;
+  margin: 0 0 28px;
+  padding: 20px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(44, 34, 29, 0.96), rgba(24, 21, 19, 0.98));
+  border: 1px solid rgba(248, 143, 82, 0.18);
+  box-shadow: var(--shadow-soft);
+`
+
+export const DetailEventVideo = styled.video`
+  width: 100%;
+  max-height: 620px;
+  border-radius: 8px;
+  background: #0f0d0c;
+  object-fit: contain;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+`
+
 export const DetailHeroContent = styled.div`
   display: grid;
   align-content: start;

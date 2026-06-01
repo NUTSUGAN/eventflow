@@ -28,7 +28,8 @@ class EventRepository extends ServiceEntityRepository
         ?\DateTimeImmutable $date = null,
         int $limit = 18,
         int $offset = 0,
-        string $scope = 'upcoming'
+        string $scope = 'upcoming',
+        ?array $organizerIds = null
     ): array {
         $queryBuilder = $this->createQueryBuilder('event')
             ->leftJoin('event.category', 'category')->addSelect('category')
@@ -40,6 +41,7 @@ class EventRepository extends ServiceEntityRepository
 
         $this->applyPublicVisibilityScope($queryBuilder, $scope);
         $this->applyPublicListFilters($queryBuilder, $search, $type, $city, $date);
+        $this->applyFollowedOrganizerFilter($queryBuilder, $organizerIds);
 
         if ($this->isArchiveScope($scope)) {
             $queryBuilder
@@ -74,7 +76,8 @@ class EventRepository extends ServiceEntityRepository
         ?string $type = null,
         ?string $city = null,
         ?\DateTimeImmutable $date = null,
-        string $scope = 'upcoming'
+        string $scope = 'upcoming',
+        ?array $organizerIds = null
     ): int {
         $queryBuilder = $this->createQueryBuilder('event')
             ->select('COUNT(DISTINCT event.id)')
@@ -86,6 +89,7 @@ class EventRepository extends ServiceEntityRepository
 
         $this->applyPublicVisibilityScope($queryBuilder, $scope);
         $this->applyPublicListFilters($queryBuilder, $search, $type, $city, $date);
+        $this->applyFollowedOrganizerFilter($queryBuilder, $organizerIds);
 
         return (int) $queryBuilder
             ->getQuery()
@@ -288,6 +292,30 @@ class EventRepository extends ServiceEntityRepository
                 ->setParameter('endOfDay', $endOfDay)
             ;
         }
+    }
+
+    /**
+     * @param list<int>|null $organizerIds
+     */
+    private function applyFollowedOrganizerFilter(
+        QueryBuilder $queryBuilder,
+        ?array $organizerIds
+    ): void {
+        if (null === $organizerIds) {
+            return;
+        }
+
+        if ([] === $organizerIds) {
+            $queryBuilder->andWhere('1 = 0');
+
+            return;
+        }
+
+        $queryBuilder
+            ->innerJoin('event.organizer', 'followedOrganizer')
+            ->andWhere('followedOrganizer.id IN (:followedOrganizerIds)')
+            ->setParameter('followedOrganizerIds', $organizerIds)
+        ;
     }
 
     private function applyPublicVisibilityScope(QueryBuilder $queryBuilder, string $scope): void

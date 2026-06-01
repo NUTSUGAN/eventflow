@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getPendingOrders } from '../../api/orders'
 import { getMyTickets } from '../../api/tickets'
+import type { PreparedOrder } from '../../types/order'
 import type { TicketRecord } from '../../types/ticket'
 import {
   MyTicketsActions,
@@ -8,6 +10,7 @@ import {
   MyTicketsCardBody,
   MyTicketsCardText,
   MyTicketsCoverButton,
+  MyTicketsDangerButton,
   MyTicketsEventTitle,
   MyTicketsGrid,
   MyTicketsHero,
@@ -15,6 +18,14 @@ import {
   MyTicketsInfoText,
   MyTicketsInfoTitle,
   MyTicketsMetaRow,
+  MyTicketsPendingCard,
+  MyTicketsPendingHeader,
+  MyTicketsPendingItem,
+  MyTicketsPendingItems,
+  MyTicketsPendingList,
+  MyTicketsPendingText,
+  MyTicketsPendingTitle,
+  MyTicketsPendingTitleGroup,
   MyTicketsPrimaryButton,
   MyTicketsSecondaryButton,
   MyTicketsSection,
@@ -34,7 +45,9 @@ import {
   MyTicketsTitle,
 } from './myTicketsPageElements'
 
-type TicketTab = 'upcoming' | 'active' | 'past'
+type TicketTab = 'upcoming' | 'pending' | 'past'
+
+const HIDDEN_PENDING_ORDERS_STORAGE_KEY = 'eventflow:hiddenPendingOrders'
 
 function formatDateTime(value: string | null): string {
   if (!value) {
@@ -57,20 +70,10 @@ function formatCurrency(value: number, currency: string | null): string {
 }
 
 function resolveTicketTab(ticket: TicketRecord, now: number): TicketTab {
-  const startsAt = ticket.event.startsAt ? new Date(ticket.event.startsAt).getTime() : null
   const endsAt = ticket.event.endsAt ? new Date(ticket.event.endsAt).getTime() : null
 
   if (endsAt !== null && endsAt < now) {
     return 'past'
-  }
-
-  if (
-    startsAt !== null &&
-    endsAt !== null &&
-    startsAt <= now &&
-    endsAt >= now
-  ) {
-    return 'active'
   }
 
   return 'upcoming'
@@ -91,9 +94,66 @@ function getPaymentLabel(ticket: TicketRecord): string {
   return provider ?? status ?? 'Paiement confirme'
 }
 
+function formatOrderStatusLabel(status: string): string {
+  switch (status) {
+    case 'pending_payment':
+      return 'En attente de paiement'
+    case 'expired':
+      return 'Paiement a relancer'
+    case 'cancelled':
+      return 'Annulee'
+    case 'paid':
+      return 'Payee'
+    default:
+      return status
+  }
+}
+
+function readHiddenPendingOrderIds(): number[] {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(
+      window.localStorage.getItem(HIDDEN_PENDING_ORDERS_STORAGE_KEY) ?? '[]',
+    )
+
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+
+    return parsed
+      .map((value) => Number.parseInt(String(value), 10))
+      .filter((value) => Number.isFinite(value) && value > 0)
+  } catch {
+    return []
+  }
+}
+
+function storeHiddenPendingOrderIds(orderIds: number[]): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(
+    HIDDEN_PENDING_ORDERS_STORAGE_KEY,
+    JSON.stringify(orderIds),
+  )
+}
+
+function getPendingOrderTicketCount(order: PreparedOrder): number {
+  return order.items.reduce((total, item) => total + item.quantity, 0)
+}
+
 export function MyTicketsPage() {
   const navigate = useNavigate()
   const [tickets, setTickets] = useState<TicketRecord[]>([])
+  const [pendingOrders, setPendingOrders] = useState<PreparedOrder[]>([])
+  const [hiddenPendingOrderIds, setHiddenPendingOrderIds] = useState<number[]>(
+    readHiddenPendingOrderIds,
+  )
+  const [currentTimestamp, setCurrentTimestamp] = useState<number>(() => Date.now())
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [requiresAuth, setRequiresAuth] = useState(false)
@@ -109,10 +169,14 @@ export function MyTicketsPage() {
       setRequiresAuth(false)
 
       try {
-        const response = await getMyTickets()
+        const [ticketsResponse, pendingOrdersResponse] = await Promise.all([
+          getMyTickets(),
+          getPendingOrders(),
+        ])
 
         if (isMounted) {
-          setTickets(response.tickets)
+          setTickets(ticketsResponse.tickets)
+          setPendingOrders(pendingOrdersResponse.orders)
         }
       } catch (error) {
         if (!isMounted) {
@@ -147,25 +211,55 @@ export function MyTicketsPage() {
     }
   }, [reloadSeed])
 
-  const ticketsByTab = useMemo(() => {
-    const now = Date.now()
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTimestamp(Date.now())
+    }, 60_000)
 
-    return {
-      upcoming: tickets.filter((ticket) => resolveTicketTab(ticket, now) === 'upcoming'),
-      active: tickets.filter((ticket) => resolveTicketTab(ticket, now) === 'active'),
-      past: tickets.filter((ticket) => resolveTicketTab(ticket, now) === 'past'),
+    return () => {
+      window.clearInterval(intervalId)
     }
-  }, [tickets])
+  }, [])
 
-  const visibleTickets = ticketsByTab[activeTab]
+  const ticketsByTab = useMemo(() => {
+    return {
+      upcoming: tickets.filter(
+        (ticket) => resolveTicketTab(ticket, currentTimestamp) === 'upcoming',
+      ),
+      past: tickets.filter(
+        (ticket) => resolveTicketTab(ticket, currentTimestamp) === 'past',
+      ),
+    }
+  }, [currentTimestamp, tickets])
+
+  const pendingOrdersToDisplay = useMemo(
+    () =>
+      pendingOrders.filter(
+        (order) => !hiddenPendingOrderIds.includes(order.id),
+      ),
+    [hiddenPendingOrderIds, pendingOrders],
+  )
+
+  const visibleTickets = activeTab === 'past'
+    ? ticketsByTab.past
+    : ticketsByTab.upcoming
+
+  function handleHidePendingOrder(orderId: number) {
+    setHiddenPendingOrderIds((currentOrderIds) => {
+      const nextOrderIds = Array.from(new Set([...currentOrderIds, orderId]))
+      storeHiddenPendingOrderIds(nextOrderIds)
+
+      return nextOrderIds
+    })
+  }
 
   return (
     <MyTicketsSection>
       <MyTicketsHero>
         <MyTicketsTitle>Mes billets</MyTicketsTitle>
         <MyTicketsSubtitle>
-          Retrouve ici tous les billets confirmes apres paiement, avec leur evenement,
-          leur commande et leur acces au detail.
+          Retrouve tes billets confirmes, et reprends les commandes preparees
+          qui attendent encore un paiement.
         </MyTicketsSubtitle>
       </MyTicketsHero>
 
@@ -179,8 +273,8 @@ export function MyTicketsPage() {
         </MyTicketsTabButton>
         <MyTicketsTabButton
           type="button"
-          $active={activeTab === 'active'}
-          onClick={() => setActiveTab('active')}
+          $active={activeTab === 'pending'}
+          onClick={() => setActiveTab('pending')}
         >
           En attente
         </MyTicketsTabButton>
@@ -228,15 +322,129 @@ export function MyTicketsPage() {
             </MyTicketsSecondaryButton>
           </MyTicketsActions>
         </MyTicketsStateCard>
+      ) : activeTab === 'pending' ? (
+        pendingOrdersToDisplay.length === 0 ? (
+          <>
+            <MyTicketsStateCard>
+              <MyTicketsStateTitle>Aucune commande en attente</MyTicketsStateTitle>
+              <MyTicketsStateText>
+                On affichera ici tes commandes preparees sans paiement confirme,
+                pour reprendre Stripe ou retirer la preparation de cette liste.
+              </MyTicketsStateText>
+              <MyTicketsActions>
+                <MyTicketsPrimaryButton
+                  type="button"
+                  onClick={() => navigate('/explorer')}
+                >
+                  Voir les prochains evenements
+                </MyTicketsPrimaryButton>
+              </MyTicketsActions>
+            </MyTicketsStateCard>
+
+            <MyTicketsInfoCard>
+              <MyTicketsInfoTitle>Preparations de commande</MyTicketsInfoTitle>
+              <MyTicketsInfoText>
+                Retirer une preparation ici la masque seulement dans ce navigateur.
+                La commande reste disponible cote plateforme si elle doit etre auditee.
+              </MyTicketsInfoText>
+            </MyTicketsInfoCard>
+          </>
+        ) : (
+          <MyTicketsPendingList>
+            {pendingOrdersToDisplay.map((order) => (
+              <MyTicketsPendingCard key={order.id}>
+                <MyTicketsPendingHeader>
+                  <MyTicketsPendingTitleGroup>
+                    <MyTicketsMetaRow>
+                      <MyTicketsTag>{formatOrderStatusLabel(order.status)}</MyTicketsTag>
+                      <MyTicketsTag>{order.reference}</MyTicketsTag>
+                    </MyTicketsMetaRow>
+                    <MyTicketsPendingTitle>
+                      {order.event.title ?? 'Evenement EventFlow'}
+                    </MyTicketsPendingTitle>
+                    <MyTicketsPendingText>
+                      {formatDateTime(order.event.startsAt ?? null)}
+                      {order.event.city ? ` - ${order.event.city}` : ''}
+                    </MyTicketsPendingText>
+                  </MyTicketsPendingTitleGroup>
+                  <MyTicketsTag>{formatCurrency(order.total, order.currency)}</MyTicketsTag>
+                </MyTicketsPendingHeader>
+
+                <MyTicketsPendingItems>
+                  {order.items.map((item) => (
+                    <MyTicketsPendingItem key={item.ticketTypeId}>
+                      {item.quantity} x {item.ticketName ?? 'Billet EventFlow'} -{' '}
+                      {formatCurrency(item.lineTotal, order.currency)}
+                    </MyTicketsPendingItem>
+                  ))}
+                </MyTicketsPendingItems>
+
+                <MyTicketsSummaryGrid>
+                  <MyTicketsSummaryItem>
+                    <MyTicketsSummaryLabel>Commande</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryValue>{order.reference}</MyTicketsSummaryValue>
+                  </MyTicketsSummaryItem>
+                  <MyTicketsSummaryItem>
+                    <MyTicketsSummaryLabel>Billets prepares</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryValue>
+                      {getPendingOrderTicketCount(order)}
+                    </MyTicketsSummaryValue>
+                  </MyTicketsSummaryItem>
+                  <MyTicketsSummaryItem>
+                    <MyTicketsSummaryLabel>Total a payer</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryValue>
+                      {formatCurrency(order.total, order.currency)}
+                    </MyTicketsSummaryValue>
+                  </MyTicketsSummaryItem>
+                  <MyTicketsSummaryItem>
+                    <MyTicketsSummaryLabel>Preparee le</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryValue>
+                      {formatDateTime(order.createdAt)}
+                    </MyTicketsSummaryValue>
+                  </MyTicketsSummaryItem>
+                </MyTicketsSummaryGrid>
+
+                {!order.canStartCheckout ? (
+                  <MyTicketsStatusMessage>
+                    Cette commande ne peut plus relancer Stripe depuis cet espace.
+                  </MyTicketsStatusMessage>
+                ) : null}
+
+                <MyTicketsActions>
+                  {order.canStartCheckout ? (
+                    <MyTicketsPrimaryButton
+                      type="button"
+                      onClick={() => navigate(`/checkout?orderId=${order.id}`)}
+                    >
+                      Continuer le paiement
+                    </MyTicketsPrimaryButton>
+                  ) : null}
+                  {order.event.id ? (
+                    <MyTicketsSecondaryButton
+                      type="button"
+                      onClick={() => navigate(`/events/${order.event.id}`)}
+                    >
+                      Voir l&apos;evenement
+                    </MyTicketsSecondaryButton>
+                  ) : null}
+                  <MyTicketsDangerButton
+                    type="button"
+                    onClick={() => handleHidePendingOrder(order.id)}
+                  >
+                    Retirer de la liste
+                  </MyTicketsDangerButton>
+                </MyTicketsActions>
+              </MyTicketsPendingCard>
+            ))}
+          </MyTicketsPendingList>
+        )
       ) : visibleTickets.length === 0 ? (
         <>
           <MyTicketsStateCard>
             <MyTicketsStateTitle>
               {activeTab === 'upcoming'
                 ? "Tu n'as pas de billets a venir"
-                : activeTab === 'active'
-                  ? "Aucun billet en attente d'utilisation"
-                  : 'Aucun billet passe pour le moment'}
+                : 'Aucun billet passe pour le moment'}
             </MyTicketsStateTitle>
             <MyTicketsStateText>
               On affichera ici les billets lies a tes commandes Stripe confirmees.

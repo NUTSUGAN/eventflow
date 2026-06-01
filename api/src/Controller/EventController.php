@@ -30,7 +30,11 @@ class EventController extends AbstractController
     }
 
     #[Route('/api/events', name: 'api_event_list', methods: ['GET'])]
-    public function index(Request $request, EventRepository $eventRepository): JsonResponse
+    public function index(
+        Request $request,
+        EventRepository $eventRepository,
+        AbonnementOrganisateurRepository $subscriptionRepository
+    ): JsonResponse
     {
         $dateFilter = null;
         $dateValue = trim((string) $request->query->get('date', ''));
@@ -49,18 +53,25 @@ class EventController extends AbstractController
         $cityFilter = trim((string) $request->query->get('city', ''));
         $searchFilter = trim((string) $request->query->get('search', ''));
         $scopeFilter = trim((string) $request->query->get('scope', 'upcoming'));
+        $followingFilter = mb_strtolower(trim((string) $request->query->get('following', '')));
         $limit = max(1, min(24, $request->query->getInt('limit', 18)));
         $requestedPage = max(1, min(500, $request->query->getInt('page', 1)));
         $normalizedSearchFilter = '' !== $searchFilter ? $searchFilter : null;
         $normalizedTypeFilter = '' !== $typeFilter ? $typeFilter : null;
         $normalizedCityFilter = '' !== $cityFilter ? $cityFilter : null;
         $normalizedScopeFilter = 'archive' === mb_strtolower($scopeFilter) ? 'archive' : 'upcoming';
+        $isFollowingOnly = in_array($followingFilter, ['1', 'true', 'yes', 'on'], true);
+        $currentUser = $this->getUser();
+        $followedOrganizerIds = $isFollowingOnly && $currentUser instanceof User
+            ? $subscriptionRepository->findActiveOrganizerIdsForClient($currentUser)
+            : null;
         $total = $eventRepository->countPublicList(
             $normalizedSearchFilter,
             $normalizedTypeFilter,
             $normalizedCityFilter,
             $dateFilter,
-            $normalizedScopeFilter
+            $normalizedScopeFilter,
+            $followedOrganizerIds
         );
         $totalPages = max(1, (int) ceil($total / $limit));
         $page = min($requestedPage, $totalPages);
@@ -73,7 +84,8 @@ class EventController extends AbstractController
             $dateFilter,
             $limit,
             $offset,
-            $normalizedScopeFilter
+            $normalizedScopeFilter,
+            $followedOrganizerIds
         );
 
         return $this->json([
@@ -156,6 +168,9 @@ class EventController extends AbstractController
             'media' => [
                 'thumbnailUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto()),
                 'coverUrl' => $this->toPublicAssetUrl($request, $event->getCoverPhoto()),
+                'videoUrl' => $this->isEventFinished($event)
+                    ? $this->toPublicAssetUrl($request, $event->getEventVideo())
+                    : null,
             ],
             'location' => [
                 'address' => $event->getLocation()?->getAddress(),
@@ -236,6 +251,14 @@ class EventController extends AbstractController
             'minPrice' => $minPrice,
             'currency' => 'EUR',
         ];
+    }
+
+    private function isEventFinished(Event $event): bool
+    {
+        $endDatetime = $event->getEndDatetime();
+
+        return $endDatetime instanceof \DateTimeImmutable
+            && $endDatetime < new \DateTimeImmutable();
     }
 
     private function formatDateTimeForFrontend(?\DateTimeImmutable $dateTime): ?string

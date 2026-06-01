@@ -17,6 +17,11 @@ import type {
 import {
   StaffScanActions,
   StaffScanCameraViewport,
+  StaffScanDiagnosticsCard,
+  StaffScanDiagnosticsGrid,
+  StaffScanDiagnosticsItem,
+  StaffScanDiagnosticsLabel,
+  StaffScanDiagnosticsValue,
   StaffScanEyebrow,
   StaffScanField,
   StaffScanGrid,
@@ -27,6 +32,7 @@ import {
   StaffScanMessage,
   StaffScanPanel,
   StaffScanPanelTitle,
+  StaffScanPrimaryButton,
   StaffScanResultCard,
   StaffScanResultGrid,
   StaffScanResultItem,
@@ -148,6 +154,23 @@ function resultTone(
   return 'neutral'
 }
 
+type ScanInputSource = 'keyboard_pause' | 'keyboard_enter' | 'camera' | 'image' | null
+
+function describeInputSource(source: ScanInputSource): string {
+  switch (source) {
+    case 'keyboard_pause':
+      return 'Scanner clavier'
+    case 'keyboard_enter':
+      return 'Scanner clavier'
+    case 'camera':
+      return 'Camera'
+    case 'image':
+      return 'Image locale'
+    default:
+      return 'Aucune lecture recente'
+  }
+}
+
 export function StaffScanPage() {
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -158,6 +181,7 @@ export function StaffScanPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [events, setEvents] = useState<StaffScanEventSummary[]>([])
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
+  const [canManageStaff, setCanManageStaff] = useState(false)
   const [scanValue, setScanValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCameraStarting, setIsCameraStarting] = useState(false)
@@ -168,6 +192,8 @@ export function StaffScanPage() {
   const [statusTone, setStatusTone] = useState<'neutral' | 'success' | 'danger'>('neutral')
   const [scanResult, setScanResult] = useState<StaffScanCheckinResponse | null>(null)
   const [scanPanelNotice, setScanPanelNotice] = useState<StaffScanPanelNotice | null>(null)
+  const [hasKeyboardFocus, setHasKeyboardFocus] = useState(false)
+  const [lastInputSource, setLastInputSource] = useState<ScanInputSource>(null)
   const canUseCamera =
     typeof navigator !== 'undefined' &&
     typeof navigator.mediaDevices !== 'undefined'
@@ -186,6 +212,8 @@ export function StaffScanPage() {
           navigate('/explorer', { replace: true })
           return
         }
+
+        setCanManageStaff(currentUser.canManageStaff)
 
         const response = await getStaffScanEvents()
 
@@ -244,7 +272,7 @@ export function StaffScanPage() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      void submitScan(normalizedToken)
+      void submitScan(normalizedToken, 'keyboard_pause')
     }, 220)
 
     return () => {
@@ -257,7 +285,16 @@ export function StaffScanPage() {
     [events, selectedEventId],
   )
 
-  async function submitScan(rawToken?: string) {
+  function focusKeyboardScanner() {
+    window.setTimeout(() => {
+      inputRef.current?.focus()
+    }, 10)
+  }
+
+  async function submitScan(
+    rawToken?: string,
+    inputSource: ScanInputSource = 'keyboard_pause',
+  ) {
     const scanPayload = (rawToken ?? scanValue).trim()
 
     if (scanPayload === '' || !selectedEventId || isSubmittingRef.current) {
@@ -267,6 +304,7 @@ export function StaffScanPage() {
     isSubmittingRef.current = true
     setIsSubmitting(true)
     setStatusMessage(null)
+    setLastInputSource(inputSource)
     setScanValue('')
     setScanPanelNotice(null)
 
@@ -307,9 +345,7 @@ export function StaffScanPage() {
     } finally {
       isSubmittingRef.current = false
       setIsSubmitting(false)
-      window.setTimeout(() => {
-        inputRef.current?.focus()
-      }, 10)
+      focusKeyboardScanner()
     }
   }
 
@@ -375,7 +411,7 @@ export function StaffScanPage() {
     }
 
     setScanValue(normalizedToken)
-    await submitScan(normalizedToken)
+    await submitScan(normalizedToken, 'camera')
   }
 
   async function startCameraScan() {
@@ -476,7 +512,7 @@ export function StaffScanPage() {
       const decodedText = await scanner.scanFile(imageFile, false)
 
       setCameraMessage('QR detecte depuis une image locale.')
-      await submitScan(decodedText)
+      await submitScan(decodedText, 'image')
     } catch (error) {
       const translatedMessage = readCameraMessage(
         error,
@@ -503,9 +539,8 @@ export function StaffScanPage() {
         <StaffScanEyebrow>Controle d acces</StaffScanEyebrow>
         <StaffScanTitle>Scanner les billets</StaffScanTitle>
         <StaffScanText>
-          Cette premiere version marche a la fois avec un scanner type Tera
-          branche en mode clavier, avec la camera du navigateur, ou depuis une
-          image du billet. EventFlow verifie ensuite le billet cote API.
+          Choisis l evenement, garde le poste pret a recevoir la douchette, puis
+          controle les entrees en temps reel avec validation API.
         </StaffScanText>
 
         <StaffScanGrid>
@@ -535,13 +570,15 @@ export function StaffScanPage() {
               type="text"
               value={scanValue}
               onChange={(changeEvent) => setScanValue(changeEvent.target.value)}
+              onFocus={() => setHasKeyboardFocus(true)}
+              onBlur={() => setHasKeyboardFocus(false)}
               onPaste={(clipboardEvent) => {
                 clipboardEvent.preventDefault()
               }}
               onKeyDown={(keyboardEvent) => {
                 if (keyboardEvent.key === 'Enter') {
                   keyboardEvent.preventDefault()
-                  void submitScan()
+                  void submitScan(undefined, 'keyboard_enter')
                 }
               }}
               aria-label="Reception du scan QR"
@@ -551,6 +588,15 @@ export function StaffScanPage() {
             />
 
             <StaffScanActions>
+              <StaffScanPrimaryButton
+                type="button"
+                onClick={focusKeyboardScanner}
+                disabled={isLoading}
+                $active={hasKeyboardFocus}
+                $wide
+              >
+                Scanner
+              </StaffScanPrimaryButton>
               <StaffScanSecondaryButton
                 type="button"
                 onClick={() =>
@@ -571,13 +617,33 @@ export function StaffScanPage() {
               >
                 {isFileScanning ? 'Lecture image...' : 'Scanner depuis une image'}
               </StaffScanSecondaryButton>
-              <StaffScanSecondaryButton
-                type="button"
-                onClick={() => navigate('/organizer/staff')}
-              >
-                Gerer le staff
-              </StaffScanSecondaryButton>
+              {canManageStaff ? (
+                <StaffScanSecondaryButton
+                  type="button"
+                  onClick={() => navigate('/organizer/staff')}
+                >
+                  Gerer le staff
+                </StaffScanSecondaryButton>
+              ) : null}
             </StaffScanActions>
+
+            <StaffScanDiagnosticsCard>
+              <StaffScanPanelTitle>Diagnostic scanner</StaffScanPanelTitle>
+              <StaffScanDiagnosticsGrid>
+                <StaffScanDiagnosticsItem>
+                  <StaffScanDiagnosticsLabel>Focus clavier</StaffScanDiagnosticsLabel>
+                  <StaffScanDiagnosticsValue $tone={hasKeyboardFocus ? 'active' : 'muted'}>
+                    {hasKeyboardFocus ? 'Pret' : 'A reactiver'}
+                  </StaffScanDiagnosticsValue>
+                </StaffScanDiagnosticsItem>
+                <StaffScanDiagnosticsItem>
+                  <StaffScanDiagnosticsLabel>Mode detecte</StaffScanDiagnosticsLabel>
+                  <StaffScanDiagnosticsValue>
+                    {describeInputSource(lastInputSource)}
+                  </StaffScanDiagnosticsValue>
+                </StaffScanDiagnosticsItem>
+              </StaffScanDiagnosticsGrid>
+            </StaffScanDiagnosticsCard>
 
             <input
               ref={fileInputRef}
@@ -602,14 +668,8 @@ export function StaffScanPage() {
             ) : null}
 
             <StaffScanInlineText>
-              Astuce Tera: si le scanner envoie directement le texte du QR sans
-              suffixe, cette page sait tout de meme le traiter apres une courte
-              pause. Si un Enter est envoye, la validation part tout de suite.
-            </StaffScanInlineText>
-            <StaffScanInlineText>
-              Astuce web: sur ordinateur tu peux autoriser la webcam, et sur
-              mobile tu peux aussi charger une capture d ecran du billet si la
-              camera n est pas disponible.
+              En secours, tu peux utiliser la webcam ou importer une capture du
+              billet quand le QR n est pas disponible sur papier.
             </StaffScanInlineText>
           </StaffScanPanel>
 

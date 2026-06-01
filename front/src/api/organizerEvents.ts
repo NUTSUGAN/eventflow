@@ -1,6 +1,7 @@
 import { apiClient } from './client'
 import type {
   OrganizerEventCreateResponse,
+  OrganizerDashboardResponse,
   OrganizerEventDetailResponse,
   OrganizerEventFormOptions,
   OrganizerEventStatus,
@@ -19,6 +20,14 @@ export async function getOrganizerEventFormOptions(): Promise<OrganizerEventForm
 
 export async function getMyOrganizerEvents(): Promise<OrganizerEventSummary[]> {
   const response = await apiClient.get<OrganizerEventSummary[]>('/api/organizer/events')
+
+  return response.data
+}
+
+export async function getOrganizerDashboard(): Promise<OrganizerDashboardResponse> {
+  const response = await apiClient.get<OrganizerDashboardResponse>(
+    '/api/organizer/events/dashboard',
+  )
 
   return response.data
 }

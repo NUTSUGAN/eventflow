@@ -50,6 +50,7 @@ export type EventCategory = {
 export type EventMedia = {
   thumbnailUrl: string | null
   coverUrl: string | null
+  videoUrl: string | null
 }
 
 export type EventLocation = {

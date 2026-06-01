@@ -147,10 +147,42 @@ export const FilterMetaRow = styled.div`
   flex-wrap: wrap;
 `
 
+export const FilterMetaActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+`
+
 export const FilterSummary = styled.p`
   margin: 0;
   color: var(--color-text-muted);
   font-size: 0.94rem;
+`
+
+export const FilterToggleButton = styled.button<{ $active?: boolean }>`
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid
+    ${({ $active }) =>
+      $active ? 'rgba(248, 143, 82, 0.38)' : 'rgba(255, 255, 255, 0.1)'};
+  background:
+    ${({ $active }) =>
+      $active ? 'rgba(248, 143, 82, 0.14)' : 'rgba(255, 255, 255, 0.04)'};
+  color: ${({ $active }) => ($active ? '#fff1e7' : 'var(--color-text)')};
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(248, 143, 82, 0.34);
+    background: rgba(248, 143, 82, 0.12);
+  }
 `
 
 export const FilterResetButton = styled.button`

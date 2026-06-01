@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { getCurrentUser } from '../../api/auth'
 import {
   getPublicEventFilters,
   getPublicEvents,
 } from '../../api/events'
 import { FeatureSpotlight } from '../../components/FeatureSpotlight/FeatureSpotlight'
 import { EventCard } from '../../components/EventCard/EventCard'
+import type { AuthUser } from '../../types/auth'
 import type { EventFiltersResponse, EventSummary, PublicEventsResponse } from '../../types/event'
 import {
   ExplorerArchiveButton,
@@ -22,10 +24,12 @@ import {
   FilterDateInput,
   FilterGroup,
   FilterLabel,
+  FilterMetaActions,
   FilterMetaRow,
   FilterResetButton,
   FilterSelect,
   FilterSummary,
+  FilterToggleButton,
   FilterToolbar,
   PaginationButton,
   PaginationControls,
@@ -98,6 +102,7 @@ function buildPaginationTokens(currentPage: number, totalPages: number): Array<n
 export function ExplorerPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [events, setEvents] = useState<EventSummary[]>([])
   const [pagination, setPagination] =
     useState<PublicEventsResponse>(emptyPublicEventsResponse)
@@ -111,7 +116,36 @@ export function ExplorerPage() {
   const typeFilter = searchParams.get('type')?.trim() ?? ''
   const cityFilter = searchParams.get('city')?.trim() ?? ''
   const dateFilter = searchParams.get('date')?.trim() ?? ''
+  const followingFilter = searchParams.get('following') === '1'
   const currentPage = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadCurrentUser() {
+      try {
+        const user = await getCurrentUser()
+
+        if (isMounted) {
+          setCurrentUser(user)
+        }
+      } catch (error) {
+        if (
+          isMounted &&
+          error instanceof Error &&
+          error.message === 'UNAUTHENTICATED'
+        ) {
+          setCurrentUser(null)
+        }
+      }
+    }
+
+    void loadCurrentUser()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -158,6 +192,7 @@ export function ExplorerPage() {
           type: typeFilter || undefined,
           city: cityFilter || undefined,
           date: dateFilter || undefined,
+          following: followingFilter || undefined,
         })
 
         if (isMounted) {
@@ -184,7 +219,7 @@ export function ExplorerPage() {
     return () => {
       isMounted = false
     }
-  }, [currentPage, searchQuery, typeFilter, cityFilter, dateFilter])
+  }, [currentPage, searchQuery, typeFilter, cityFilter, dateFilter, followingFilter])
 
   function updateFilter(key: 'type' | 'city' | 'date', value: string) {
     const nextParams = new URLSearchParams(searchParams)
@@ -222,8 +257,25 @@ export function ExplorerPage() {
     setSearchParams(nextParams)
   }
 
+  function toggleFollowingFilter() {
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (followingFilter) {
+      nextParams.delete('following')
+    } else {
+      nextParams.set('following', '1')
+    }
+
+    nextParams.delete('page')
+    setSearchParams(nextParams)
+  }
+
   const hasActiveFilters =
-    searchQuery !== '' || typeFilter !== '' || cityFilter !== '' || dateFilter !== ''
+    searchQuery !== '' ||
+    typeFilter !== '' ||
+    cityFilter !== '' ||
+    dateFilter !== '' ||
+    followingFilter
   const paginationTokens = useMemo(
     () => buildPaginationTokens(currentPage, pagination.totalPages),
     [currentPage, pagination.totalPages],
@@ -294,11 +346,23 @@ export function ExplorerPage() {
             : formatResultsCount(events.length, pagination.total)}
         </FilterSummary>
 
-        {hasActiveFilters ? (
-          <FilterResetButton type="button" onClick={resetFilters}>
-            Reinitialiser les filtres
-          </FilterResetButton>
-        ) : null}
+        <FilterMetaActions>
+          {currentUser ? (
+            <FilterToggleButton
+              type="button"
+              $active={followingFilter}
+              onClick={toggleFollowingFilter}
+            >
+              Mes organisateurs
+            </FilterToggleButton>
+          ) : null}
+
+          {hasActiveFilters ? (
+            <FilterResetButton type="button" onClick={resetFilters}>
+              Reinitialiser les filtres
+            </FilterResetButton>
+          ) : null}
+        </FilterMetaActions>
       </FilterMetaRow>
 
       {isLoading ? (
@@ -313,7 +377,9 @@ export function ExplorerPage() {
         </ExplorerCardsGrid>
       ) : (
         <ExplorerStateText>
-          Aucun evenement publie ne correspond a ces filtres pour le moment.
+          {followingFilter
+            ? "Aucun evenement a venir ne correspond aux organisateurs que tu suis pour le moment."
+            : 'Aucun evenement publie ne correspond a ces filtres pour le moment.'}
         </ExplorerStateText>
       )}
 

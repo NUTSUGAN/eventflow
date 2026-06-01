@@ -3,11 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Entity\Checkin;
 use App\Entity\Event;
 use App\Entity\Location;
+use App\Entity\Order;
+use App\Entity\OrderItem;
 use App\Entity\User;
 use App\Repository\CategoryRepository;
 use App\Repository\CheckinRepository;
+use App\Repository\AbonnementOrganisateurRepository;
 use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -113,6 +117,90 @@ final class OrganizerEventController extends AbstractController
             fn (Event $event): array => $this->serializeEvent($event),
             $events
         ));
+    }
+
+    #[Route('/dashboard', name: 'api_organizer_event_dashboard', methods: ['GET'])]
+    public function dashboard(
+        EventRepository $eventRepository,
+        EntityManagerInterface $entityManager,
+        AbonnementOrganisateurRepository $subscriptionRepository,
+    ): JsonResponse {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->json([
+                'message' => 'Non authentifie.',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (!$this->isOrganizerOrAdmin($user)) {
+            return $this->json([
+                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $events = $eventRepository->findBy(
+            ['organizer' => $user],
+            ['createdAt' => 'DESC']
+        );
+
+        $salesByEvent = $this->findOrganizerSalesByEvent($user, $entityManager);
+        $salesTotals = $this->findOrganizerSalesTotals($user, $entityManager);
+        $scansByEvent = $this->findOrganizerScansByEvent($user, $entityManager);
+        $scanTotals = $this->findOrganizerScanTotals($user, $entityManager);
+        $subscriberCount = $subscriptionRepository->countActiveForOrganizer($user);
+        $now = new \DateTimeImmutable();
+
+        return $this->json([
+            'stats' => [
+                'revenue' => [
+                    'total' => $salesTotals['revenueTotal'],
+                    'currency' => Order::DEFAULT_CURRENCY,
+                ],
+                'orders' => [
+                    'paid' => $salesTotals['paidOrders'],
+                ],
+                'subscribers' => [
+                    'total' => $subscriberCount,
+                ],
+                'tickets' => [
+                    'sold' => $salesTotals['ticketsSold'],
+                ],
+                'scans' => $scanTotals,
+                'events' => [
+                    'total' => count($events),
+                    'published' => count(array_filter(
+                        $events,
+                        static fn (Event $event): bool => 'published' === $event->getStatus(),
+                    )),
+                    'draft' => count(array_filter(
+                        $events,
+                        static fn (Event $event): bool => 'draft' === $event->getStatus(),
+                    )),
+                    'cancelled' => count(array_filter(
+                        $events,
+                        static fn (Event $event): bool => 'cancelled' === $event->getStatus(),
+                    )),
+                    'upcoming' => count(array_filter(
+                        $events,
+                        static fn (Event $event): bool => $event->getStartDatetime() instanceof \DateTimeImmutable
+                            && $event->getStartDatetime() >= $now
+                            && 'cancelled' !== $event->getStatus(),
+                    )),
+                ],
+                'staff' => [
+                    'active' => $user->countActiveManagedStaffMembers(),
+                ],
+            ],
+            'events' => array_map(
+                fn (Event $event): array => $this->serializeDashboardEvent(
+                    $event,
+                    $salesByEvent,
+                    $scansByEvent,
+                ),
+                $events,
+            ),
+        ]);
     }
 
     #[Route('', name: 'api_organizer_event_create', methods: ['POST'])]
@@ -283,6 +371,7 @@ final class OrganizerEventController extends AbstractController
         int $eventId,
         EventRepository $eventRepository,
         CheckinRepository $checkinRepository,
+        EntityManagerInterface $entityManager,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -306,9 +395,14 @@ final class OrganizerEventController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
+        $salesByEvent = $this->findOrganizerSalesByEvent($user, $entityManager);
+        $scansByEvent = $this->findOrganizerScansByEvent($user, $entityManager);
+
         return $this->json([
-            'event' => $this->serializeEvent(
+            'event' => $this->serializeDashboardEvent(
                 $event,
+                $salesByEvent,
+                $scansByEvent,
                 $this->serializeScanStats($checkinRepository->findStaffScanStatsForEvent($event)),
             ),
         ]);
@@ -465,6 +559,7 @@ final class OrganizerEventController extends AbstractController
 
         $thumbnailFile = $request->files->get('thumbnailPhoto');
         $coverFile = $request->files->get('coverPhoto');
+        $eventVideoFile = $request->files->get('eventVideo');
 
         if (null !== $thumbnailFile && !$thumbnailFile instanceof UploadedFile) {
             return $this->json([
@@ -478,6 +573,18 @@ final class OrganizerEventController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        if (null !== $eventVideoFile && !$eventVideoFile instanceof UploadedFile) {
+            return $this->json([
+                'message' => 'La video envoyee est invalide.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($eventVideoFile instanceof UploadedFile && $endDatetime >= $now) {
+            return $this->json([
+                'message' => 'La video souvenir peut etre ajoutee uniquement quand l evenement est termine.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         try {
             if ($thumbnailFile instanceof UploadedFile) {
                 $event->setThumbnailPhoto($this->uploadImage($thumbnailFile));
@@ -485,6 +592,10 @@ final class OrganizerEventController extends AbstractController
 
             if ($coverFile instanceof UploadedFile) {
                 $event->setCoverPhoto($this->uploadImage($coverFile));
+            }
+
+            if ($eventVideoFile instanceof UploadedFile) {
+                $event->setEventVideo($this->uploadVideo($eventVideoFile));
             }
         } catch (\Throwable $exception) {
             return $this->json([
@@ -744,6 +855,45 @@ final class OrganizerEventController extends AbstractController
         return '/uploads/events/'.$filename;
     }
 
+    private function uploadVideo(UploadedFile $file): string
+    {
+        if (!$file->isValid()) {
+            throw new \RuntimeException('La video envoyee est invalide ou trop lourde.');
+        }
+
+        $mimeType = $file->getClientMimeType() ?? '';
+
+        if (!str_starts_with($mimeType, 'video/')) {
+            throw new \RuntimeException('Le fichier envoye doit etre une video.');
+        }
+
+        $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/events/videos';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeName = preg_replace('/[^A-Za-z0-9_-]/', '-', $originalName) ?: 'video';
+        $extension = strtolower(pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
+
+        if ('' === $extension) {
+            $extension = 'mp4';
+        }
+
+        $filename = uniqid('event_video_', true).'-'.$safeName.'.'.$extension;
+
+        try {
+            $file->move($uploadDir, $filename);
+        } catch (FileException) {
+            throw new \RuntimeException(
+                "Impossible d'enregistrer la video envoyee pour le moment."
+            );
+        }
+
+        return '/uploads/events/videos/'.$filename;
+    }
+
     private function getUploadErrorMessage(int $errorCode): string
     {
         return match ($errorCode) {
@@ -771,6 +921,7 @@ final class OrganizerEventController extends AbstractController
             'capacity' => $event->getCapacity(),
             'thumbnailPhoto' => $event->getThumbnailPhoto(),
             'coverPhoto' => $event->getCoverPhoto(),
+            'eventVideo' => $event->getEventVideo(),
             'status' => $event->getStatus(),
             'createdAt' => $this->formatDateTimeForFrontend($event->getCreatedAt()),
             'ticketTypesCount' => $event->getTicketTypes()->count(),
@@ -794,6 +945,179 @@ final class OrganizerEventController extends AbstractController
         }
 
         return $serializedEvent;
+    }
+
+    /**
+     * @param array<int, array{revenueTotal: string, paidOrders: int, ticketsSold: int, currency: string}> $salesByEvent
+     * @param array<int, array{total: int, valid: int, invalid: int, alreadyUsed: int}> $scansByEvent
+     * @param array<string, mixed>|null $scanStats
+     */
+    private function serializeDashboardEvent(
+        Event $event,
+        array $salesByEvent,
+        array $scansByEvent,
+        ?array $scanStats = null
+    ): array
+    {
+        $eventId = (int) ($event->getId() ?? 0);
+        $serializedEvent = $this->serializeEvent($event, $scanStats);
+        $serializedEvent['sales'] = $salesByEvent[$eventId] ?? [
+            'revenueTotal' => '0.00',
+            'paidOrders' => 0,
+            'ticketsSold' => 0,
+            'currency' => Order::DEFAULT_CURRENCY,
+        ];
+        $serializedEvent['scans'] = $scansByEvent[$eventId] ?? [
+            'total' => 0,
+            'valid' => 0,
+            'invalid' => 0,
+            'alreadyUsed' => 0,
+        ];
+
+        return $serializedEvent;
+    }
+
+    /**
+     * @return array<int, array{revenueTotal: string, paidOrders: int, ticketsSold: int, currency: string}>
+     */
+    private function findOrganizerSalesByEvent(User $organizer, EntityManagerInterface $entityManager): array
+    {
+        $rows = $entityManager->createQueryBuilder()
+            ->select('event.id AS eventId')
+            ->addSelect('COUNT(DISTINCT customerOrder.id) AS paidOrders')
+            ->addSelect('COALESCE(SUM(orderItem.quantity), 0) AS ticketsSold')
+            ->addSelect('COALESCE(SUM(orderItem.quantity * orderItem.unitPriceAtPurchase), 0) AS revenueTotal')
+            ->from(OrderItem::class, 'orderItem')
+            ->innerJoin('orderItem.customerOrder', 'customerOrder')
+            ->innerJoin('orderItem.ticketType', 'ticketType')
+            ->innerJoin('ticketType.event', 'event')
+            ->andWhere('event.organizer = :organizer')
+            ->andWhere('customerOrder.status = :paidStatus')
+            ->setParameter('organizer', $organizer)
+            ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->groupBy('event.id')
+            ->getQuery()
+            ->getArrayResult()
+        ;
+
+        $salesByEvent = [];
+
+        foreach ($rows as $row) {
+            $eventId = (int) ($row['eventId'] ?? 0);
+
+            if ($eventId <= 0) {
+                continue;
+            }
+
+            $salesByEvent[$eventId] = [
+                'revenueTotal' => number_format((float) ($row['revenueTotal'] ?? 0), 2, '.', ''),
+                'paidOrders' => (int) ($row['paidOrders'] ?? 0),
+                'ticketsSold' => (int) ($row['ticketsSold'] ?? 0),
+                'currency' => Order::DEFAULT_CURRENCY,
+            ];
+        }
+
+        return $salesByEvent;
+    }
+
+    /**
+     * @return array{revenueTotal: string, paidOrders: int, ticketsSold: int}
+     */
+    private function findOrganizerSalesTotals(User $organizer, EntityManagerInterface $entityManager): array
+    {
+        $row = $entityManager->createQueryBuilder()
+            ->select('COUNT(DISTINCT customerOrder.id) AS paidOrders')
+            ->addSelect('COALESCE(SUM(orderItem.quantity), 0) AS ticketsSold')
+            ->addSelect('COALESCE(SUM(orderItem.quantity * orderItem.unitPriceAtPurchase), 0) AS revenueTotal')
+            ->from(OrderItem::class, 'orderItem')
+            ->innerJoin('orderItem.customerOrder', 'customerOrder')
+            ->innerJoin('orderItem.ticketType', 'ticketType')
+            ->innerJoin('ticketType.event', 'event')
+            ->andWhere('event.organizer = :organizer')
+            ->andWhere('customerOrder.status = :paidStatus')
+            ->setParameter('organizer', $organizer)
+            ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->getQuery()
+            ->getSingleResult()
+        ;
+
+        return [
+            'revenueTotal' => number_format((float) ($row['revenueTotal'] ?? 0), 2, '.', ''),
+            'paidOrders' => (int) ($row['paidOrders'] ?? 0),
+            'ticketsSold' => (int) ($row['ticketsSold'] ?? 0),
+        ];
+    }
+
+    /**
+     * @return array<int, array{total: int, valid: int, invalid: int, alreadyUsed: int}>
+     */
+    private function findOrganizerScansByEvent(User $organizer, EntityManagerInterface $entityManager): array
+    {
+        $rows = $entityManager->createQueryBuilder()
+            ->select('event.id AS eventId')
+            ->addSelect('COUNT(checkin.id) AS total')
+            ->addSelect('SUM(CASE WHEN checkin.result = :validResult THEN 1 ELSE 0 END) AS valid')
+            ->addSelect('SUM(CASE WHEN checkin.result = :invalidResult THEN 1 ELSE 0 END) AS invalid')
+            ->addSelect('SUM(CASE WHEN checkin.result = :alreadyUsedResult THEN 1 ELSE 0 END) AS alreadyUsed')
+            ->from(Checkin::class, 'checkin')
+            ->innerJoin('checkin.event', 'event')
+            ->andWhere('event.organizer = :organizer')
+            ->setParameter('organizer', $organizer)
+            ->setParameter('validResult', Checkin::RESULT_VALID)
+            ->setParameter('invalidResult', Checkin::RESULT_INVALID)
+            ->setParameter('alreadyUsedResult', Checkin::RESULT_ALREADY_USED)
+            ->groupBy('event.id')
+            ->getQuery()
+            ->getArrayResult()
+        ;
+
+        $scansByEvent = [];
+
+        foreach ($rows as $row) {
+            $eventId = (int) ($row['eventId'] ?? 0);
+
+            if ($eventId <= 0) {
+                continue;
+            }
+
+            $scansByEvent[$eventId] = [
+                'total' => (int) ($row['total'] ?? 0),
+                'valid' => (int) ($row['valid'] ?? 0),
+                'invalid' => (int) ($row['invalid'] ?? 0),
+                'alreadyUsed' => (int) ($row['alreadyUsed'] ?? 0),
+            ];
+        }
+
+        return $scansByEvent;
+    }
+
+    /**
+     * @return array{total: int, valid: int, invalid: int, alreadyUsed: int}
+     */
+    private function findOrganizerScanTotals(User $organizer, EntityManagerInterface $entityManager): array
+    {
+        $row = $entityManager->createQueryBuilder()
+            ->select('COUNT(checkin.id) AS total')
+            ->addSelect('SUM(CASE WHEN checkin.result = :validResult THEN 1 ELSE 0 END) AS valid')
+            ->addSelect('SUM(CASE WHEN checkin.result = :invalidResult THEN 1 ELSE 0 END) AS invalid')
+            ->addSelect('SUM(CASE WHEN checkin.result = :alreadyUsedResult THEN 1 ELSE 0 END) AS alreadyUsed')
+            ->from(Checkin::class, 'checkin')
+            ->innerJoin('checkin.event', 'event')
+            ->andWhere('event.organizer = :organizer')
+            ->setParameter('organizer', $organizer)
+            ->setParameter('validResult', Checkin::RESULT_VALID)
+            ->setParameter('invalidResult', Checkin::RESULT_INVALID)
+            ->setParameter('alreadyUsedResult', Checkin::RESULT_ALREADY_USED)
+            ->getQuery()
+            ->getSingleResult()
+        ;
+
+        return [
+            'total' => (int) ($row['total'] ?? 0),
+            'valid' => (int) ($row['valid'] ?? 0),
+            'invalid' => (int) ($row['invalid'] ?? 0),
+            'alreadyUsed' => (int) ($row['alreadyUsed'] ?? 0),
+        ];
     }
 
     /**

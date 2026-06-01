@@ -15,6 +15,7 @@ type PublicEventFilters = {
   type?: string
   city?: string
   date?: string
+  following?: boolean
   scope?: 'upcoming' | 'archive'
   limit?: number
   page?: number

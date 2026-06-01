@@ -14,6 +14,8 @@ import {
   DetailBody,
   DetailCaption,
   DetailEmptyText,
+  DetailEventVideo,
+  DetailEventVideoPanel,
   DetailField,
   DetailFieldLabel,
   DetailGrid,
@@ -204,6 +206,16 @@ function getOrganizerInitials(fullName: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('')
+}
+
+function isEventFinished(value: string | null): boolean {
+  if (!value) {
+    return false
+  }
+
+  const endDatetime = new Date(value)
+
+  return !Number.isNaN(endDatetime.getTime()) && endDatetime < new Date()
 }
 
 const eventStatusOptions = [
@@ -489,6 +501,7 @@ export function EventDetailPage() {
   }
 
   const coverImageUrl = event.media.coverUrl ?? event.media.thumbnailUrl ?? heroImage
+  const shouldShowEventVideo = isEventFinished(event.endsAt) && Boolean(event.media.videoUrl)
   const organizerInitials = event.organizer
     ? getOrganizerInitials(event.organizer.fullName)
     : 'EV'
@@ -545,6 +558,20 @@ export function EventDetailPage() {
           </DetailHeroMeta>
         </DetailHeroContent>
       </DetailHero>
+
+      {shouldShowEventVideo && event.media.videoUrl ? (
+        <DetailEventVideoPanel>
+          <DetailPanelHeader>
+            <div>
+              <DetailPanelTitle>Video souvenir</DetailPanelTitle>
+              <DetailCaption>
+                Un apercu de cet evenement passe, partage par l organisateur.
+              </DetailCaption>
+            </div>
+          </DetailPanelHeader>
+          <DetailEventVideo controls preload="metadata" src={event.media.videoUrl} />
+        </DetailEventVideoPanel>
+      ) : null}
 
       <DetailGrid>
         <DetailBody>

@@ -50,6 +50,9 @@ class Event
     #[ORM\Column(name: 'cover_photo', length: 255)]
     private ?string $coverPhoto = null;
 
+    #[ORM\Column(name: 'event_video', length: 255, nullable: true)]
+    private ?string $eventVideo = null;
+
     #[ORM\Column(name: 'status', length: 30)]
     private ?string $status = null;
 
@@ -195,6 +198,18 @@ class Event
     public function setCoverPhoto(string $coverPhoto): static
     {
         $this->coverPhoto = $coverPhoto;
+
+        return $this;
+    }
+
+    public function getEventVideo(): ?string
+    {
+        return $this->eventVideo;
+    }
+
+    public function setEventVideo(?string $eventVideo): static
+    {
+        $this->eventVideo = $eventVideo;
 
         return $this;
     }
