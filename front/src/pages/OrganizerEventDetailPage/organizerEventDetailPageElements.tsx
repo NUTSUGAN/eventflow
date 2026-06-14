@@ -479,10 +479,11 @@ export const OrganizerEventDetailTicketText = styled.p`
 
 export const OrganizerEventDetailTicketGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
   gap: 18px;
+  align-items: start;
 
-  @media (max-width: 1040px) {
+  @media (max-width: 1180px) {
     grid-template-columns: 1fr;
   }
 `
@@ -495,6 +496,7 @@ export const OrganizerEventDetailTicketCreateCard = styled.div`
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   align-content: start;
+  min-width: 0;
 `
 
 export const OrganizerEventDetailTicketList = styled.div`
@@ -509,6 +511,7 @@ export const OrganizerEventDetailTicketCard = styled.article`
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
 `
 
 export const OrganizerEventDetailTicketCardHeader = styled.div`
@@ -552,8 +555,12 @@ export const OrganizerEventDetailTicketStats = styled.div`
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 
-  @media (max-width: 880px) {
+  @media (max-width: 980px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
   }
 `
 
@@ -564,6 +571,7 @@ export const OrganizerEventDetailTicketStat = styled.div`
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
 `
 
 export const OrganizerEventDetailTicketStatLabel = styled.span`
@@ -577,6 +585,95 @@ export const OrganizerEventDetailTicketStatValue = styled.span`
   color: #fff8f2;
   font-size: 0.98rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
+`
+
+export const OrganizerEventDetailGuestSection = styled.section`
+  display: grid;
+  gap: 18px;
+  padding-top: 4px;
+`
+
+export const OrganizerEventDetailGuestGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(360px, 0.85fr) minmax(420px, 1.15fr);
+  gap: 18px;
+  align-items: start;
+
+  @media (max-width: 1180px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const OrganizerEventDetailGuestList = styled.div`
+  display: grid;
+  gap: 12px;
+`
+
+export const OrganizerEventDetailGuestCard = styled.article`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const OrganizerEventDetailGuestMeta = styled.div`
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+`
+
+export const OrganizerEventDetailGuestName = styled.h3`
+  margin: 0;
+  color: #fff8f2;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+`
+
+export const OrganizerEventDetailGuestText = styled.p`
+  margin: 0;
+  color: rgba(255, 237, 222, 0.72);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+`
+
+export const OrganizerEventDetailGuestBadge = styled.span<{ $checkedIn: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: ${({ $checkedIn }) =>
+    $checkedIn ? 'rgba(89, 181, 114, 0.16)' : 'rgba(235, 148, 81, 0.14)'};
+  border: 1px solid
+    ${({ $checkedIn }) =>
+      $checkedIn ? 'rgba(89, 181, 114, 0.26)' : 'rgba(235, 148, 81, 0.24)'};
+  color: ${({ $checkedIn }) => ($checkedIn ? '#d9ffe3' : '#ffe2cb')};
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+`
+
+export const OrganizerEventDetailLinkButton = styled.button`
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(235, 148, 81, 0.26);
+  background: rgba(235, 148, 81, 0.1);
+  color: #ffe2cb;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
 `
 
 export const OrganizerEventDetailTicketCardActions = styled.div`

@@ -61,8 +61,8 @@ export function SiteFooter() {
       <FooterTop>
         <FooterTrustTitle>Des organisateurs nous font confiance</FooterTrustTitle>
         <FooterTrustList>
-          {trustedNames.map((name) => (
-            <FooterTrustItem key={name}>{name}</FooterTrustItem>
+          {trustedNames.map((name, index) => (
+            <FooterTrustItem key={`${name}-${index}`}>{name}</FooterTrustItem>
           ))}
         </FooterTrustList>
       </FooterTop>

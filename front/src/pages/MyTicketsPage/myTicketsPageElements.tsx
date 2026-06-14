@@ -406,12 +406,31 @@ export const TicketDetailCodePanel = styled.div`
 `
 
 export const TicketDetailQrWrap = styled.div`
+  position: relative;
   width: min(100%, 240px);
   margin: 0 auto;
   padding: 16px;
   border-radius: 18px;
   background: #ffffff;
   box-shadow: inset 0 0 0 1px rgba(32, 23, 17, 0.08);
+  line-height: 0;
+`
+
+export const TicketDetailQrLogo = styled.span`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 11px;
+  background:
+    #ffffff url('/eventflow-logo-mobile.png') center / 135% auto no-repeat;
+  box-shadow:
+    0 0 0 1px rgba(28, 20, 15, 0.1),
+    0 8px 18px rgba(28, 20, 15, 0.14);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 `
 
 export const TicketDetailCodeBadge = styled.span`

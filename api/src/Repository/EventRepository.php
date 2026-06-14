@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Event;
+use App\Entity\PromotionCampaign;
+use App\Entity\PromotionCampaignChannel;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -32,11 +34,28 @@ class EventRepository extends ServiceEntityRepository
         ?array $organizerIds = null
     ): array {
         $queryBuilder = $this->createQueryBuilder('event')
+            ->distinct()
             ->leftJoin('event.category', 'category')->addSelect('category')
             ->leftJoin('event.location', 'location')->addSelect('location')
             ->leftJoin('event.ticketTypes', 'ticketType', 'WITH', 'ticketType.isActive = true')->addSelect('ticketType')
+            ->leftJoin(
+                'event.promotionCampaigns',
+                'activePromotion',
+                'WITH',
+                'activePromotion.status = :activePromotionStatus AND activePromotion.startsAt <= :promotionNow AND activePromotion.endsAt >= :promotionNow'
+            )->addSelect('activePromotion')
+            ->leftJoin('activePromotion.channels', 'activePromotionChannel')->addSelect('activePromotionChannel')
+            ->leftJoin(
+                'activePromotion.channels',
+                'launchPromotionChannel',
+                'WITH',
+                'launchPromotionChannel.channelCode = :launchPackChannel AND launchPromotionChannel.isFeatured = true'
+            )->addSelect('launchPromotionChannel')
             ->andWhere('LOWER(event.status) = :publishedStatus')
             ->setParameter('publishedStatus', 'published')
+            ->setParameter('activePromotionStatus', PromotionCampaign::STATUS_ACTIVE)
+            ->setParameter('promotionNow', new \DateTimeImmutable())
+            ->setParameter('launchPackChannel', PromotionCampaignChannel::CHANNEL_LAUNCH_PACK)
         ;
 
         $this->applyPublicVisibilityScope($queryBuilder, $scope);
@@ -49,7 +68,11 @@ class EventRepository extends ServiceEntityRepository
                 ->addOrderBy('event.startDatetime', 'DESC')
             ;
         } else {
-            $queryBuilder->orderBy('event.startDatetime', 'ASC');
+            $queryBuilder
+                ->addSelect('CASE WHEN launchPromotionChannel.id IS NOT NULL THEN 0 ELSE 1 END AS HIDDEN sponsoredPriority')
+                ->orderBy('sponsoredPriority', 'ASC')
+                ->addOrderBy('event.startDatetime', 'ASC')
+            ;
         }
 
         $queryBuilder
@@ -103,8 +126,17 @@ class EventRepository extends ServiceEntityRepository
             ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
             ->leftJoin('event.category', 'category')->addSelect('category')
             ->leftJoin('event.location', 'location')->addSelect('location')
+            ->leftJoin(
+                'event.promotionCampaigns',
+                'activePromotion',
+                'WITH',
+                'activePromotion.status = :activePromotionStatus AND activePromotion.startsAt <= :promotionNow AND activePromotion.endsAt >= :promotionNow'
+            )->addSelect('activePromotion')
+            ->leftJoin('activePromotion.channels', 'activePromotionChannel')->addSelect('activePromotionChannel')
             ->andWhere('event.id = :id')
             ->setParameter('id', $id)
+            ->setParameter('activePromotionStatus', PromotionCampaign::STATUS_ACTIVE)
+            ->setParameter('promotionNow', new \DateTimeImmutable())
         ;
 
         return $queryBuilder

@@ -255,6 +255,7 @@ final class StaffCheckinService
         $event = $ticket->getTicketType()?->getEvent();
         $location = $event?->getLocation();
         $customer = $order?->getClient();
+        $isInvitation = $ticket->getSource() === Ticket::SOURCE_INVITATION;
 
         return [
             'id' => $ticket->getId(),
@@ -279,9 +280,11 @@ final class StaffCheckinService
                 'status' => $order?->getStatus(),
             ],
             'customer' => [
-                'id' => $customer?->getId(),
-                'displayName' => $customer?->getDisplayName() ?? 'Client EventFlow',
-                'email' => $customer?->getEmail(),
+                'id' => $isInvitation ? null : $customer?->getId(),
+                'displayName' => $isInvitation
+                    ? ($ticket->getRecipientName() ?? 'Invité')
+                    : ($customer?->getDisplayName() ?? 'Client'),
+                'email' => $isInvitation ? $ticket->getRecipientEmail() : $customer?->getEmail(),
             ],
         ];
     }

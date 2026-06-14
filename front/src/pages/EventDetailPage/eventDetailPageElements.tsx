@@ -25,6 +25,8 @@ export const DetailHero = styled.section`
 `
 
 export const DetailHeroCover = styled.div<{ $imageUrl: string }>`
+  position: relative;
+  overflow: visible;
   min-height: 420px;
   border-radius: 8px;
   background-image:
@@ -36,6 +38,24 @@ export const DetailHeroCover = styled.div<{ $imageUrl: string }>`
 
   @media (max-width: 1040px) {
     min-height: 320px;
+  }
+`
+
+export const DetailSponsoredBadge = styled.img`
+  position: absolute;
+  right: -24px;
+  bottom: -38px;
+  width: clamp(126px, 24%, 190px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, .5));
+  pointer-events: none;
+
+  @media (max-width: 640px) {
+    right: -10px;
+    bottom: -28px;
+    width: 126px;
   }
 `
 

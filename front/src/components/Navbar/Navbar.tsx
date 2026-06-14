@@ -286,6 +286,12 @@ export function Navbar() {
     navigate('/mes-billets')
   }
 
+  function handleMyOrdersNavigation() {
+    setIsProfileMenuOpen(false)
+    setIsMobileMenuOpen(false)
+    navigate('/mes-commandes')
+  }
+
   function handleOrganizerStaffNavigation() {
     setIsProfileMenuOpen(false)
     setIsMobileMenuOpen(false)
@@ -316,7 +322,10 @@ export function Navbar() {
     <NavbarContainer>
       <NavbarInner>
         <Brand to="/" aria-label="Retour a l'accueil EventFlow">
-          <BrandImage src="/eventflow-logo.png" alt="EventFlow" />
+          <picture>
+            <source media="(max-width: 840px)" srcSet="/eventflow-logo-mobile.png" />
+            <BrandImage src="/eventflow-logo.png" alt="EventFlow" />
+          </picture>
         </Brand>
 
         <SearchBox ref={searchBoxRef}>
@@ -479,6 +488,9 @@ export function Navbar() {
                 <ProfileDropdownAction type="button" onClick={handleMyTicketsNavigation}>
                   Mes billets
                 </ProfileDropdownAction>
+                <ProfileDropdownAction type="button" onClick={handleMyOrdersNavigation}>
+                  Mes commandes
+                </ProfileDropdownAction>
                 {currentUser.canAccessStaffTools ? (
                   <ProfileDropdownAction type="button" onClick={handleStaffScanNavigation}>
                     Scanner billets
@@ -496,7 +508,7 @@ export function Navbar() {
                       navigate(hasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
                   }}
                 >
-                  {hasOrganizerAccess ? 'Ouvrir mon espace organisateur' : 'Devenir organisateur'}
+                  {hasOrganizerAccess ? 'Espace organisateur' : 'Devenir organisateur'}
                 </ProfileDropdownAction>
                 {currentUser.role === 'ROLE_ADMIN' ? (
                   <ProfileDropdownAction
@@ -556,6 +568,9 @@ export function Navbar() {
               <MobileMenuLink type="button" onClick={handleMyTicketsNavigation}>
                 Mes billets
               </MobileMenuLink>
+              <MobileMenuLink type="button" onClick={handleMyOrdersNavigation}>
+                Mes commandes
+              </MobileMenuLink>
               {currentUser.canAccessStaffTools ? (
                 <MobileMenuLink type="button" onClick={handleStaffScanNavigation}>
                   Scanner billets
@@ -573,7 +588,7 @@ export function Navbar() {
                   navigate(hasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
                 }}
               >
-                {hasOrganizerAccess ? 'Ouvrir mon espace organisateur' : 'Devenir organisateur'}
+                {hasOrganizerAccess ? 'Espace organisateur' : 'Devenir organisateur'}
               </MobileMenuLink>
               {currentUser.role === 'ROLE_ADMIN' ? (
                 <MobileMenuLink

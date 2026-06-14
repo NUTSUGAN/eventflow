@@ -71,6 +71,14 @@ export type AdminUserSummary = {
   termsAcceptedAt: string | null
   privacyAcceptedAt: string | null
   newsletterSubscribed: boolean
+  eventflowSubscriptionsCount: number
+  eventflowSubscriptions: Array<{
+    id: number | null
+    organizerId: number | null
+    organizerName: string
+    organizerEmail: string | null
+    createdAt: string | null
+  }>
   organizedEventsCount: number
   ordersCount: number
   ticketsCount: number
@@ -148,6 +156,11 @@ export type AdminOrderSummary = {
     paidAt: string | null
   } | null
   ticketsCount: number
+  promotion: {
+    campaignId: number | null
+    eventId: number | null
+    eventTitle: string | null
+  } | null
   tickets: Array<{
     id: number | null
     status: string | null

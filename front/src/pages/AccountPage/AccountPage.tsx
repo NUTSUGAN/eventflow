@@ -411,13 +411,16 @@ export function AccountPage() {
             <AccountPrimaryButton type="button" onClick={() => navigate('/mes-billets')}>
               Voir mes billets
             </AccountPrimaryButton>
+            <AccountSecondaryButton type="button" onClick={() => navigate('/mes-commandes')}>
+              Voir mes commandes
+            </AccountSecondaryButton>
             <AccountSecondaryButton
               type="button"
               onClick={() =>
                 navigate(hasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
               }
             >
-              {hasOrganizerAccess ? 'Ouvrir mon espace organisateur' : 'Devenir organisateur'}
+              {hasOrganizerAccess ? 'Espace organisateur' : 'Devenir organisateur'}
             </AccountSecondaryButton>
             {user.role === 'ROLE_ADMIN' ? (
               <AccountSecondaryButton type="button" onClick={() => navigate('/admin')}>
@@ -497,7 +500,6 @@ export function AccountPage() {
                   onChange={(event) => setEmailChangeValue(event.target.value)}
                   placeholder="nouvel-email@exemple.com"
                   autoComplete="email"
-                  required
                 />
               </AccountField>
 

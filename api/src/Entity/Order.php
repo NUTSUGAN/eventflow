@@ -18,6 +18,7 @@ class Order
     public const STATUS_EXPIRED = 'expired';
 
     public const TYPE_TICKET = 'ticket';
+    public const TYPE_PROMOTION = 'promotion';
 
     public const STOCK_CONSUMING_STATUSES = [
         self::STATUS_PAID,
@@ -39,8 +40,13 @@ class Order
     private ?User $client = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    #[ORM\JoinColumn(name: 'promotion_id', referencedColumnName: 'id_promotion', nullable: true)]
-    private ?Promotion $promotion = null;
+    #[ORM\JoinColumn(
+        name: 'promotion_campaign_id',
+        referencedColumnName: 'id_promotion_campaign',
+        nullable: true,
+        onDelete: 'SET NULL'
+    )]
+    private ?PromotionCampaign $promotionCampaign = null;
 
     #[ORM\Column(name: 'reference', length: 40)]
     private ?string $reference = null;
@@ -98,14 +104,14 @@ class Order
         return $this;
     }
 
-    public function getPromotion(): ?Promotion
+    public function getPromotionCampaign(): ?PromotionCampaign
     {
-        return $this->promotion;
+        return $this->promotionCampaign;
     }
 
-    public function setPromotion(?Promotion $promotion): static
+    public function setPromotionCampaign(?PromotionCampaign $promotionCampaign): static
     {
-        $this->promotion = $promotion;
+        $this->promotionCampaign = $promotionCampaign;
 
         return $this;
     }

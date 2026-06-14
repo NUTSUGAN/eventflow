@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { trackPromotionMetric } from '../../api/promotions'
 import { EventCard } from '../../components/EventCard/EventCard'
 import {
   followOrganizer,
@@ -22,6 +23,7 @@ import {
   DetailHero,
   DetailHeroContent,
   DetailHeroCover,
+  DetailSponsoredBadge,
   DetailHeroMeta,
   DetailHeroTop,
   DetailInfoGrid,
@@ -256,6 +258,7 @@ export function EventDetailPage() {
   const [reportDetails, setReportDetails] = useState('')
   const [reportMessage, setReportMessage] = useState<string | null>(null)
   const [reportErrorMessage, setReportErrorMessage] = useState<string | null>(null)
+  const [followErrorMessage, setFollowErrorMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -335,6 +338,16 @@ export function EventDetailPage() {
     }
   }, [event?.category?.name, event?.id])
 
+  useEffect(() => {
+    if (!event?.isSponsored || !event.sponsoredCampaignId) return
+
+    const storageKey = `promotion-impression-${event.sponsoredCampaignId}-detail`
+    if (window.sessionStorage.getItem(storageKey)) return
+
+    window.sessionStorage.setItem(storageKey, '1')
+    void trackPromotionMetric(event.sponsoredCampaignId, 'impression', 'detail').catch(() => undefined)
+  }, [event?.isSponsored, event?.sponsoredCampaignId])
+
   const mapEmbedUrl = useMemo(() => {
     if (!event?.location) {
       return null
@@ -396,6 +409,7 @@ export function EventDetailPage() {
     }
 
     setIsFollowLoading(true)
+    setFollowErrorMessage(null)
 
     try {
       const response = event.subscription.isFollowing
@@ -411,8 +425,8 @@ export function EventDetailPage() {
           : currentEvent,
       )
     } catch {
-      setErrorMessage(
-        "Impossible de mettre a jour l'abonnement a cet organisateur pour le moment.",
+      setFollowErrorMessage(
+        "Impossible de mettre a jour l'abonnement EventFlow pour le moment.",
       )
     } finally {
       setIsFollowLoading(false)
@@ -510,7 +524,11 @@ export function EventDetailPage() {
   return (
     <DetailSection>
       <DetailHero>
-        <DetailHeroCover $imageUrl={coverImageUrl} />
+        <DetailHeroCover $imageUrl={coverImageUrl}>
+          {event.isSponsored ? (
+            <DetailSponsoredBadge src="/assets/badge-sponsorise-eventflow.png" alt="Evenement sponsorise" />
+          ) : null}
+        </DetailHeroCover>
 
         <DetailHeroContent>
           <DetailHeroTop>
@@ -712,8 +730,8 @@ export function EventDetailPage() {
                         />
                       </FollowIcon>
                       {event.subscription.isFollowing
-                        ? 'Organisateur suivi'
-                        : "Suivre l'organisateur"}
+                        ? "Abonné à l'organisateur"
+                        : "S'abonner à l'organisateur"}
                     </FollowButton>
                   ) : null}
 
@@ -726,8 +744,13 @@ export function EventDetailPage() {
 
                 {event.subscription.requiresAuth ? (
                   <DetailOrganizerNote>
-                    Connecte-toi ou cree un compte pour suivre cet organisateur.
+                    Connecte-toi ou cree un compte pour t'abonner EventFlow.
                   </DetailOrganizerNote>
+                ) : null}
+                {followErrorMessage ? (
+                  <DetailInlineMessage $tone="danger">
+                    {followErrorMessage}
+                  </DetailInlineMessage>
                 ) : null}
               </DetailOrganizerCard>
             ) : (

@@ -269,6 +269,12 @@ export function OrganizerDashboardPage() {
           >
             Mes evenements
           </OrganizerDashboardSecondaryButton>
+          <OrganizerDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/organizer/promotions')}
+          >
+            Mes campagnes Booster
+          </OrganizerDashboardSecondaryButton>
           {user?.canAccessStaffTools ? (
             <OrganizerDashboardSecondaryButton
               type="button"

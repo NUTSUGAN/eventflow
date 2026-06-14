@@ -6,6 +6,8 @@ import {
   updateAdminUserRole,
 } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
+import { usePagination } from '../../hooks/usePagination'
 import type {
   AdminAccountStatus,
   AdminUserRole,
@@ -123,6 +125,18 @@ function escapeCsvValue(value: string): string {
   return `"${value.replace(/"/g, '""')}"`
 }
 
+function formatEventflowSubscriptionTargets(user: AdminUserSummary): string {
+  const organizerNames = user.eventflowSubscriptions
+    .map((subscription) => subscription.organizerName)
+    .filter(Boolean)
+
+  if (organizerNames.length > 0) {
+    return organizerNames.join(', ')
+  }
+
+  return user.newsletterSubscribed ? 'EventFlow direct' : 'Aucun'
+}
+
 export function AdminUsersPage() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<AdminUsersTabId>('users')
@@ -135,10 +149,21 @@ export function AdminUsersPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const newsletterUsers = useMemo(
-    () => users.filter((user) => user.newsletterSubscribed),
+  const eventflowSubscribers = useMemo(
+    () =>
+      users.filter(
+        (user) => user.newsletterSubscribed || user.eventflowSubscriptionsCount > 0,
+      ),
     [users],
   )
+  const userPagination = usePagination(users, {
+    pageSize: 20,
+    resetKey: `users-${users.length}-${search}-${roleFilter}`,
+  })
+  const eventflowSubscriberPagination = usePagination(eventflowSubscribers, {
+    pageSize: 20,
+    resetKey: `eventflow-${eventflowSubscribers.length}-${search}-${roleFilter}`,
+  })
 
   useEffect(() => {
     let isMounted = true
@@ -261,8 +286,8 @@ export function AdminUsersPage() {
     }
   }
 
-  function handleNewsletterExport() {
-    const rows = newsletterUsers
+  function handleEventflowSubscribersExport() {
+    const rows = eventflowSubscribers
       .filter((user) => user.email)
       .map((user) => [
         user.firstName ?? '',
@@ -270,16 +295,17 @@ export function AdminUsersPage() {
         user.fullName,
         user.email ?? '',
         getRoleLabel(user.role),
+        formatEventflowSubscriptionTargets(user),
         formatDate(user.createdAt),
       ])
 
     if (rows.length === 0) {
-      setErrorMessage('Aucun email newsletter a exporter.')
+      setErrorMessage('Aucun abonne EventFlow a exporter.')
       return
     }
 
     const csv = [
-      ['Prenom', 'Nom', 'Nom complet', 'Email', 'Role', 'Date inscription'],
+      ['Prenom', 'Nom', 'Nom complet', 'Email', 'Role', 'Organisateurs suivis', 'Date inscription'],
       ...rows,
     ]
       .map((row) => row.map(escapeCsvValue).join(';'))
@@ -289,12 +315,12 @@ export function AdminUsersPage() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = 'abonnes-newsletter-eventflow.csv'
+    link.download = 'abonnes-eventflow.csv'
     document.body.appendChild(link)
     link.click()
     link.remove()
     URL.revokeObjectURL(url)
-    setStatusMessage('Export newsletter genere.')
+    setStatusMessage('Export abonnes EventFlow genere.')
   }
 
   return (
@@ -352,8 +378,8 @@ export function AdminUsersPage() {
           <AdminDashboardMetricValue>{users.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>
-          <AdminDashboardMetricLabel>Abonnes newsletter</AdminDashboardMetricLabel>
-          <AdminDashboardMetricValue>{newsletterUsers.length}</AdminDashboardMetricValue>
+          <AdminDashboardMetricLabel>Abonnes EventFlow</AdminDashboardMetricLabel>
+          <AdminDashboardMetricValue>{eventflowSubscribers.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
       </AdminDashboardGrid>
 
@@ -362,7 +388,7 @@ export function AdminUsersPage() {
         <AdminDashboardPanelHeader>
           <div>
             <AdminDashboardPanelTitle>Utilisateurs</AdminDashboardPanelTitle>
-            <AdminDashboardText>{users.length} compte(s) affiche(s)</AdminDashboardText>
+            <AdminDashboardText>{users.length} compte(s) trouve(s)</AdminDashboardText>
           </div>
         </AdminDashboardPanelHeader>
 
@@ -405,7 +431,7 @@ export function AdminUsersPage() {
         ) : null}
 
         <AdminDashboardList>
-          {users.map((user) => (
+          {userPagination.paginatedItems.map((user) => (
             <AdminDashboardRow key={user.id}>
               <AdminDashboardRowMain>
                 <AdminDashboardRowTitle>{user.fullName}</AdminDashboardRowTitle>
@@ -481,6 +507,14 @@ export function AdminUsersPage() {
             </AdminDashboardRow>
           ))}
         </AdminDashboardList>
+        <AdminPagination
+          page={userPagination.page}
+          pageSize={userPagination.pageSize}
+          totalItems={users.length}
+          totalPages={userPagination.totalPages}
+          itemLabel="utilisateurs"
+          onPageChange={userPagination.setPage}
+        />
       </AdminDashboardPanel>
       ) : null}
 
@@ -488,37 +522,52 @@ export function AdminUsersPage() {
         <AdminDashboardPanel>
           <AdminDashboardPanelHeader>
             <div>
-              <AdminDashboardPanelTitle>Abonnes newsletter</AdminDashboardPanelTitle>
+              <AdminDashboardPanelTitle>Abonnes EventFlow</AdminDashboardPanelTitle>
               <AdminDashboardText>
-                {newsletterUsers.length} compte(s) ont accepte de recevoir les communications EventFlow.
+                {eventflowSubscribers.length} compte(s) suivent au moins un organisateur EventFlow.
               </AdminDashboardText>
             </div>
             <AdminDashboardSecondaryButton
               type="button"
-              onClick={handleNewsletterExport}
-              disabled={newsletterUsers.length === 0}
+              onClick={handleEventflowSubscribersExport}
+              disabled={eventflowSubscribers.length === 0}
             >
               Exporter les mails
             </AdminDashboardSecondaryButton>
           </AdminDashboardPanelHeader>
-          {newsletterUsers.length === 0 ? (
+          {eventflowSubscribers.length === 0 ? (
             <AdminDashboardMessage $tone="neutral">
-              Aucun inscrit newsletter dans cette selection.
+              Aucun abonne EventFlow dans cette selection.
             </AdminDashboardMessage>
           ) : (
             <AdminDashboardList>
-              {newsletterUsers.map((user) => (
-                <AdminDashboardRow key={`newsletter-${user.id}`}>
+              {eventflowSubscriberPagination.paginatedItems.map((user) => (
+                <AdminDashboardRow key={`eventflow-${user.id}`}>
                   <AdminDashboardRowMain>
                     <AdminDashboardRowTitle>{user.fullName}</AdminDashboardRowTitle>
                     <AdminDashboardRowText>{user.email ?? 'Email inconnu'}</AdminDashboardRowText>
+                    <AdminDashboardRowText>
+                      Suit: {formatEventflowSubscriptionTargets(user)}
+                    </AdminDashboardRowText>
                   </AdminDashboardRowMain>
-                  <AdminDashboardBadge $tone="success">Newsletter</AdminDashboardBadge>
+                  <AdminDashboardBadge $tone="success">
+                    {user.eventflowSubscriptionsCount > 0
+                      ? `${user.eventflowSubscriptionsCount} abonnement(s)`
+                      : 'EventFlow direct'}
+                  </AdminDashboardBadge>
                   <span />
                 </AdminDashboardRow>
               ))}
             </AdminDashboardList>
           )}
+          <AdminPagination
+            page={eventflowSubscriberPagination.page}
+            pageSize={eventflowSubscriberPagination.pageSize}
+            totalItems={eventflowSubscribers.length}
+            totalPages={eventflowSubscriberPagination.totalPages}
+            itemLabel="abonnes"
+            onPageChange={eventflowSubscriberPagination.setPage}
+          />
         </AdminDashboardPanel>
       ) : null}
     </AdminDashboardSection>

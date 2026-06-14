@@ -30,6 +30,7 @@ final class AdminOrderController extends AbstractController
     {
         $client = $order->getClient();
         $payment = $order->getPayment();
+        $promotionCampaign = $order->getPromotionCampaign();
 
         return [
             'id' => $order->getId(),
@@ -54,6 +55,11 @@ final class AdminOrderController extends AbstractController
                 'paidAt' => $payment->getPaidAt()?->format(DATE_ATOM),
             ] : null,
             'ticketsCount' => $order->getTickets()->count(),
+            'promotion' => $promotionCampaign ? [
+                'campaignId' => $promotionCampaign->getId(),
+                'eventId' => $promotionCampaign->getEvent()?->getId(),
+                'eventTitle' => $promotionCampaign->getEvent()?->getTitle(),
+            ] : null,
             'tickets' => array_map(
                 fn (Ticket $ticket): array => [
                     'id' => $ticket->getId(),

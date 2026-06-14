@@ -63,3 +63,24 @@ export type OrderCheckoutSessionResponse = {
   checkoutUrl: string
   sessionId: string
 }
+
+export type OrderHistoryItem = {
+  id: number
+  reference: string
+  status: string
+  orderType: 'ticket' | 'promotion'
+  total: number
+  currency: string
+  createdAt: string | null
+  paidAt: string | null
+  ticketCount: number
+  event: {
+    id: number | null
+    title: string | null
+  }
+  promotionCampaignId: number | null
+}
+
+export type OrderHistoryResponse = {
+  orders: OrderHistoryItem[]
+}

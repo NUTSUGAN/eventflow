@@ -8,16 +8,20 @@ import { AccountEmailChangeConfirmPage } from './pages/AccountPage/AccountEmailC
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminOrganizerApplicationsPage } from './pages/AdminOrganizerApplicationsPage/AdminOrganizerApplicationsPage'
 import { AdminOrdersPage } from './pages/AdminOrdersPage/AdminOrdersPage'
+import { AdminPromotionsPage } from './pages/AdminPromotionsPage/AdminPromotionsPage'
+import { AdminPromotionDetailPage } from './pages/AdminPromotionsPage/AdminPromotionDetailPage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
 import { AuthPage } from './pages/AuthPage/AuthPage'
 import { EventDetailPage } from './pages/EventDetailPage/EventDetailPage'
 import { ExplorerPage } from './pages/ExplorerPage/ExplorerPage'
 import { EventsListPage } from './pages/EventsListPage/EventsListPage'
+import { GuestTicketPage } from './pages/GuestTicketPage/GuestTicketPage'
 import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
 import { OrderPreparationPage } from './pages/OrderPreparationPage/OrderPreparationPage'
 import { OrderCheckoutPage } from './pages/OrderCheckoutPage/OrderCheckoutPage'
 import { MyTicketsPage } from './pages/MyTicketsPage/MyTicketsPage'
+import { MyOrdersPage } from './pages/MyOrdersPage/MyOrdersPage'
 import { OrganizerAccessPage } from './pages/OrganizerAccessPage/OrganizerAccessPage'
 import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage/OrganizerDashboardPage'
 import { OrganizerEventCreatePage } from './pages/OrganizerEventCreatePage/OrganizerEventCreatePage'
@@ -25,6 +29,8 @@ import { OrganizerEventDetailPage } from './pages/OrganizerEventDetailPage/Organ
 import { OrganizerEventsPage } from './pages/OrganizerEventsPage/OrganizerEventsPage'
 import { OrganizerStaffPage } from './pages/OrganizerStaffPage/OrganizerStaffPage'
 import { OrganizerProfilePage } from './pages/OrganizerProfilePage/OrganizerProfilePage'
+import { OrganizerPromotionsPage } from './pages/OrganizerPromotionsPage/OrganizerPromotionsPage'
+import { OrganizerPromotionDetailPage } from './pages/OrganizerPromotionsPage/OrganizerPromotionDetailPage'
 import { PastEventsPage } from './pages/PastEventsPage/PastEventsPage'
 import { StaffScanPage } from './pages/StaffScanPage/StaffScanPage'
 import { TicketDetailPage } from './pages/TicketDetailPage/TicketDetailPage'
@@ -50,6 +56,8 @@ function App() {
           <Route path="/" element={<EventsListPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/promotions" element={<AdminPromotionsPage />} />
+          <Route path="/admin/promotions/:promotionId" element={<AdminPromotionDetailPage />} />
           <Route path="/admin/tickets" element={<AdminTicketsPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route
@@ -69,14 +77,18 @@ function App() {
           <Route path="/checkout/success" element={<OrderCheckoutPage />} />
           <Route path="/checkout/cancel" element={<OrderCheckoutPage />} />
           <Route path="/mes-billets" element={<MyTicketsPage />} />
+          <Route path="/mes-commandes" element={<MyOrdersPage />} />
           <Route path="/corbeille" element={<PastEventsPage />} />
           <Route path="/mes-billets/:ticketId" element={<TicketDetailPage />} />
+          <Route path="/guest-ticket/:token" element={<GuestTicketPage />} />
           <Route path="/organizer-access" element={<OrganizerAccessPage />} />
           <Route
             path="/organizer/dashboard"
             element={<OrganizerDashboardPage />}
           />
           <Route path="/organizer/staff" element={<OrganizerStaffPage />} />
+          <Route path="/organizer/promotions" element={<OrganizerPromotionsPage />} />
+          <Route path="/organizer/promotions/:promotionId" element={<OrganizerPromotionDetailPage />} />
           <Route
             path="/organizer/events"
             element={<OrganizerEventsPage />}

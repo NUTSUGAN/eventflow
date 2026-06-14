@@ -30,6 +30,8 @@ class OrderRepository extends ServiceEntityRepository
             ->leftJoin('orderItems.ticketType', 'ticketType')->addSelect('ticketType')
             ->leftJoin('ticketType.event', 'event')->addSelect('event')
             ->leftJoin('event.organizer', 'organizer')->addSelect('organizer')
+            ->leftJoin('customerOrder.promotionCampaign', 'promotionCampaign')->addSelect('promotionCampaign')
+            ->leftJoin('promotionCampaign.event', 'promotionEvent')->addSelect('promotionEvent')
             ->andWhere('customerOrder.client = :user')
             ->andWhere('customerOrder.status = :paidStatus')
             ->setParameter('user', $user)

@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { trackPromotionMetric } from '../../api/promotions'
 import type { EventSummary } from '../../types/event'
 import {
   Card,
@@ -11,6 +13,7 @@ import {
   CardWhen,
   EventLink,
   PriceTag,
+  SponsoredBadge,
 } from './eventCardElements'
 
 type EventCardProps = {
@@ -47,14 +50,37 @@ function formatPrice(price: number | null, currency: string): string {
 
 export function EventCard({ event, variant = 'default' }: EventCardProps) {
   const isExplorerVariant = variant === 'explorer'
+  const placement = isExplorerVariant ? 'explorer' : 'homepage'
+
+  useEffect(() => {
+    if (!event.isSponsored || !event.sponsoredCampaignId) return
+
+    const storageKey = `promotion-impression-${event.sponsoredCampaignId}-${placement}`
+    if (window.sessionStorage.getItem(storageKey)) return
+    window.sessionStorage.setItem(storageKey, '1')
+    void trackPromotionMetric(event.sponsoredCampaignId, 'impression', placement).catch(() => undefined)
+  }, [event.isSponsored, event.sponsoredCampaignId, placement])
+
+  function trackClick() {
+    if (event.isSponsored && event.sponsoredCampaignId) {
+      void trackPromotionMetric(event.sponsoredCampaignId, 'click', placement).catch(() => undefined)
+    }
+  }
 
   return (
-    <EventLink to={`/events/${event.id}`}>
+    <EventLink to={`/events/${event.id}`} onClick={trackClick}>
       <Card $variant={variant}>
         <CardCover
           $imageUrl={event.coverImageUrl ?? undefined}
           $variant={variant}
-        />
+        >
+          {event.isSponsored ? (
+            <SponsoredBadge
+              src="/assets/badge-sponsorise-eventflow.png"
+              alt="Evenement sponsorise"
+            />
+          ) : null}
+        </CardCover>
         <CardContent $variant={variant}>
           {isExplorerVariant ? <CardCategory>{event.category}</CardCategory> : null}
           <CardTitle>{event.title}</CardTitle>

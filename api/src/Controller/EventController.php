@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\PromotionCampaign;
 use App\Entity\OrderItem;
 use App\Entity\TicketType;
 use App\Entity\User;
@@ -196,6 +197,7 @@ class EventController extends AbstractController
                 ),
                 $ticketTypes
             ),
+            ...$this->serializeSponsorship($event),
         ]);
     }
 
@@ -250,6 +252,43 @@ class EventController extends AbstractController
             'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
             'currency' => 'EUR',
+            ...$this->serializeSponsorship($event),
+        ];
+    }
+
+    /**
+     * @return array{isSponsored: bool, sponsoredCampaignId: int|null, sponsoredChannels: list<string>}
+     */
+    private function serializeSponsorship(Event $event): array
+    {
+        $now = new \DateTimeImmutable();
+
+        foreach ($event->getPromotionCampaigns() as $campaign) {
+            if (!$campaign instanceof PromotionCampaign || !$campaign->isActiveAt($now)) {
+                continue;
+            }
+
+            $channels = [];
+
+            foreach ($campaign->getChannels() as $channel) {
+                $channelCode = $channel->getChannelCode();
+
+                if (is_string($channelCode)) {
+                    $channels[] = $channelCode;
+                }
+            }
+
+            return [
+                'isSponsored' => true,
+                'sponsoredCampaignId' => $campaign->getId(),
+                'sponsoredChannels' => $channels,
+            ];
+        }
+
+        return [
+            'isSponsored' => false,
+            'sponsoredCampaignId' => null,
+            'sponsoredChannels' => [],
         ];
     }
 

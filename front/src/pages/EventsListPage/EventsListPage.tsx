@@ -65,7 +65,7 @@ export function EventsListPage() {
     <PageSection>
       <PageHeader>
         <PageTitle>
-          {searchQuery ? 'Resultats de recherche' : 'Evenements a venir'}
+          {searchQuery ? 'Resultats de recherche' : 'Évènements à venir'}
         </PageTitle>
         {searchQuery ? (
           <PageIntro>

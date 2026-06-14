@@ -9,6 +9,8 @@ import {
   updateAdminEventStatus,
 } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
+import { usePagination } from '../../hooks/usePagination'
 import { getAdminOrganizerApplications } from '../../api/organizerApplication'
 import type {
   AdminCategory,
@@ -275,6 +277,14 @@ export function AdminDashboardPage() {
         .slice(0, 6),
     [events],
   )
+  const eventPagination = usePagination(filteredEvents, {
+    pageSize: 20,
+    resetKey: eventSearchQuery,
+  })
+  const categoryPagination = usePagination(categories, {
+    pageSize: 20,
+    resetKey: String(categories.length),
+  })
 
   async function handleEventStatusUpdate(
     event: AdminEventSummary,
@@ -382,6 +392,12 @@ export function AdminDashboardPage() {
           >
             Creer un evenement
           </AdminDashboardPrimaryButton>
+          <AdminDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/admin/promotions')}
+          >
+            Campagnes Booster
+          </AdminDashboardSecondaryButton>
         </AdminDashboardActions>
       </AdminDashboardHeader>
 
@@ -501,11 +517,19 @@ export function AdminDashboardPage() {
             />
           </AdminDashboardField>
           {renderEventList(
-            filteredEvents,
+            eventPagination.paginatedItems,
             eventSearchQuery.trim() !== ''
               ? 'Aucun evenement ne correspond a cette recherche.'
               : undefined,
           )}
+          <AdminPagination
+            page={eventPagination.page}
+            pageSize={eventPagination.pageSize}
+            totalItems={filteredEvents.length}
+            totalPages={eventPagination.totalPages}
+            itemLabel="evenements"
+            onPageChange={eventPagination.setPage}
+          />
         </AdminDashboardPanel>
       ) : null}
 
@@ -551,7 +575,7 @@ export function AdminDashboardPage() {
             </AdminDashboardPrimaryButton>
           </AdminDashboardForm>
           <AdminDashboardList>
-            {categories.map((category) => (
+            {categoryPagination.paginatedItems.map((category) => (
               <AdminDashboardRow key={category.id}>
                 <AdminDashboardRowMain>
                   <AdminDashboardRowTitle>{category.name}</AdminDashboardRowTitle>
@@ -564,6 +588,14 @@ export function AdminDashboardPage() {
               </AdminDashboardRow>
             ))}
           </AdminDashboardList>
+          <AdminPagination
+            page={categoryPagination.page}
+            pageSize={categoryPagination.pageSize}
+            totalItems={categories.length}
+            totalPages={categoryPagination.totalPages}
+            itemLabel="categories"
+            onPageChange={categoryPagination.setPage}
+          />
         </AdminDashboardPanel>
       ) : null}
     </AdminDashboardSection>

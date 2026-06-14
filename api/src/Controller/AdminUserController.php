@@ -2,9 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\OrganizerApplication;
-use App\Entity\Order;
+use App\Entity\AbonnementOrganisateur;
 use App\Entity\NewsletterSubscription;
+use App\Entity\Order;
+use App\Entity\OrganizerApplication;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -149,6 +150,8 @@ final class AdminUserController extends AbstractController
      *   termsAcceptedAt: string|null,
      *   privacyAcceptedAt: string|null,
      *   newsletterSubscribed: bool,
+     *   eventflowSubscriptionsCount: int,
+     *   eventflowSubscriptions: list<array{id: int|null, organizerId: int|null, organizerName: string, organizerEmail: string|null, createdAt: string|null}>,
      *   organizedEventsCount: int,
      *   ordersCount: int,
      *   ticketsCount: int,
@@ -160,6 +163,8 @@ final class AdminUserController extends AbstractController
      */
     private function serializeUser(User $user): array
     {
+        $eventflowSubscriptions = $this->serializeActiveEventflowSubscriptions($user);
+
         return [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
@@ -178,6 +183,8 @@ final class AdminUserController extends AbstractController
             'termsAcceptedAt' => $user->getTermsAcceptedAt()?->format(DATE_ATOM),
             'privacyAcceptedAt' => $user->getPrivacyAcceptedAt()?->format(DATE_ATOM),
             'newsletterSubscribed' => $this->hasActiveNewsletterSubscription($user),
+            'eventflowSubscriptionsCount' => count($eventflowSubscriptions),
+            'eventflowSubscriptions' => $eventflowSubscriptions,
             'organizedEventsCount' => $user->getOrganizedEvents()->count(),
             'ordersCount' => $user->getClientOrders()->count(),
             'ticketsCount' => $this->countUserTickets($user),
@@ -214,6 +221,39 @@ final class AdminUserController extends AbstractController
         }
 
         return $count;
+    }
+
+    /**
+     * @return list<array{id: int|null, organizerId: int|null, organizerName: string, organizerEmail: string|null, createdAt: string|null}>
+     */
+    private function serializeActiveEventflowSubscriptions(User $user): array
+    {
+        $subscriptions = [];
+
+        foreach ($user->getClientSubscriptions() as $subscription) {
+            if (
+                !$subscription instanceof AbonnementOrganisateur ||
+                'ACTIVE' !== $subscription->getStatus()
+            ) {
+                continue;
+            }
+
+            $organizer = $subscription->getOrganizer();
+
+            if (!$organizer instanceof User) {
+                continue;
+            }
+
+            $subscriptions[] = [
+                'id' => $subscription->getId(),
+                'organizerId' => $organizer->getId(),
+                'organizerName' => $organizer->getDisplayName(),
+                'organizerEmail' => $organizer->getEmail(),
+                'createdAt' => $subscription->getCreatedAt()?->format(DATE_ATOM),
+            ];
+        }
+
+        return $subscriptions;
     }
 
     /**

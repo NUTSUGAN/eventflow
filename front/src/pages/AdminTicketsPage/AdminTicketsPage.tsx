@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminTickets } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
+import { usePagination } from '../../hooks/usePagination'
 import type { AdminTicketSummary } from '../../types/admin'
 import {
   AdminDashboardActions,
@@ -237,6 +239,10 @@ export function AdminTicketsPage() {
       return searchableText.includes(query)
     })
   }, [tickets, searchQuery, selectedEventKey])
+  const ticketPagination = usePagination(filteredTickets, {
+    pageSize: 20,
+    resetKey: `${searchQuery}-${selectedEventKey}`,
+  })
 
   const ticketsByEvent = useMemo(() => {
     const groups = new Map<
@@ -249,7 +255,7 @@ export function AdminTicketsPage() {
       }
     >()
 
-    filteredTickets.forEach((ticket) => {
+    ticketPagination.paginatedItems.forEach((ticket) => {
       const eventTitle = getEventTitle(ticket)
       const eventKey = getEventKey(ticket)
       const existingGroup = groups.get(eventKey)
@@ -271,7 +277,7 @@ export function AdminTicketsPage() {
     return Array.from(groups.values()).sort((left, right) =>
       left.eventTitle.localeCompare(right.eventTitle, 'fr'),
     )
-  }, [filteredTickets])
+  }, [ticketPagination.paginatedItems])
 
   function handleEventSelection(eventKey: string) {
     setSelectedEventKey(eventKey)
@@ -445,6 +451,14 @@ export function AdminTicketsPage() {
             </AdminDashboardGroup>
           ))}
         </AdminDashboardList>
+        <AdminPagination
+          page={ticketPagination.page}
+          pageSize={ticketPagination.pageSize}
+          totalItems={filteredTickets.length}
+          totalPages={ticketPagination.totalPages}
+          itemLabel="billets"
+          onPageChange={ticketPagination.setPage}
+        />
       </AdminDashboardPanel>
     </AdminDashboardSection>
   )

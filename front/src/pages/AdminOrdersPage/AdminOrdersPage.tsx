@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminOrders } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
+import { usePagination } from '../../hooks/usePagination'
 import type { AdminOrderSummary } from '../../types/admin'
 import {
   AdminDashboardActions,
@@ -129,6 +131,7 @@ export function AdminOrdersPage() {
         order.payment?.provider,
         order.payment?.providerPaymentId,
         order.payment?.status,
+        order.promotion?.eventTitle,
         ...order.items.flatMap((item) => [
           item.ticketType.name,
           item.event.title,
@@ -141,6 +144,10 @@ export function AdminOrdersPage() {
       return searchableText.includes(query)
     })
   }, [orders, searchQuery])
+  const orderPagination = usePagination(filteredOrders, {
+    pageSize: 20,
+    resetKey: searchQuery,
+  })
 
   return (
     <AdminDashboardSection>
@@ -198,7 +205,7 @@ export function AdminOrdersPage() {
         ) : null}
 
         <AdminDashboardList>
-          {filteredOrders.map((order) => (
+          {orderPagination.paginatedItems.map((order) => (
             <AdminDashboardRow key={order.id}>
               <AdminDashboardRowMain>
                 <AdminDashboardRowTitle>
@@ -208,15 +215,18 @@ export function AdminOrdersPage() {
                   {order.client.fullName ?? 'Client inconnu'} - {order.client.email ?? 'Email inconnu'}
                 </AdminDashboardRowText>
                 <AdminDashboardRowText>
-                  {formatCurrency(order.totalAmount, order.currency)} - {order.ticketsCount} billet(s)
-                  {' '}genere(s) - creee le {formatDate(order.createdAt)}
+                  {formatCurrency(order.totalAmount, order.currency)} - {' '}
+                  {order.orderType === 'promotion'
+                    ? 'commande Booster'
+                    : `${order.ticketsCount} billet(s) genere(s)`}
+                  {' '} - creee le {formatDate(order.createdAt)}
                 </AdminDashboardRowText>
                 <AdminDashboardRowText>
                   Paiement: {order.payment?.provider ?? 'aucun'} / {order.payment?.status ?? 'non renseigne'}
                   {order.payment?.providerPaymentId ? ` - ${order.payment.providerPaymentId}` : ''}
                 </AdminDashboardRowText>
                 <AdminDashboardRowText>
-                  Evenements: {order.items.map((item) => item.event.title).filter(Boolean).join(', ') || 'Non renseigne'}
+                  Evenements: {order.promotion?.eventTitle ?? (order.items.map((item) => item.event.title).filter(Boolean).join(', ') || 'Non renseigne')}
                 </AdminDashboardRowText>
               </AdminDashboardRowMain>
               <AdminDashboardBadge $tone={getStatusTone(order.status)}>
@@ -226,6 +236,14 @@ export function AdminOrdersPage() {
             </AdminDashboardRow>
           ))}
         </AdminDashboardList>
+        <AdminPagination
+          page={orderPagination.page}
+          pageSize={orderPagination.pageSize}
+          totalItems={filteredOrders.length}
+          totalPages={orderPagination.totalPages}
+          itemLabel="commandes"
+          onPageChange={orderPagination.setPage}
+        />
       </AdminDashboardPanel>
     </AdminDashboardSection>
   )

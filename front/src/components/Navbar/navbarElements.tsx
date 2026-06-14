@@ -31,6 +31,11 @@ export const Brand = styled(NavLink)`
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+
+  picture {
+    display: block;
+    line-height: 0;
+  }
 `
 
 export const BrandImage = styled.img`
@@ -41,7 +46,9 @@ export const BrandImage = styled.img`
   filter: brightness(1.1) contrast(1.05);
 
   @media (max-width: 840px) {
-    width: 140px;
+    width: 58px;
+    max-height: 52px;
+    object-fit: contain;
   }
 `
 

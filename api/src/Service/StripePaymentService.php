@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Payment;
+use App\Entity\PromotionCampaign;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Checkout\Session;
 use Stripe\Event;
@@ -69,6 +70,71 @@ final class StripePaymentService
         return $this->createClient()->checkout->sessions->create($payload);
     }
 
+    public function createPromotionCheckoutSession(PromotionCampaign $campaign): Session
+    {
+        if (PromotionCampaign::STATUS_APPROVED !== $campaign->getStatus()) {
+            throw new \LogicException('Seule une campagne approuvee peut etre payee.');
+        }
+
+        if (null !== $campaign->getPaidAt()) {
+            throw new \LogicException('Cette campagne a deja ete payee.');
+        }
+
+        $frontendUrl = $this->getFrontendAppUrl();
+
+        if (null === $frontendUrl) {
+            throw new \RuntimeException('FRONTEND_APP_URL nest pas configure.');
+        }
+
+        $event = $campaign->getEvent();
+        $organizer = $campaign->getOrganizer();
+        $campaignId = (int) $campaign->getId();
+        $payload = [
+            'mode' => 'payment',
+            'client_reference_id' => (string) $campaignId,
+            'locale' => 'fr',
+            'payment_method_types' => ['card'],
+            'success_url' => sprintf(
+                '%s/organizer/promotions?payment=success&campaignId=%d&session_id={CHECKOUT_SESSION_ID}',
+                rtrim($frontendUrl, '/'),
+                $campaignId,
+            ),
+            'cancel_url' => sprintf(
+                '%s/organizer/promotions?payment=cancelled&campaignId=%d',
+                rtrim($frontendUrl, '/'),
+                $campaignId,
+            ),
+            'line_items' => [[
+                'quantity' => 1,
+                'price_data' => [
+                    'currency' => strtolower($campaign->getCurrency()),
+                    'unit_amount' => $this->moneyStringToCents($campaign->getTotalPrice()),
+                    'product_data' => [
+                        'name' => 'Booster EventFlow',
+                        'description' => (string) ($event?->getTitle() ?? 'Promotion evenement'),
+                        'metadata' => [
+                            'promotion_campaign_id' => (string) $campaignId,
+                            'event_id' => (string) ($event?->getId() ?? ''),
+                        ],
+                    ],
+                ],
+            ]],
+            'metadata' => [
+                'promotion_campaign_id' => (string) $campaignId,
+                'event_id' => (string) ($event?->getId() ?? ''),
+                'organizer_id' => (string) ($organizer?->getId() ?? ''),
+            ],
+        ];
+
+        $customerEmail = $organizer?->getEmail();
+
+        if (is_string($customerEmail) && '' !== trim($customerEmail)) {
+            $payload['customer_email'] = trim($customerEmail);
+        }
+
+        return $this->createClient()->checkout->sessions->create($payload);
+    }
+
     public function constructWebhookEvent(string $payload, ?string $signatureHeader): Event
     {
         $webhookSecret = $this->getStripeWebhookSecret();
@@ -118,6 +184,77 @@ final class StripePaymentService
         return $orderId > 0 ? $orderId : null;
     }
 
+    public function extractPromotionCampaignIdFromSession(Session $session): ?int
+    {
+        $metadata = $this->normalizeMetadata($session->metadata);
+        $rawCampaignId = $metadata['promotion_campaign_id'] ?? null;
+
+        if (!is_scalar($rawCampaignId) || !is_numeric((string) $rawCampaignId)) {
+            return null;
+        }
+
+        $campaignId = (int) $rawCampaignId;
+
+        return $campaignId > 0 ? $campaignId : null;
+    }
+
+    public function retrievePromotionCheckoutSession(string $sessionId): Session
+    {
+        $sessionId = trim($sessionId);
+
+        if ('' === $sessionId || !str_starts_with($sessionId, 'cs_')) {
+            throw new \InvalidArgumentException('Identifiant de session Stripe invalide.');
+        }
+
+        return $this->createClient()->checkout->sessions->retrieve($sessionId, []);
+    }
+
+    public function assertPaidPromotionSession(Session $session, PromotionCampaign $campaign): void
+    {
+        if ((int) $campaign->getId() !== $this->extractPromotionCampaignIdFromSession($session)) {
+            throw new \LogicException('Cette session Stripe ne correspond pas a la campagne.');
+        }
+
+        if ('paid' !== (string) $session->payment_status) {
+            throw new \LogicException('Stripe ne confirme pas encore ce paiement.');
+        }
+
+        if ($this->moneyStringToCents($campaign->getTotalPrice()) !== (int) ($session->amount_total ?? -1)) {
+            throw new \LogicException('Le montant confirme par Stripe ne correspond pas a la campagne.');
+        }
+
+        if (strtolower($campaign->getCurrency()) !== strtolower((string) ($session->currency ?? ''))) {
+            throw new \LogicException('La devise confirmee par Stripe ne correspond pas a la campagne.');
+        }
+    }
+
+    public function findPaidPromotionSession(PromotionCampaign $campaign, int $limit = 100): ?Session
+    {
+        $sessions = $this->createClient()->checkout->sessions->all([
+            'limit' => max(1, min(100, $limit)),
+        ]);
+
+        foreach ($sessions->data as $session) {
+            if (!$session instanceof Session) {
+                continue;
+            }
+
+            if ((int) $campaign->getId() !== $this->extractPromotionCampaignIdFromSession($session)) {
+                continue;
+            }
+
+            try {
+                $this->assertPaidPromotionSession($session, $campaign);
+
+                return $session;
+            } catch (\LogicException) {
+                continue;
+            }
+        }
+
+        return null;
+    }
+
     public function markOrderAsPaid(Order $order, Session $session): void
     {
         if (Order::STATUS_PAID === $order->getStatus() && null !== $order->getPayment()) {
@@ -138,6 +275,53 @@ final class StripePaymentService
 
         $this->entityManager->persist($payment);
         $this->entityManager->flush();
+    }
+
+    public function recordPromotionOrder(PromotionCampaign $campaign, Session $session): Order
+    {
+        $existingOrder = $this->entityManager->getRepository(Order::class)->findOneBy([
+            'promotionCampaign' => $campaign,
+        ]);
+
+        if ($existingOrder instanceof Order) {
+            return $existingOrder;
+        }
+
+        $campaignId = (int) $campaign->getId();
+        $paidAt = $campaign->getPaidAt() ?? new \DateTimeImmutable();
+        $organizer = $campaign->getOrganizer();
+
+        if (null === $organizer) {
+            throw new \LogicException('Organisateur de campagne introuvable.');
+        }
+
+        $order = (new Order())
+            ->setClient($organizer)
+            ->setPromotionCampaign($campaign)
+            ->setReference(sprintf('BST-%s-%06d', $paidAt->format('Ymd'), $campaignId))
+            ->setStatus(Order::STATUS_PAID)
+            ->setOrderType(Order::TYPE_PROMOTION)
+            ->setTotalAmount($campaign->getTotalPrice())
+            ->setCurrency($campaign->getCurrency())
+            ->setCreatedAt($paidAt)
+        ;
+
+        $payment = (new Payment())
+            ->setCustomerOrder($order)
+            ->setProvider(Payment::PROVIDER_STRIPE)
+            ->setProviderPaymentId($this->resolveProviderPaymentId($session))
+            ->setAmount($campaign->getTotalPrice())
+            ->setCurrency($campaign->getCurrency())
+            ->setStatus(Payment::STATUS_PAID)
+            ->setPaidAt($paidAt)
+        ;
+
+        $order->setPayment($payment);
+        $campaign->addOrder($order);
+        $this->entityManager->persist($order);
+        $this->entityManager->persist($payment);
+
+        return $order;
     }
 
     public function markOrderAsExpired(Order $order): void

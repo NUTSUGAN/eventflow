@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\AbonnementOrganisateur;
+use App\Entity\NewsletterSubscription;
 use App\Entity\User;
 use App\Repository\AbonnementOrganisateurRepository;
 use App\Repository\UserRepository;
@@ -52,20 +53,27 @@ class OrganizerSubscriptionController extends AbstractController
         $subscription = $subscriptionRepository->findOneForClientAndOrganizer($currentUser, $organizer);
         $statusCode = Response::HTTP_OK;
 
+        $now = new \DateTimeImmutable();
+
         if (!$subscription instanceof AbonnementOrganisateur) {
             $subscription = new AbonnementOrganisateur();
             $subscription->setClient($currentUser);
             $subscription->setOrganizer($organizer);
-            $subscription->setCreatedAt(new \DateTimeImmutable());
+            $subscription->setCreatedAt($now);
             $entityManager->persist($subscription);
             $statusCode = Response::HTTP_CREATED;
         }
 
         $subscription->setStatus('ACTIVE');
+        $this->upsertEventflowSubscription(
+            $currentUser,
+            $entityManager,
+            $now
+        );
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Abonnement organisateur active.',
+            'message' => 'Abonnement Organisateur active.',
             'subscription' => $this->buildSubscriptionPayload($subscription),
             'organizer' => $this->buildOrganizerPayload($organizer),
         ], $statusCode);
@@ -114,7 +122,7 @@ class OrganizerSubscriptionController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Abonnement organisateur desactive.',
+            'message' => 'Abonnement Organisateur desactive.',
             'subscription' => $this->buildSubscriptionPayload($subscription),
             'organizer' => $this->buildOrganizerPayload($organizer),
         ]);
@@ -143,6 +151,42 @@ class OrganizerSubscriptionController extends AbstractController
             'role' => $this->resolvePrimaryRole($organizer),
             'profilePhoto' => $organizer->getProfilePhoto(),
         ];
+    }
+
+    private function upsertEventflowSubscription(
+        User $user,
+        EntityManagerInterface $entityManager,
+        \DateTimeImmutable $now
+    ): void {
+        $email = $user->getEmail() ?? '';
+
+        if ('' === $email) {
+            return;
+        }
+
+        $newsletterSubscription = $entityManager
+            ->getRepository(NewsletterSubscription::class)
+            ->findOneBy(['email' => $email])
+        ;
+
+        if (!$newsletterSubscription instanceof NewsletterSubscription) {
+            $newsletterSubscription = (new NewsletterSubscription())
+                ->setEmail($email)
+                ->setCreatedAt($now)
+            ;
+        }
+
+        $newsletterSubscription
+            ->setUser($user)
+            ->setStatus(NewsletterSubscription::STATUS_SUBSCRIBED)
+            ->setSource(NewsletterSubscription::SOURCE_ORGANIZER_FOLLOW)
+            ->setConsentedAt($now)
+            ->setUnsubscribedAt(null)
+            ->setUpdatedAt($now)
+        ;
+
+        $user->addNewsletterSubscription($newsletterSubscription);
+        $entityManager->persist($newsletterSubscription);
     }
 
     private function isOrganizer(User $user): bool

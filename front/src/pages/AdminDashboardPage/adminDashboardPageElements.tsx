@@ -388,5 +388,40 @@ export const AdminDashboardMessage = styled.div<{ $tone: 'neutral' | 'success' |
         ? '#dfffe7'
         : $tone === 'danger'
           ? '#ffd5ca'
-          : 'rgba(255, 239, 229, 0.84)'};
+        : 'rgba(255, 239, 229, 0.84)'};
+`
+
+export const AdminDashboardPagination = styled.nav`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+`
+
+export const AdminDashboardPaginationSummary = styled.span`
+  color: rgba(255, 237, 222, 0.72);
+  font-size: 0.88rem;
+  font-weight: 800;
+`
+
+export const AdminDashboardPaginationButton = styled.button<{ $active?: boolean }>`
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid
+    ${({ $active }) => ($active ? 'rgba(235, 148, 81, 0.48)' : 'rgba(255, 255, 255, 0.09)')};
+  background: ${({ $active }) =>
+    $active ? 'rgba(235, 148, 81, 0.18)' : 'rgba(255, 255, 255, 0.04)'};
+  color: #fff4ea;
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
 `

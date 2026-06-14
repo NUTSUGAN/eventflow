@@ -66,15 +66,15 @@ class Event
     private Collection $ticketTypes;
 
     /**
-     * @var Collection<int, Promotion>
+     * @var Collection<int, PromotionCampaign>
      */
-    #[ORM\OneToMany(targetEntity: Promotion::class, mappedBy: 'event')]
-    private Collection $promotions;
+    #[ORM\OneToMany(targetEntity: PromotionCampaign::class, mappedBy: 'event')]
+    private Collection $promotionCampaigns;
 
     public function __construct()
     {
         $this->ticketTypes = new ArrayCollection();
-        $this->promotions = new ArrayCollection();
+        $this->promotionCampaigns = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -269,30 +269,30 @@ class Event
     }
 
     /**
-     * @return Collection<int, Promotion>
+     * @return Collection<int, PromotionCampaign>
      */
-    public function getPromotions(): Collection
+    public function getPromotionCampaigns(): Collection
     {
-        return $this->promotions;
+        return $this->promotionCampaigns;
     }
 
-    public function addPromotion(Promotion $promotion): static
+    public function addPromotionCampaign(PromotionCampaign $promotionCampaign): static
     {
-        if (!$this->promotions->contains($promotion)) {
-            $this->promotions->add($promotion);
-            $promotion->setEvent($this);
+        if (!$this->promotionCampaigns->contains($promotionCampaign)) {
+            $this->promotionCampaigns->add($promotionCampaign);
+            $promotionCampaign->setEvent($this);
         }
 
         return $this;
     }
 
-    public function removePromotion(Promotion $promotion): static
+    public function removePromotionCampaign(PromotionCampaign $promotionCampaign): static
     {
-        if ($this->promotions->removeElement($promotion)) {
-            // set the owning side to null (unless already changed)
-            if ($promotion->getEvent() === $this) {
-                $promotion->setEvent(null);
-            }
+        if (
+            $this->promotionCampaigns->removeElement($promotionCampaign)
+            && $promotionCampaign->getEvent() === $this
+        ) {
+            $promotionCampaign->setEvent(null);
         }
 
         return $this;

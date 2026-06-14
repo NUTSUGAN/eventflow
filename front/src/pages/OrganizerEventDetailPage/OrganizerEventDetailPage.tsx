@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { PromotionBoosterPanel } from '../../components/PromotionBoosterPanel/PromotionBoosterPanel'
 import { getBackendPublicUrl } from '../../api/client'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
 import {
@@ -14,6 +15,10 @@ import {
   getOrganizerTicketTypes,
   updateOrganizerTicketType,
 } from '../../api/organizerTicketTypes'
+import {
+  createOrganizerGuestTicket,
+  getOrganizerGuestTickets,
+} from '../../api/organizerGuestTickets'
 import type { AuthUser } from '../../types/auth'
 import type {
   OrganizerEventFormOptions,
@@ -23,6 +28,10 @@ import type {
   OrganizerTicketType,
   OrganizerTicketTypePayload,
 } from '../../types/organizerTicketType'
+import type {
+  OrganizerGuestTicket,
+  OrganizerGuestTicketPayload,
+} from '../../types/organizerGuestTicket'
 import {
   OrganizerEventDetailActions,
   OrganizerEventDetailBackButton,
@@ -33,6 +42,14 @@ import {
   OrganizerEventDetailField,
   OrganizerEventDetailForm,
   OrganizerEventDetailGrid,
+  OrganizerEventDetailGuestBadge,
+  OrganizerEventDetailGuestCard,
+  OrganizerEventDetailGuestGrid,
+  OrganizerEventDetailGuestList,
+  OrganizerEventDetailGuestMeta,
+  OrganizerEventDetailGuestName,
+  OrganizerEventDetailGuestSection,
+  OrganizerEventDetailGuestText,
   OrganizerEventDetailHero,
   OrganizerEventDetailHeroContent,
   OrganizerEventDetailHint,
@@ -41,6 +58,7 @@ import {
   OrganizerEventDetailInfoTitle,
   OrganizerEventDetailInput,
   OrganizerEventDetailLabel,
+  OrganizerEventDetailLinkButton,
   OrganizerEventDetailMediaCard,
   OrganizerEventDetailMediaGrid,
   OrganizerEventDetailMediaLabel,
@@ -151,7 +169,13 @@ const initialTicketForm: OrganizerTicketTypePayload = {
   isActive: true,
 }
 
-type OrganizerEventDetailTab = 'overview' | 'event' | 'scan' | 'tickets'
+const initialGuestTicketForm: OrganizerGuestTicketPayload = {
+  recipientName: '',
+  recipientEmail: '',
+  ticketTypeId: '',
+}
+
+type OrganizerEventDetailTab = 'overview' | 'event' | 'booster' | 'scan' | 'tickets'
 
 const organizerEventDetailTabs: Array<{
   id: OrganizerEventDetailTab
@@ -159,6 +183,7 @@ const organizerEventDetailTabs: Array<{
 }> = [
   { id: 'overview', label: 'Apercu' },
   { id: 'event', label: 'Evenement' },
+  { id: 'booster', label: 'Booster' },
   { id: 'scan', label: 'Scan' },
   { id: 'tickets', label: 'Billets' },
 ]
@@ -324,23 +349,29 @@ export function OrganizerEventDetailPage() {
   const [event, setEvent] = useState<OrganizerEventSummary | null>(null)
   const [options, setOptions] = useState<OrganizerEventFormOptions>(emptyOptions)
   const [ticketTypes, setTicketTypes] = useState<OrganizerTicketType[]>([])
+  const [guestTickets, setGuestTickets] = useState<OrganizerGuestTicket[]>([])
   const [eventForm, setEventForm] = useState<OrganizerEventEditFormState>(
     initialEventForm,
   )
   const [ticketForm, setTicketForm] = useState<OrganizerTicketTypePayload>(
     initialTicketForm,
   )
+  const [guestTicketForm, setGuestTicketForm] =
+    useState<OrganizerGuestTicketPayload>(initialGuestTicketForm)
   const [editingTicketId, setEditingTicketId] = useState<number | null>(null)
   const [editingTicketForm, setEditingTicketForm] =
     useState<OrganizerTicketTypePayload>(initialTicketForm)
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingEvent, setIsSavingEvent] = useState(false)
   const [isSavingTicket, setIsSavingTicket] = useState(false)
+  const [isSendingGuestTicket, setIsSendingGuestTicket] = useState(false)
   const [deletingTicketId, setDeletingTicketId] = useState<number | null>(null)
   const [eventErrorMessage, setEventErrorMessage] = useState<string | null>(null)
   const [eventSuccessMessage, setEventSuccessMessage] = useState<string | null>(null)
   const [ticketErrorMessage, setTicketErrorMessage] = useState<string | null>(null)
   const [ticketSuccessMessage, setTicketSuccessMessage] = useState<string | null>(null)
+  const [guestTicketErrorMessage, setGuestTicketErrorMessage] = useState<string | null>(null)
+  const [guestTicketSuccessMessage, setGuestTicketSuccessMessage] = useState<string | null>(null)
 
   const selectedCategory = useMemo(
     () =>
@@ -408,6 +439,28 @@ export function OrganizerEventDetailPage() {
     remainingTicketCapacity + (editingTicket?.stock ?? 0),
   )
 
+  const availableInvitationTicketTypes = useMemo(
+    () =>
+      ticketTypes.filter(
+        (ticketType) => ticketType.isActive && ticketType.availableStock > 0,
+      ),
+    [ticketTypes],
+  )
+
+  const totalAvailableTickets = useMemo(
+    () =>
+      ticketTypes.reduce(
+        (total, ticketType) => total + Math.max(0, ticketType.availableStock),
+        0,
+      ),
+    [ticketTypes],
+  )
+
+  const guestTicketsCheckedIn = useMemo(
+    () => guestTickets.filter((guestTicket) => guestTicket.hasCheckedIn).length,
+    [guestTickets],
+  )
+
   const createdFromEventSetup = searchParams.get('created') === '1'
   const shouldFocusTickets = searchParams.get('focus') === 'tickets'
   const ticketSectionMessage =
@@ -465,6 +518,8 @@ export function OrganizerEventDetailPage() {
       setEventSuccessMessage(null)
       setTicketErrorMessage(null)
       setTicketSuccessMessage(null)
+      setGuestTicketErrorMessage(null)
+      setGuestTicketSuccessMessage(null)
 
       try {
         const user = await getCurrentUser(true)
@@ -484,11 +539,17 @@ export function OrganizerEventDetailPage() {
           return
         }
 
-        const [organizerEventResponse, organizerOptions, organizerTicketTypes] =
+        const [
+          organizerEventResponse,
+          organizerOptions,
+          organizerTicketTypes,
+          organizerGuestTickets,
+        ] =
           await Promise.all([
             getOrganizerEvent(Number(eventId)),
             getOrganizerEventFormOptions(),
             getOrganizerTicketTypes(Number(eventId)),
+            getOrganizerGuestTickets(Number(eventId)),
           ])
 
         if (isMounted) {
@@ -497,6 +558,7 @@ export function OrganizerEventDetailPage() {
           setOptions(organizerOptions)
           setEventForm(buildEventFormFromEvent(organizerEventResponse.event))
           setTicketTypes(organizerTicketTypes)
+          setGuestTickets(organizerGuestTickets.guestTickets)
         }
       } catch (error) {
         if (isMounted) {
@@ -753,6 +815,72 @@ export function OrganizerEventDetailPage() {
     }
   }
 
+  async function handleGuestTicketCreate(submitEvent: FormEvent<HTMLFormElement>) {
+    submitEvent.preventDefault()
+
+    if (!eventId || isSendingGuestTicket) {
+      return
+    }
+
+    if (
+      guestTicketForm.recipientEmail.trim() === '' ||
+      guestTicketForm.ticketTypeId.trim() === ''
+    ) {
+      setGuestTicketErrorMessage('Renseigne au minimum l email et le billet a envoyer.')
+      return
+    }
+
+    setIsSendingGuestTicket(true)
+    setGuestTicketErrorMessage(null)
+    setGuestTicketSuccessMessage(null)
+
+    try {
+      const response = await createOrganizerGuestTicket(
+        Number(eventId),
+        guestTicketForm,
+      )
+      const selectedTicketTypeId = Number(guestTicketForm.ticketTypeId)
+
+      setGuestTickets((current) => [response.guestTicket, ...current])
+      setTicketTypes((current) =>
+        current.map((ticketType) =>
+          ticketType.id === selectedTicketTypeId
+            ? {
+                ...ticketType,
+                reservedQuantity: ticketType.reservedQuantity + 1,
+                availableStock: Math.max(0, ticketType.availableStock - 1),
+              }
+            : ticketType,
+        ),
+      )
+      setGuestTicketForm(initialGuestTicketForm)
+      setGuestTicketSuccessMessage(
+        response.message ?? 'Invitation creee et envoyee par email.',
+      )
+      revealTicketSection()
+    } catch (error) {
+      setGuestTicketErrorMessage(
+        extractErrorMessage(error, 'Impossible de creer l invitation pour le moment.'),
+      )
+      revealTicketSection()
+    } finally {
+      setIsSendingGuestTicket(false)
+    }
+  }
+
+  async function copyGuestTicketLink(url: string | null) {
+    if (!url) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(url)
+      setGuestTicketSuccessMessage('Lien du billet invite copie.')
+    } catch {
+      setGuestTicketErrorMessage('Impossible de copier le lien automatiquement.')
+    }
+  }
+
   if (isLoading) {
     return (
       <OrganizerEventDetailSection>
@@ -909,7 +1037,7 @@ export function OrganizerEventDetailPage() {
               <OrganizerEventDetailScanStat>
                 <OrganizerEventDetailScanStatLabel>Places restantes</OrganizerEventDetailScanStatLabel>
                 <OrganizerEventDetailScanStatValue>
-                  {remainingTicketCapacity}
+                  {totalAvailableTickets}
                 </OrganizerEventDetailScanStatValue>
               </OrganizerEventDetailScanStat>
             </OrganizerEventDetailScanSummaryGrid>
@@ -1298,6 +1426,12 @@ export function OrganizerEventDetailPage() {
             </OrganizerEventDetailActions>
           </OrganizerEventDetailForm>
         </OrganizerEventDetailSplitSection>
+        ) : null}
+
+        {activeTab === 'booster' && event ? (
+          <OrganizerEventDetailSplitSection>
+            <PromotionBoosterPanel eventId={event.id} eventStatus={event.status} />
+          </OrganizerEventDetailSplitSection>
         ) : null}
 
         {activeTab === 'scan' ? (
@@ -1837,6 +1971,161 @@ export function OrganizerEventDetailPage() {
               )}
             </OrganizerEventDetailTicketList>
           </OrganizerEventDetailTicketGrid>
+
+          <OrganizerEventDetailGuestSection>
+            <OrganizerEventDetailTicketHeader>
+              <div>
+                <OrganizerEventDetailTicketTitle>
+                  Invitations nominatives
+                </OrganizerEventDetailTicketTitle>
+                <OrganizerEventDetailTicketText>
+                  Cree un billet gratuit pour un invite, envoie-le par email et
+                  suis ensuite s il est passe au scan.
+                </OrganizerEventDetailTicketText>
+              </div>
+              <OrganizerEventDetailGuestBadge $checkedIn={false}>
+                {guestTicketsCheckedIn}/{guestTickets.length} venu(s)
+              </OrganizerEventDetailGuestBadge>
+            </OrganizerEventDetailTicketHeader>
+
+            {guestTicketErrorMessage ? (
+              <OrganizerEventDetailError>{guestTicketErrorMessage}</OrganizerEventDetailError>
+            ) : null}
+            {guestTicketSuccessMessage ? (
+              <OrganizerEventDetailSuccess>{guestTicketSuccessMessage}</OrganizerEventDetailSuccess>
+            ) : null}
+
+            <OrganizerEventDetailGuestGrid>
+              <OrganizerEventDetailTicketCreateCard>
+                <OrganizerEventDetailInfoTitle>Envoyer un billet invite</OrganizerEventDetailInfoTitle>
+                <OrganizerEventDetailInfoText>
+                  Le billet consomme une place disponible du type choisi et reste
+                  scannable comme un billet classique.
+                </OrganizerEventDetailInfoText>
+
+                <OrganizerEventDetailForm onSubmit={handleGuestTicketCreate}>
+                  <OrganizerEventDetailField>
+                    <OrganizerEventDetailLabel>Nom de l invite</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailInput
+                      value={guestTicketForm.recipientName}
+                      onChange={(changeEvent) =>
+                        setGuestTicketForm((current) => ({
+                          ...current,
+                          recipientName: changeEvent.target.value,
+                        }))
+                      }
+                      placeholder="Nina Scene"
+                    />
+                  </OrganizerEventDetailField>
+
+                  <OrganizerEventDetailField>
+                    <OrganizerEventDetailLabel>Email de l invite</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailInput
+                      type="email"
+                      value={guestTicketForm.recipientEmail}
+                      onChange={(changeEvent) =>
+                        setGuestTicketForm((current) => ({
+                          ...current,
+                          recipientEmail: changeEvent.target.value,
+                        }))
+                      }
+                      placeholder="invite@example.com"
+                      required
+                    />
+                  </OrganizerEventDetailField>
+
+                  <OrganizerEventDetailField>
+                    <OrganizerEventDetailLabel>Billet a envoyer</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailSelect
+                      value={guestTicketForm.ticketTypeId}
+                      onChange={(changeEvent) =>
+                        setGuestTicketForm((current) => ({
+                          ...current,
+                          ticketTypeId: changeEvent.target.value,
+                        }))
+                      }
+                      required
+                    >
+                      <option value="">Choisir un billet disponible</option>
+                      {availableInvitationTicketTypes.map((ticketType) => (
+                        <option key={ticketType.id} value={String(ticketType.id)}>
+                          {ticketType.name} - {ticketType.availableStock} dispo
+                        </option>
+                      ))}
+                    </OrganizerEventDetailSelect>
+                    <OrganizerEventDetailHint>
+                      {availableInvitationTicketTypes.length > 0
+                        ? `${totalAvailableTickets} place(s) encore disponible(s) sur les billets actifs.`
+                        : 'Aucun billet actif avec du stock disponible pour creer une invitation.'}
+                    </OrganizerEventDetailHint>
+                  </OrganizerEventDetailField>
+
+                  <OrganizerEventDetailActions>
+                    <OrganizerEventDetailPrimaryButton
+                      type="submit"
+                      disabled={
+                        isSendingGuestTicket ||
+                        availableInvitationTicketTypes.length === 0
+                      }
+                    >
+                      {isSendingGuestTicket
+                        ? 'Envoi en cours...'
+                        : 'Creer et envoyer'}
+                    </OrganizerEventDetailPrimaryButton>
+                  </OrganizerEventDetailActions>
+                </OrganizerEventDetailForm>
+              </OrganizerEventDetailTicketCreateCard>
+
+              <OrganizerEventDetailGuestList>
+                {guestTickets.length > 0 ? (
+                  guestTickets.map((guestTicket) => (
+                    <OrganizerEventDetailGuestCard key={guestTicket.id}>
+                      <OrganizerEventDetailGuestMeta>
+                        <OrganizerEventDetailGuestName>
+                          {guestTicket.recipientName ?? 'Invite EventFlow'}
+                        </OrganizerEventDetailGuestName>
+                        <OrganizerEventDetailGuestText>
+                          {guestTicket.recipientEmail ?? 'Email indisponible'}
+                        </OrganizerEventDetailGuestText>
+                        <OrganizerEventDetailGuestText>
+                          {guestTicket.ticketType.name ?? 'Billet'} -{' '}
+                          {guestTicket.displayCode}
+                        </OrganizerEventDetailGuestText>
+                        <OrganizerEventDetailGuestText>
+                          Envoye: {formatOrganizerDate(guestTicket.sentAt)}
+                        </OrganizerEventDetailGuestText>
+                        <OrganizerEventDetailGuestText>
+                          Passage scan:{' '}
+                          {guestTicket.usedAt
+                            ? formatOrganizerDate(guestTicket.usedAt)
+                            : 'pas encore scanne'}
+                        </OrganizerEventDetailGuestText>
+                      </OrganizerEventDetailGuestMeta>
+
+                      <OrganizerEventDetailActions>
+                        <OrganizerEventDetailGuestBadge
+                          $checkedIn={guestTicket.hasCheckedIn}
+                        >
+                          {guestTicket.hasCheckedIn ? 'Venu' : 'Non scanne'}
+                        </OrganizerEventDetailGuestBadge>
+                        <OrganizerEventDetailLinkButton
+                          type="button"
+                          onClick={() => void copyGuestTicketLink(guestTicket.guestTicketUrl)}
+                        >
+                          Copier le lien
+                        </OrganizerEventDetailLinkButton>
+                      </OrganizerEventDetailActions>
+                    </OrganizerEventDetailGuestCard>
+                  ))
+                ) : (
+                  <OrganizerEventDetailState>
+                    Aucun billet invite pour le moment. Cree une invitation pour
+                    envoyer un QR par email et suivre son passage au scan.
+                  </OrganizerEventDetailState>
+                )}
+              </OrganizerEventDetailGuestList>
+            </OrganizerEventDetailGuestGrid>
+          </OrganizerEventDetailGuestSection>
           </OrganizerEventDetailTicketSection>
         </OrganizerEventDetailSplitSection>
         ) : null}

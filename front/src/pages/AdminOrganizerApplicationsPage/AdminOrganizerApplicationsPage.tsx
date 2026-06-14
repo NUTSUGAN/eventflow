@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
+import { usePagination } from '../../hooks/usePagination'
 import {
   approveOrganizerApplication,
   getAdminOrganizerApplications,
@@ -214,6 +216,10 @@ export function AdminOrganizerApplicationsPage() {
       return searchableText.includes(query)
     })
   }, [activeTab, applications, processedFilter, searchQuery])
+  const applicationPagination = usePagination(filteredApplications, {
+    pageSize: 20,
+    resetKey: `${activeTab}-${processedFilter}-${searchQuery}`,
+  })
 
   const pendingCount = useMemo(
     () => applications.filter((application) => application.status === 'PENDING').length,
@@ -332,81 +338,91 @@ export function AdminOrganizerApplicationsPage() {
                 : 'Aucune demande traitee ne correspond a cette recherche.'}
         </AdminOrganizerApplicationsState>
       ) : (
-        <AdminOrganizerApplicationsList>
-          {filteredApplications.map((application) => (
-            <AdminOrganizerApplicationsCard key={application.id}>
-              <div>
-                <AdminOrganizerApplicationsMeta>
-                  <AdminOrganizerApplicationsBadge
-                    $tone={getStatusTone(application.status)}
+        <>
+          <AdminOrganizerApplicationsList>
+            {applicationPagination.paginatedItems.map((application) => (
+              <AdminOrganizerApplicationsCard key={application.id}>
+                <div>
+                  <AdminOrganizerApplicationsMeta>
+                    <AdminOrganizerApplicationsBadge
+                      $tone={getStatusTone(application.status)}
+                    >
+                      {getStatusLabel(application.status)}
+                    </AdminOrganizerApplicationsBadge>
+                    <AdminOrganizerApplicationsBadge>
+                      {application.city}
+                    </AdminOrganizerApplicationsBadge>
+                    <AdminOrganizerApplicationsBadge>
+                      {application.applicant.role ?? 'ROLE_CLIENT'}
+                    </AdminOrganizerApplicationsBadge>
+                  </AdminOrganizerApplicationsMeta>
+                  <AdminOrganizerApplicationsCardTitle>
+                    {application.organizationName}
+                  </AdminOrganizerApplicationsCardTitle>
+                  <AdminOrganizerApplicationsApplicant>
+                    {application.applicant.fullName} - {application.applicant.email}
+                  </AdminOrganizerApplicationsApplicant>
+                </div>
+
+                <AdminOrganizerApplicationsGrid>
+                  <AdminOrganizerApplicationsInfoCard>
+                    <AdminOrganizerApplicationsLabel>Presentation</AdminOrganizerApplicationsLabel>
+                    <AdminOrganizerApplicationsValue>
+                      {application.motivation}
+                    </AdminOrganizerApplicationsValue>
+                  </AdminOrganizerApplicationsInfoCard>
+                  <AdminOrganizerApplicationsInfoCard>
+                    <AdminOrganizerApplicationsLabel>Liens publics</AdminOrganizerApplicationsLabel>
+                    <AdminOrganizerApplicationsValue>
+                      {[application.website, application.instagramUrl, application.tiktokUrl, application.linkedinUrl, application.otherLinks]
+                        .filter(Boolean)
+                        .join('\n') || 'Aucun lien'}
+                    </AdminOrganizerApplicationsValue>
+                  </AdminOrganizerApplicationsInfoCard>
+                </AdminOrganizerApplicationsGrid>
+
+                <div>
+                  <AdminOrganizerApplicationsLabel>Note admin</AdminOrganizerApplicationsLabel>
+                  <AdminOrganizerApplicationsTextarea
+                    value={reviewNotes[application.id] ?? ''}
+                    placeholder="Retour interne ou message de retour pour l organisateur..."
+                    onChange={(event) =>
+                      setReviewNotes((current) => ({
+                        ...current,
+                        [application.id]: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <AdminOrganizerApplicationsActions>
+                  <AdminOrganizerApplicationsPrimaryButton
+                    type="button"
+                    disabled={isSubmittingId === application.id}
+                    onClick={() => handleApprove(application)}
                   >
-                    {getStatusLabel(application.status)}
-                  </AdminOrganizerApplicationsBadge>
-                  <AdminOrganizerApplicationsBadge>
-                    {application.city}
-                  </AdminOrganizerApplicationsBadge>
-                  <AdminOrganizerApplicationsBadge>
-                    {application.applicant.role ?? 'ROLE_CLIENT'}
-                  </AdminOrganizerApplicationsBadge>
-                </AdminOrganizerApplicationsMeta>
-                <AdminOrganizerApplicationsCardTitle>
-                  {application.organizationName}
-                </AdminOrganizerApplicationsCardTitle>
-                <AdminOrganizerApplicationsApplicant>
-                  {application.applicant.fullName} - {application.applicant.email}
-                </AdminOrganizerApplicationsApplicant>
-              </div>
-
-              <AdminOrganizerApplicationsGrid>
-                <AdminOrganizerApplicationsInfoCard>
-                  <AdminOrganizerApplicationsLabel>Presentation</AdminOrganizerApplicationsLabel>
-                  <AdminOrganizerApplicationsValue>
-                    {application.motivation}
-                  </AdminOrganizerApplicationsValue>
-                </AdminOrganizerApplicationsInfoCard>
-                <AdminOrganizerApplicationsInfoCard>
-                  <AdminOrganizerApplicationsLabel>Liens publics</AdminOrganizerApplicationsLabel>
-                  <AdminOrganizerApplicationsValue>
-                    {[application.website, application.instagramUrl, application.tiktokUrl, application.linkedinUrl, application.otherLinks]
-                      .filter(Boolean)
-                      .join('\n') || 'Aucun lien'}
-                  </AdminOrganizerApplicationsValue>
-                </AdminOrganizerApplicationsInfoCard>
-              </AdminOrganizerApplicationsGrid>
-
-              <div>
-                <AdminOrganizerApplicationsLabel>Note admin</AdminOrganizerApplicationsLabel>
-                <AdminOrganizerApplicationsTextarea
-                  value={reviewNotes[application.id] ?? ''}
-                  placeholder="Retour interne ou message de retour pour l organisateur..."
-                  onChange={(event) =>
-                    setReviewNotes((current) => ({
-                      ...current,
-                      [application.id]: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <AdminOrganizerApplicationsActions>
-                <AdminOrganizerApplicationsPrimaryButton
-                  type="button"
-                  disabled={isSubmittingId === application.id}
-                  onClick={() => handleApprove(application)}
-                >
-                  {isSubmittingId === application.id ? 'Validation...' : 'Approuver'}
-                </AdminOrganizerApplicationsPrimaryButton>
-                <AdminOrganizerApplicationsSecondaryButton
-                  type="button"
-                  disabled={isSubmittingId === application.id}
-                  onClick={() => handleReject(application)}
-                >
-                  {application.status === 'APPROVED' ? 'Annuler le role' : 'Refuser'}
-                </AdminOrganizerApplicationsSecondaryButton>
-              </AdminOrganizerApplicationsActions>
-            </AdminOrganizerApplicationsCard>
-          ))}
-        </AdminOrganizerApplicationsList>
+                    {isSubmittingId === application.id ? 'Validation...' : 'Approuver'}
+                  </AdminOrganizerApplicationsPrimaryButton>
+                  <AdminOrganizerApplicationsSecondaryButton
+                    type="button"
+                    disabled={isSubmittingId === application.id}
+                    onClick={() => handleReject(application)}
+                  >
+                    {application.status === 'APPROVED' ? 'Annuler le role' : 'Refuser'}
+                  </AdminOrganizerApplicationsSecondaryButton>
+                </AdminOrganizerApplicationsActions>
+              </AdminOrganizerApplicationsCard>
+            ))}
+          </AdminOrganizerApplicationsList>
+          <AdminPagination
+            page={applicationPagination.page}
+            pageSize={applicationPagination.pageSize}
+            totalItems={filteredApplications.length}
+            totalPages={applicationPagination.totalPages}
+            itemLabel="demandes"
+            onPageChange={applicationPagination.setPage}
+          />
+        </>
       )}
     </AdminOrganizerApplicationsSection>
   )

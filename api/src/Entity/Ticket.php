@@ -14,6 +14,8 @@ class Ticket
     public const STATUS_ISSUED = 'issued';
     public const STATUS_USED = 'used';
     public const STATUS_CANCELLED = 'cancelled';
+    public const SOURCE_PURCHASE = 'purchase';
+    public const SOURCE_INVITATION = 'invitation';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,8 +36,20 @@ class Ticket
     #[ORM\Column(name: 'status', length: 20)]
     private ?string $status = null;
 
+    #[ORM\Column(name: 'source', length: 20, options: ['default' => self::SOURCE_PURCHASE])]
+    private string $source = self::SOURCE_PURCHASE;
+
+    #[ORM\Column(name: 'recipient_email', length: 180, nullable: true)]
+    private ?string $recipientEmail = null;
+
+    #[ORM\Column(name: 'recipient_name', length: 120, nullable: true)]
+    private ?string $recipientName = null;
+
     #[ORM\Column(name: 'issued_at')]
     private ?\DateTimeImmutable $issuedAt = null;
+
+    #[ORM\Column(name: 'sent_at', nullable: true)]
+    private ?\DateTimeImmutable $sentAt = null;
 
     /**
      * @var Collection<int, Checkin>
@@ -101,6 +115,44 @@ class Ticket
         return $this;
     }
 
+    public function getSource(): string
+    {
+        return $this->source;
+    }
+
+    public function setSource(string $source): static
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    public function getRecipientEmail(): ?string
+    {
+        return $this->recipientEmail;
+    }
+
+    public function setRecipientEmail(?string $recipientEmail): static
+    {
+        $recipientEmail = null !== $recipientEmail ? trim($recipientEmail) : null;
+        $this->recipientEmail = '' !== $recipientEmail ? $recipientEmail : null;
+
+        return $this;
+    }
+
+    public function getRecipientName(): ?string
+    {
+        return $this->recipientName;
+    }
+
+    public function setRecipientName(?string $recipientName): static
+    {
+        $recipientName = null !== $recipientName ? trim($recipientName) : null;
+        $this->recipientName = '' !== $recipientName ? $recipientName : null;
+
+        return $this;
+    }
+
     public function getIssuedAt(): ?\DateTimeImmutable
     {
         return $this->issuedAt;
@@ -109,6 +161,18 @@ class Ticket
     public function setIssuedAt(\DateTimeImmutable $issuedAt): static
     {
         $this->issuedAt = $issuedAt;
+
+        return $this;
+    }
+
+    public function getSentAt(): ?\DateTimeImmutable
+    {
+        return $this->sentAt;
+    }
+
+    public function setSentAt(?\DateTimeImmutable $sentAt): static
+    {
+        $this->sentAt = $sentAt;
 
         return $this;
     }

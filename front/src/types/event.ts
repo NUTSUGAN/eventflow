@@ -19,6 +19,9 @@ export type EventSummary = {
   coverImageUrl: string | null
   minPrice: number | null
   currency: string
+  isSponsored: boolean
+  sponsoredCampaignId: number | null
+  sponsoredChannels: string[]
 }
 
 export type EventFilterCategory = {
@@ -116,6 +119,9 @@ export type EventDetail = {
   organizer: EventOrganizer | null
   subscription: EventSubscription
   ticketTypes: EventTicketType[]
+  isSponsored: boolean
+  sponsoredCampaignId: number | null
+  sponsoredChannels: string[]
 }
 
 export type OrganizerFollowResponse = {

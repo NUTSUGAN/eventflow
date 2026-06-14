@@ -18,6 +18,7 @@ class NewsletterSubscription
     public const STATUS_UNSUBSCRIBED = 'UNSUBSCRIBED';
 
     public const SOURCE_REGISTER = 'register';
+    public const SOURCE_ORGANIZER_FOLLOW = 'organizer_follow';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

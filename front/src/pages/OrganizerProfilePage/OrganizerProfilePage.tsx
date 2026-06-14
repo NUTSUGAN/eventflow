@@ -125,7 +125,7 @@ export function OrganizerProfilePage() {
       )
     } catch {
       setErrorMessage(
-        "Impossible de mettre a jour l'abonnement a cet organisateur pour le moment.",
+        "Impossible de mettre a jour l'abonnement EventFlow pour le moment.",
       )
     } finally {
       setIsFollowLoading(false)
@@ -186,8 +186,8 @@ export function OrganizerProfilePage() {
                 $active={profile.subscription.isFollowing}
               >
                 {profile.subscription.isFollowing
-                  ? 'Organisateur suivi'
-                  : "Suivre l'organisateur"}
+                  ? "Abonné à l'organisateur"
+                  : "S'abonner à l'organisateur"}
               </ProfileActionButton>
             ) : null}
 
@@ -210,7 +210,7 @@ export function OrganizerProfilePage() {
 
         {profile.subscription.requiresAuth ? (
           <ProfileActionNote>
-            Connecte-toi ou cree un compte pour suivre cet organisateur depuis son profil.
+            Connecte-toi ou crée un compte pour t'abonner EventFlow depuis son profil.
           </ProfileActionNote>
         ) : null}
       </ProfileHero>

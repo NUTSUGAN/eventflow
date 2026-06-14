@@ -64,6 +64,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $organizedEvents;
 
     /**
+     * @var Collection<int, PromotionCampaign>
+     */
+    #[ORM\OneToMany(targetEntity: PromotionCampaign::class, mappedBy: 'organizer')]
+    private Collection $promotionCampaigns;
+
+    /**
      * @var Collection<int, AbonnementOrganisateur>
      */
     #[ORM\OneToMany(targetEntity: AbonnementOrganisateur::class, mappedBy: 'client')]
@@ -127,6 +133,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->organizedEvents = new ArrayCollection();
+        $this->promotionCampaigns = new ArrayCollection();
         $this->clientSubscriptions = new ArrayCollection();
         $this->organizerSubscriptions = new ArrayCollection();
         $this->clientOrders = new ArrayCollection();
@@ -390,6 +397,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($organizedEvent->getOrganizer() === $this) {
                 $organizedEvent->setOrganizer(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PromotionCampaign>
+     */
+    public function getPromotionCampaigns(): Collection
+    {
+        return $this->promotionCampaigns;
+    }
+
+    public function addPromotionCampaign(PromotionCampaign $promotionCampaign): static
+    {
+        if (!$this->promotionCampaigns->contains($promotionCampaign)) {
+            $this->promotionCampaigns->add($promotionCampaign);
+            $promotionCampaign->setOrganizer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromotionCampaign(PromotionCampaign $promotionCampaign): static
+    {
+        if (
+            $this->promotionCampaigns->removeElement($promotionCampaign)
+            && $promotionCampaign->getOrganizer() === $this
+        ) {
+            $promotionCampaign->setOrganizer(null);
         }
 
         return $this;

@@ -5,6 +5,7 @@ import type {
   OrderPreparationPayload,
   OrderPreparationResponse,
   OrderSummaryResponse,
+  OrderHistoryResponse,
 } from '../types/order'
 
 export async function prepareOrder(
@@ -15,6 +16,11 @@ export async function prepareOrder(
     payload,
   )
 
+  return response.data
+}
+
+export async function getMyOrders(): Promise<OrderHistoryResponse> {
+  const response = await apiClient.get<OrderHistoryResponse>('/api/me/orders')
   return response.data
 }
 

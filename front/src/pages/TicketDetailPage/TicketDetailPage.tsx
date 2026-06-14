@@ -22,6 +22,7 @@ import {
   TicketDetailHero,
   TicketDetailHeroText,
   TicketDetailNote,
+  TicketDetailQrLogo,
   TicketDetailQrWrap,
   TicketDetailShell,
   TicketDetailState,
@@ -357,6 +358,7 @@ export function TicketDetailPage() {
                   fgColor="#1c140f"
                   style={{ width: '100%', height: 'auto' }}
                 />
+                <TicketDetailQrLogo aria-hidden="true" />
               </TicketDetailQrWrap>
             ) : null}
             <TicketDetailCodeValue>
@@ -596,6 +598,7 @@ export function TicketDetailPage() {
               </div>
               <div
                 style={{
+                  position: 'relative',
                   width: '340px',
                   padding: '20px',
                   borderRadius: '24px',
@@ -610,6 +613,21 @@ export function TicketDetailPage() {
                   bgColor="#FFFFFF"
                   fgColor="#1c140f"
                   style={{ width: '100%', height: 'auto' }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    width: '42px',
+                    height: '42px',
+                    padding: '8px',
+                    borderRadius: '16px',
+                    background: '#ffffff url("/eventflow-logo-mobile.png") center / 135% auto no-repeat',
+                    transform: 'translate(-50%, -50%)',
+                    boxShadow: '0 0 0 1px rgba(28, 20, 15, 0.1), 0 10px 22px rgba(28, 20, 15, 0.14)',
+                  }}
                 />
               </div>
               <div

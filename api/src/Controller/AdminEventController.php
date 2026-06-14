@@ -307,7 +307,7 @@ final class AdminEventController extends AbstractController
         Event $event,
         EntityManagerInterface $entityManager
     ): JsonResponse {
-        if (!$event->getTicketTypes()->isEmpty() || !$event->getPromotions()->isEmpty()) {
+        if (!$event->getTicketTypes()->isEmpty() || !$event->getPromotionCampaigns()->isEmpty()) {
             return $this->json([
                 'message' => 'Impossible de supprimer un événement déjà lié à des types de billets ou des promotions.'
             ], 409);

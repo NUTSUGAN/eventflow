@@ -34,8 +34,10 @@ class TicketRepository extends ServiceEntityRepository
             ->leftJoin('event.location', 'location')->addSelect('location')
             ->andWhere('customerOrder.client = :user')
             ->andWhere('customerOrder.status = :paidStatus')
+            ->andWhere('ticket.source = :purchaseSource')
             ->setParameter('user', $user)
             ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->setParameter('purchaseSource', Ticket::SOURCE_PURCHASE)
             ->orderBy('event.startDatetime', 'ASC')
             ->addOrderBy('ticket.id', 'ASC')
             ->getQuery()
@@ -58,9 +60,11 @@ class TicketRepository extends ServiceEntityRepository
             ->andWhere('ticket.id = :ticketId')
             ->andWhere('customerOrder.client = :user')
             ->andWhere('customerOrder.status = :paidStatus')
+            ->andWhere('ticket.source = :purchaseSource')
             ->setParameter('ticketId', $ticketId)
             ->setParameter('user', $user)
             ->setParameter('paidStatus', Order::STATUS_PAID)
+            ->setParameter('purchaseSource', Ticket::SOURCE_PURCHASE)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -109,5 +113,49 @@ class TicketRepository extends ServiceEntityRepository
         ;
 
         return $tickets;
+    }
+
+    /**
+     * @return list<Ticket>
+     */
+    public function findInvitationsForEvent(int $eventId): array
+    {
+        /** @var list<Ticket> $tickets */
+        $tickets = $this->createQueryBuilder('ticket')
+            ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
+            ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
+            ->innerJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('ticket.checkins', 'checkin')->addSelect('checkin')
+            ->leftJoin('checkin.staffUser', 'staffUser')->addSelect('staffUser')
+            ->andWhere('event.id = :eventId')
+            ->andWhere('ticket.source = :source')
+            ->setParameter('eventId', $eventId)
+            ->setParameter('source', Ticket::SOURCE_INVITATION)
+            ->orderBy('ticket.issuedAt', 'DESC')
+            ->addOrderBy('ticket.id', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+
+        return $tickets;
+    }
+
+    public function findInvitationByQrToken(string $qrToken): ?Ticket
+    {
+        /** @var Ticket|null $ticket */
+        $ticket = $this->createQueryBuilder('ticket')
+            ->innerJoin('ticket.customerOrder', 'customerOrder')->addSelect('customerOrder')
+            ->innerJoin('ticket.ticketType', 'ticketType')->addSelect('ticketType')
+            ->innerJoin('ticketType.event', 'event')->addSelect('event')
+            ->leftJoin('event.location', 'location')->addSelect('location')
+            ->andWhere('ticket.qrToken = :qrToken')
+            ->andWhere('ticket.source = :source')
+            ->setParameter('qrToken', trim($qrToken))
+            ->setParameter('source', Ticket::SOURCE_INVITATION)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        return $ticket;
     }
 }

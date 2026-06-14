@@ -46,7 +46,8 @@ export const Card = styled.article<{ $variant?: CardVariant }>`
 
 export const CardCover = styled.div<{ $imageUrl?: string; $variant?: CardVariant }>`
   position: relative;
-  overflow: hidden;
+  z-index: 2;
+  overflow: visible;
   width: 100%;
   aspect-ratio: 1.68;
   border-radius: ${({ $variant }) => ($variant === 'explorer' ? '0' : '6px')};
@@ -75,7 +76,28 @@ export const CardCover = styled.div<{ $imageUrl?: string; $variant?: CardVariant
   }
 `
 
+export const SponsoredBadge = styled.img`
+  position: absolute;
+  z-index: 2;
+  right: -14px;
+  bottom: -54px;
+  width: clamp(104px, 31%, 146px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .48));
+  pointer-events: none;
+
+  @media (max-width: 600px) {
+    right: -8px;
+    bottom: -42px;
+    width: 112px;
+  }
+`
+
 export const CardContent = styled.div<{ $variant?: CardVariant }>`
+  position: relative;
+  z-index: 1;
   padding: ${({ $variant }) => ($variant === 'explorer' ? '16px 16px 18px' : '0')};
   display: grid;
   gap: ${({ $variant }) => ($variant === 'explorer' ? '10px' : '8px')};

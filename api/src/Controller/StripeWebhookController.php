@@ -3,9 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Entity\PromotionCampaign;
 use App\Repository\OrderRepository;
+use App\Repository\PromotionCampaignRepository;
+use App\Service\PromotionCampaignService;
+use App\Service\PromotionNotificationService;
 use App\Service\StripePaymentService;
 use App\Service\TicketFulfillmentService;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
@@ -22,7 +27,11 @@ final class StripeWebhookController extends AbstractController
     public function webhook(
         Request $request,
         OrderRepository $orderRepository,
+        PromotionCampaignRepository $promotionCampaignRepository,
         StripePaymentService $stripePaymentService,
+        PromotionCampaignService $promotionCampaignService,
+        PromotionNotificationService $promotionNotificationService,
+        EntityManagerInterface $entityManager,
         TicketFulfillmentService $ticketFulfillmentService,
         LoggerInterface $logger,
     ): JsonResponse {
@@ -50,6 +59,42 @@ final class StripeWebhookController extends AbstractController
             return $this->json([
                 'message' => 'Objet de session Stripe invalide.',
             ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $promotionCampaignId = $stripePaymentService->extractPromotionCampaignIdFromSession($session);
+
+        if (null !== $promotionCampaignId) {
+            $campaign = $promotionCampaignRepository->find($promotionCampaignId);
+
+            if (!$campaign instanceof PromotionCampaign) {
+                return $this->json(['message' => 'Campagne Stripe introuvable.'], Response::HTTP_NOT_FOUND);
+            }
+
+            if (in_array($event->type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true)
+                && 'paid' === (string) $session->payment_status
+            ) {
+                try {
+                    $wasAlreadyPaid = null !== $campaign->getPaidAt();
+                    $stripePaymentService->assertPaidPromotionSession($session, $campaign);
+                    $promotionCampaignService->assertLaunchPackAvailable($campaign);
+                    $promotionCampaignService->activatePaidCampaign($campaign, (string) $session->id);
+                    $stripePaymentService->recordPromotionOrder($campaign, $session);
+                    $entityManager->flush();
+
+                    if (!$wasAlreadyPaid) {
+                        $promotionNotificationService->notifyPaymentConfirmed($campaign);
+                    }
+                } catch (\LogicException $exception) {
+                    $logger->error('Promotion payment could not activate campaign.', [
+                        'campaignId' => $promotionCampaignId,
+                        'message' => $exception->getMessage(),
+                    ]);
+
+                    return $this->json(['message' => $exception->getMessage()], Response::HTTP_CONFLICT);
+                }
+            }
+
+            return $this->json(['received' => true]);
         }
 
         $orderId = $stripePaymentService->extractOrderIdFromSession($session);
