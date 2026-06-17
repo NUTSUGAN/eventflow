@@ -173,13 +173,13 @@ export function OrganizerEventCreatePage() {
       form.capacity.trim() === ''
     ) {
       setErrorMessage(
-        "Renseigne d'abord le titre, la capacite, la description et la categorie avant de passer a l'etape suivante.",
+        "Renseigne d’abord le titre, la capacité, la description et la catégorie avant de passer à l’étape suivante.",
       )
       return
     }
 
     if (!Number.isFinite(Number(form.capacity)) || Number(form.capacity) <= 0) {
-      setErrorMessage('La capacite doit etre un entier positif.')
+      setErrorMessage('La capacité doit être un entier positif.')
       return
     }
 
@@ -200,7 +200,7 @@ export function OrganizerEventCreatePage() {
     }
 
     if (!form.thumbnailPhoto || !form.coverPhoto) {
-      setErrorMessage('Ajoute la miniature et la cover avant de publier l evenement.')
+      setErrorMessage('Ajoute la miniature et la cover avant de publiér l’évènement.')
       return
     }
 
@@ -209,17 +209,17 @@ export function OrganizerEventCreatePage() {
     const endDateTime = new Date(form.endDatetime)
 
     if (Number.isNaN(startDateTime.getTime()) || Number.isNaN(endDateTime.getTime())) {
-      setErrorMessage('Renseigne des dates valides pour le debut et la fin.')
+      setErrorMessage('Renseigne des dates valides pour le début et la fin.')
       return
     }
 
     if (startDateTime < now) {
-      setErrorMessage('La date de debut ne peut pas etre dans le passe.')
+      setErrorMessage('La date de début ne peut pas être dans le passé.')
       return
     }
 
     if (endDateTime <= startDateTime) {
-      setErrorMessage('La date de fin doit etre posterieure a la date de debut.')
+      setErrorMessage('La date de fin doit être postérieure à la date de début.')
       return
     }
 
@@ -262,7 +262,7 @@ export function OrganizerEventCreatePage() {
           ),
         )
       } else {
-        setErrorMessage("Impossible de creer l'evenement pour le moment.")
+        setErrorMessage("Impossible de créer l’évènement pour le moment.")
       }
     } finally {
       setIsSubmitting(false)
@@ -274,9 +274,9 @@ export function OrganizerEventCreatePage() {
       <OrganizerEventCreateSection>
         <OrganizerEventCreateHero>
           <OrganizerEventCreateEyebrow>Espace organisateur</OrganizerEventCreateEyebrow>
-          <OrganizerEventCreateTitle>Creation de l evenement...</OrganizerEventCreateTitle>
+          <OrganizerEventCreateTitle>Création de l’évènement...</OrganizerEventCreateTitle>
           <OrganizerEventCreateState>
-            On charge les categories et ton espace organisateur.
+            On charge les catégories et ton espace organisateur.
           </OrganizerEventCreateState>
         </OrganizerEventCreateHero>
       </OrganizerEventCreateSection>
@@ -287,11 +287,11 @@ export function OrganizerEventCreatePage() {
     <OrganizerEventCreateSection>
       <OrganizerEventCreateHero ref={flowRef}>
         <OrganizerEventCreateEyebrow>Espace organisateur</OrganizerEventCreateEyebrow>
-        <OrganizerEventCreateTitle>Creer un evenement</OrganizerEventCreateTitle>
+        <OrganizerEventCreateTitle>Créer un évènement</OrganizerEventCreateTitle>
         <OrganizerEventCreateText>
           {currentUser
-            ? `${currentUser.firstName}, on construit ici la fiche evenement avant les billets et la commande client.`
-            : 'Prepare la fiche publique de ton evenement.'}
+            ? `${currentUser.firstName}, on construit ici la fiche événement avant les billets et la commande client.`
+            : 'Prepare la fiche publique de ton évènement.'}
         </OrganizerEventCreateText>
 
         {errorMessage ? (
@@ -300,7 +300,7 @@ export function OrganizerEventCreatePage() {
 
         <OrganizerEventCreateState>
           {currentStep === 1
-            ? 'Etape 1 sur 2 - informations principales de l evenement.'
+            ? 'Etape 1 sur 2 - informations principales de l’évènement.'
             : 'Etape 2 sur 2 - lieu, dates, statut et medias.'}
         </OrganizerEventCreateState>
 
@@ -321,7 +321,7 @@ export function OrganizerEventCreatePage() {
                 </OrganizerEventCreateField>
 
                 <OrganizerEventCreateField>
-                  <OrganizerEventCreateLabel>Capacite</OrganizerEventCreateLabel>
+                  <OrganizerEventCreateLabel>Capacité</OrganizerEventCreateLabel>
                   <OrganizerEventCreateInput
                     type="number"
                     min="1"
@@ -342,13 +342,13 @@ export function OrganizerEventCreatePage() {
                   onChange={(event) =>
                     setForm((current) => ({ ...current, description: event.target.value }))
                   }
-                  placeholder="Decris l ambiance, le programme et ce qui rend cet evenement special."
+                  placeholder="Décris l’ambiance, le programme et ce qui rend cet évènement spécial."
                   required
                 />
               </OrganizerEventCreateField>
 
               <OrganizerEventCreateField>
-                <OrganizerEventCreateLabel>Categorie</OrganizerEventCreateLabel>
+                <OrganizerEventCreateLabel>Catégorie</OrganizerEventCreateLabel>
                 <OrganizerEventCreateSelect
                   value={form.categoryId}
                   onChange={(event) =>
@@ -356,7 +356,7 @@ export function OrganizerEventCreatePage() {
                   }
                   required
                 >
-                  <option value="">Choisir une categorie</option>
+                  <option value="">Choisir une catégorie</option>
                   {options.categories.map((category) => (
                     <option key={category.id} value={String(category.id)}>
                       {category.name}
@@ -367,7 +367,7 @@ export function OrganizerEventCreatePage() {
                   <OrganizerEventCreateHint>{selectedCategory.description}</OrganizerEventCreateHint>
                 ) : (
                   <OrganizerEventCreateHint>
-                    Tu as maintenant plusieurs categories prêtes a l emploi pour le tri public.
+                    Tu as maintenant plusieurs catégories prêtes à l’emploi pour le tri public.
                   </OrganizerEventCreateHint>
                 )}
               </OrganizerEventCreateField>
@@ -383,7 +383,7 @@ export function OrganizerEventCreatePage() {
                   type="button"
                   onClick={() => navigate('/organizer/events')}
                 >
-                  Revenir a mes evenements
+                  Revenir à mes évènements
                 </OrganizerEventCreateSecondaryButton>
               </OrganizerEventCreateActions>
             </>
@@ -391,10 +391,10 @@ export function OrganizerEventCreatePage() {
             <>
               <OrganizerEventCreateSummary>
                 <OrganizerEventCreateSummaryTitle>
-                  {form.title || 'Nouvel evenement'}
+                  {form.title || 'Nouvel’évènement'}
                 </OrganizerEventCreateSummaryTitle>
                 <OrganizerEventCreateSummaryText>
-                  {selectedCategory?.name ?? 'Categorie a confirmer'} - capacite {form.capacity || '0'} personnes
+                  {selectedCategory?.name ?? 'Catégorie à confirmer'} - capacité {form.capacity || '0'} personnes
                 </OrganizerEventCreateSummaryText>
                 <OrganizerEventCreateSummaryText>
                   {form.description || 'Ajoute ensuite le lieu, les dates et le statut de publication.'}
@@ -412,7 +412,7 @@ export function OrganizerEventCreatePage() {
                         locationAddress: event.target.value,
                       }))
                     }
-                    placeholder="10 Rue de l Example"
+                    placeholder="10 Rue de l’Exemple"
                     required
                   />
                 </OrganizerEventCreateField>
@@ -481,7 +481,7 @@ export function OrganizerEventCreatePage() {
                     placeholder="48.8566000"
                   />
                   <OrganizerEventCreateHint>
-                    Facultatif. Utile si tu veux positionner precisement le lieu plus tard.
+                    Facultatif. Utile si tu veux positionner précisément le lieu plus tard.
                   </OrganizerEventCreateHint>
                 </OrganizerEventCreateField>
 
@@ -500,14 +500,14 @@ export function OrganizerEventCreatePage() {
                     placeholder="2.3522000"
                   />
                   <OrganizerEventCreateHint>
-                    Facultatif. Laisse vide si tu n as pas encore les coordonnees.
+                    Facultatif. Laisse vide si tu n’as pas encore les coordonnées.
                   </OrganizerEventCreateHint>
                 </OrganizerEventCreateField>
               </OrganizerEventCreateGrid>
 
               <OrganizerEventCreateGrid>
                 <OrganizerEventCreateField>
-                  <OrganizerEventCreateLabel>Debut</OrganizerEventCreateLabel>
+                  <OrganizerEventCreateLabel>Début</OrganizerEventCreateLabel>
                   <OrganizerEventCreateInput
                     type="datetime-local"
                     min={minimumStartDatetime}
@@ -540,7 +540,7 @@ export function OrganizerEventCreatePage() {
                     required
                   />
                   <OrganizerEventCreateHint>
-                    La date de debut doit etre a venir.
+                    La date de début doit être à venir.
                   </OrganizerEventCreateHint>
                 </OrganizerEventCreateField>
 
@@ -556,7 +556,7 @@ export function OrganizerEventCreatePage() {
                     required
                   />
                   <OrganizerEventCreateHint>
-                    La fin doit toujours etre apres le debut.
+                    La fin doit toujours être après le début.
                   </OrganizerEventCreateHint>
                 </OrganizerEventCreateField>
               </OrganizerEventCreateGrid>
@@ -611,7 +611,7 @@ export function OrganizerEventCreatePage() {
                   <option value="published">Public</option>
                 </OrganizerEventCreateSelect>
                 <OrganizerEventCreateHint>
-                  Pas de statut annule ici. On garde un parcours simple: brouillon ou public.
+                  Pas de statut annulé ici. On garde un parcours simple: brouillon ou public.
                 </OrganizerEventCreateHint>
               </OrganizerEventCreateField>
 
@@ -620,10 +620,10 @@ export function OrganizerEventCreatePage() {
                   type="button"
                   onClick={() => goToStep(1)}
                 >
-                  Revenir aux infos principales
+                  Revenir cux infos principales
                 </OrganizerEventCreateSecondaryButton>
                 <OrganizerEventCreatePrimaryButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Creation en cours...' : "Creer l'evenement"}
+                  {isSubmitting ? 'Création en cours...' : "Créer l’évènement"}
                 </OrganizerEventCreatePrimaryButton>
               </OrganizerEventCreateActions>
             </>

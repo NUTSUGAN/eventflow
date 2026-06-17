@@ -53,7 +53,7 @@ export function AccountEmailChangeConfirmPage() {
 
         if (isMounted) {
           setErrorMessage(
-            responseMessage ?? "Impossible de confirmer ce changement d'email.",
+            responseMessage ?? "Impossible de confirmer ce changement d’email.",
           )
         }
       } finally {
@@ -74,14 +74,14 @@ export function AccountEmailChangeConfirmPage() {
     <AccountSection>
       <AccountStateCard>
         <div>
-          <AccountSectionTitle>Validation de ton nouvel email</AccountSectionTitle>
+          <AccountSectionTitle>Validation de ton nouvel’email</AccountSectionTitle>
           <AccountSectionLead>
             On finalise ici le changement demande depuis ton espace client.
           </AccountSectionLead>
         </div>
 
         {isLoading ? (
-          <AccountState>Verification du lien en cours...</AccountState>
+          <AccountState>Vérification du lien en cours...</AccountState>
         ) : null}
 
         {!isLoading && statusMessage ? (
@@ -97,7 +97,7 @@ export function AccountEmailChangeConfirmPage() {
             Se connecter
           </AccountPrimaryButton>
           <AccountSecondaryButton type="button" onClick={() => navigate('/account')}>
-            Retour au profil
+            Retour cu profil
           </AccountSecondaryButton>
         </AccountActions>
       </AccountStateCard>

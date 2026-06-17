@@ -14,7 +14,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:promotions:expire',
-    description: 'Expire les campagnes Booster dont la periode est terminee.',
+    description: 'Expire les campagnes Booster dont la période est terminée.',
 )]
 final class ExpirePromotionCampaignsCommand extends Command
 {
@@ -49,7 +49,7 @@ final class ExpirePromotionCampaignsCommand extends Command
         }
 
         $this->entityManager->flush();
-        $io->success(sprintf('%d campagne(s) Booster expiree(s).', count($campaigns)));
+        $io->success(sprintf('%d campagne(s) Booster expirée(s).', count($campaigns)));
 
         return Command::SUCCESS;
     }

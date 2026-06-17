@@ -49,7 +49,7 @@ final class AdminOrganizerApplicationController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Le compte lie a cette demande est introuvable.',
+                'message' => 'Le compte lié à cette demande est introuvable.',
             ], 404);
         }
 
@@ -70,7 +70,7 @@ final class AdminOrganizerApplicationController extends AbstractController
         $this->sendDecisionEmail($mailer, $user, $application, true);
 
         return $this->json([
-            'message' => 'La demande organisateur a ete approuvee.',
+            'message' => 'La demande organisateur a été approuvée.',
             'application' => $this->serializeApplication($application),
         ]);
     }
@@ -86,7 +86,7 @@ final class AdminOrganizerApplicationController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Le compte lie a cette demande est introuvable.',
+                'message' => 'Le compte lié à cette demande est introuvable.',
             ], 404);
         }
 
@@ -119,8 +119,8 @@ final class AdminOrganizerApplicationController extends AbstractController
 
         return $this->json([
             'message' => $wasApproved
-                ? 'Le role organisateur a ete retire et le compte est repasse client.'
-                : 'La demande organisateur a ete refusee.',
+                ? 'Le rôle organisateur a été retiré et le compte est repassé client.'
+                : 'La demande organisateur a été refusée.',
             'application' => $this->serializeApplication($application),
         ]);
     }
@@ -139,17 +139,17 @@ final class AdminOrganizerApplicationController extends AbstractController
 
         $fullName = trim(sprintf('%s %s', $user->getFirstName(), $user->getLastName()));
         $subject = $approved
-            ? 'Ta demande organisateur EventFlow a ete approuvee'
-            : 'Mise a jour de ta demande organisateur EventFlow';
+            ? 'Ta demande organisateur EventFlow a été approuvée'
+            : 'Mise à jour de ta demande organisateur EventFlow';
         $body = $approved
             ? "Bonjour {$fullName},\n\n".
-                "Bonne nouvelle: ta demande organisateur pour {$application->getOrganizationName()} a ete approuvee.\n".
-                "Tu peux maintenant acceder a ton espace organisateur EventFlow.\n\n".
-                ($application->getReviewNote() ? "Note de l equipe:\n{$application->getReviewNote()}\n" : '')
+                "Bonne nouvelle: ta demande organisateur pour {$application->getOrganizationName()} a été approuvée.\n".
+                "Tu peux maintenant accéder à ton espace organisateur EventFlow.\n\n".
+                ($application->getReviewNote() ? "Note de l’équipe :\n{$application->getReviewNote()}\n" : '')
             : "Bonjour {$fullName},\n\n".
-                "Ta demande organisateur pour {$application->getOrganizationName()} a ete relue, mais elle ne peut pas encore etre validee.\n\n".
-                "Retour de l equipe:\n{$application->getReviewNote()}\n\n".
-                "Tu peux mettre a jour ta demande puis la renvoyer depuis ton espace EventFlow.\n";
+                "Ta demande organisateur pour {$application->getOrganizationName()} a été relue, mais elle ne peut pas encore être validée.\n\n".
+                "Retour de l’équipe :\n{$application->getReviewNote()}\n\n".
+                "Tu peux mettre à jour ta demande puis la renvoyer depuis ton espace EventFlow.\n";
 
         try {
             $mailer->send(

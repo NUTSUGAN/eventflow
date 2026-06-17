@@ -44,7 +44,7 @@ final class AccountEmailChangeController extends AbstractController
 
         if ('' === $newEmail) {
             return $this->json([
-                'message' => 'Renseigne le nouvel email a utiliser.',
+                'message' => 'Renseigne le nouvel email à utiliser.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -64,7 +64,7 @@ final class AccountEmailChangeController extends AbstractController
 
         if ($existingUser instanceof User && $existingUser->getId() !== $user->getId()) {
             return $this->json([
-                'message' => 'Cette adresse email est deja utilisee.',
+                'message' => 'Cette adresse email est déjà utilisée.',
             ], Response::HTTP_CONFLICT);
         }
 
@@ -90,7 +90,7 @@ final class AccountEmailChangeController extends AbstractController
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to($currentEmail)
-                    ->subject('Validation du changement d email EventFlow')
+                    ->subject('Validation du changement d’email EventFlow')
                     ->text(
                         "Bonjour,\n\n".
                         "Tu as demande le changement de ton adresse EventFlow vers : ".$newEmail."\n\n".
@@ -106,7 +106,7 @@ final class AccountEmailChangeController extends AbstractController
         }
 
         return $this->json([
-            'message' => "Un email de validation a ete envoye sur ton adresse actuelle.",
+            'message' => "Un email de validation a été envoyé sur ton adresse actuelle.",
         ], Response::HTTP_CREATED);
     }
 
@@ -144,7 +144,7 @@ final class AccountEmailChangeController extends AbstractController
 
         if ($existingUser instanceof User && $existingUser->getId() !== $user->getId()) {
             return $this->json([
-                'message' => 'Cette adresse email est deja utilisee par un autre compte.',
+                'message' => 'Cette adresse email est déjà utilisée par un autre compte.',
             ], Response::HTTP_CONFLICT);
         }
 
@@ -167,7 +167,7 @@ final class AccountEmailChangeController extends AbstractController
         }
 
         return $this->json([
-            'message' => "Ton adresse email a ete mise a jour. Reconnecte-toi avec cette nouvelle adresse.",
+            'message' => "Ton adresse email a été mise à jour. Reconnecte-toi avec cette nouvelle adresse.",
         ], Response::HTTP_OK);
     }
 }

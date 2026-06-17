@@ -51,7 +51,7 @@ const HIDDEN_PENDING_ORDERS_STORAGE_KEY = 'eventflow:hiddenPendingOrders'
 
 function formatDateTime(value: string | null): string {
   if (!value) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -84,14 +84,14 @@ function getPaymentLabel(ticket: TicketRecord): string {
   const status = ticket.order.payment?.status
 
   if (!provider && !status) {
-    return 'Paiement confirme'
+    return 'Paiement confirmé'
   }
 
   if (provider && status) {
     return `${provider} - ${status}`
   }
 
-  return provider ?? status ?? 'Paiement confirme'
+  return provider ?? status ?? 'Paiement confirmé'
 }
 
 function formatOrderStatusLabel(status: string): string {
@@ -258,7 +258,7 @@ export function MyTicketsPage() {
       <MyTicketsHero>
         <MyTicketsTitle>Mes billets</MyTicketsTitle>
         <MyTicketsSubtitle>
-          Retrouve tes billets confirmes, et reprends les commandes preparees
+          Retrouve tes billets confirmés, et reprends les commandes préparees
           qui attendent encore un paiement.
         </MyTicketsSubtitle>
       </MyTicketsHero>
@@ -283,7 +283,7 @@ export function MyTicketsPage() {
           $active={activeTab === 'past'}
           onClick={() => setActiveTab('past')}
         >
-          Passe
+          Passé
         </MyTicketsTabButton>
       </MyTicketsTabs>
 
@@ -291,12 +291,12 @@ export function MyTicketsPage() {
         <MyTicketsStateCard>
           <MyTicketsStateTitle>Chargement de tes billets...</MyTicketsStateTitle>
           <MyTicketsStateText>
-            On recupere les commandes payees et les billets emis depuis Stripe.
+            On récupère les commandes payées et les billets émis depuis Stripe.
           </MyTicketsStateText>
         </MyTicketsStateCard>
       ) : errorMessage ? (
         <MyTicketsStateCard>
-          <MyTicketsStateTitle>Acces indisponible</MyTicketsStateTitle>
+          <MyTicketsStateTitle>Accès indisponible</MyTicketsStateTitle>
           <MyTicketsStateText>{errorMessage}</MyTicketsStateText>
           <MyTicketsActions>
             {requiresAuth ? (
@@ -318,7 +318,7 @@ export function MyTicketsPage() {
               type="button"
               onClick={() => navigate('/explorer')}
             >
-              Retour a Explorer
+              Retour à Explorer
             </MyTicketsSecondaryButton>
           </MyTicketsActions>
         </MyTicketsStateCard>
@@ -326,26 +326,26 @@ export function MyTicketsPage() {
         pendingOrdersToDisplay.length === 0 ? (
           <>
             <MyTicketsStateCard>
-              <MyTicketsStateTitle>Aucune commande en attente</MyTicketsStateTitle>
+              <MyTicketsStateTitle>Aucune commande en’attente</MyTicketsStateTitle>
               <MyTicketsStateText>
-                On affichera ici tes commandes preparees sans paiement confirme,
-                pour reprendre Stripe ou retirer la preparation de cette liste.
+                On affichera ici tes commandes préparees sans paiement confirmé,
+                pour reprendre Stripe ou retirer la préparation de cette liste.
               </MyTicketsStateText>
               <MyTicketsActions>
                 <MyTicketsPrimaryButton
                   type="button"
                   onClick={() => navigate('/explorer')}
                 >
-                  Voir les prochains evenements
+                  Voir les prochains évènements
                 </MyTicketsPrimaryButton>
               </MyTicketsActions>
             </MyTicketsStateCard>
 
             <MyTicketsInfoCard>
-              <MyTicketsInfoTitle>Preparations de commande</MyTicketsInfoTitle>
+              <MyTicketsInfoTitle>Préparations de commande</MyTicketsInfoTitle>
               <MyTicketsInfoText>
-                Retirer une preparation ici la masque seulement dans ce navigateur.
-                La commande reste disponible cote plateforme si elle doit etre auditee.
+                Retirer une préparation ici la masque seulement dans ce navigateur.
+                La commande reste disponible cote plateforme si elle doit être auditee.
               </MyTicketsInfoText>
             </MyTicketsInfoCard>
           </>
@@ -360,7 +360,7 @@ export function MyTicketsPage() {
                       <MyTicketsTag>{order.reference}</MyTicketsTag>
                     </MyTicketsMetaRow>
                     <MyTicketsPendingTitle>
-                      {order.event.title ?? 'Evenement EventFlow'}
+                      {order.event.title ?? 'évènement EventFlow'}
                     </MyTicketsPendingTitle>
                     <MyTicketsPendingText>
                       {formatDateTime(order.event.startsAt ?? null)}
@@ -385,13 +385,13 @@ export function MyTicketsPage() {
                     <MyTicketsSummaryValue>{order.reference}</MyTicketsSummaryValue>
                   </MyTicketsSummaryItem>
                   <MyTicketsSummaryItem>
-                    <MyTicketsSummaryLabel>Billets prepares</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryLabel>Billets prépares</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
                       {getPendingOrderTicketCount(order)}
                     </MyTicketsSummaryValue>
                   </MyTicketsSummaryItem>
                   <MyTicketsSummaryItem>
-                    <MyTicketsSummaryLabel>Total a payer</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryLabel>Total À payer</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
                       {formatCurrency(order.total, order.currency)}
                     </MyTicketsSummaryValue>
@@ -424,7 +424,7 @@ export function MyTicketsPage() {
                       type="button"
                       onClick={() => navigate(`/events/${order.event.id}`)}
                     >
-                      Voir l&apos;evenement
+                      Voir l&apos;évènement
                     </MyTicketsSecondaryButton>
                   ) : null}
                   <MyTicketsDangerButton
@@ -443,18 +443,18 @@ export function MyTicketsPage() {
           <MyTicketsStateCard>
             <MyTicketsStateTitle>
               {activeTab === 'upcoming'
-                ? "Tu n'as pas de billets a venir"
-                : 'Aucun billet passe pour le moment'}
+                ? "Tu n’as pas de billets à venir"
+                : 'Aucun billet passé pour le moment'}
             </MyTicketsStateTitle>
             <MyTicketsStateText>
-              On affichera ici les billets lies a tes commandes Stripe confirmees.
+              On affichera ici les billets liés à tes commandes Stripe confirmées.
             </MyTicketsStateText>
             <MyTicketsActions>
               <MyTicketsPrimaryButton
                 type="button"
                 onClick={() => navigate('/explorer')}
               >
-                Voir les prochains evenements
+                Voir les prochains évènements
               </MyTicketsPrimaryButton>
             </MyTicketsActions>
           </MyTicketsStateCard>
@@ -463,7 +463,7 @@ export function MyTicketsPage() {
             <MyTicketsInfoTitle>Conditions de revente</MyTicketsInfoTitle>
             <MyTicketsInfoText>
               La revente de billets n&apos;est pas encore geree depuis cet espace.
-              Chaque billet visible ici correspond uniquement a une commande Stripe payee.
+              Chaque billet visible ici correspond'uniquement à une commande Stripe payée.
             </MyTicketsInfoText>
           </MyTicketsInfoCard>
         </>
@@ -489,10 +489,10 @@ export function MyTicketsPage() {
                     type="button"
                     onClick={() => navigate(`/mes-billets/${ticket.id}`)}
                   >
-                    <MyTicketsEventTitle>{ticket.event.title ?? 'Evenement EventFlow'}</MyTicketsEventTitle>
+                    <MyTicketsEventTitle>{ticket.event.title ?? 'évènement EventFlow'}</MyTicketsEventTitle>
                   </MyTicketsTitleButton>
                   <MyTicketsCardText>
-                    {ticket.event.venue ?? 'Lieu a confirmer'}{ticket.event.city ? ` - ${ticket.event.city}` : ''}
+                    {ticket.event.venue ?? 'Lieu à confirmer'}{ticket.event.city ? ` - ${ticket.event.city}` : ''}
                   </MyTicketsCardText>
                 </div>
 
@@ -506,11 +506,11 @@ export function MyTicketsPage() {
                   <MyTicketsSummaryItem>
                     <MyTicketsSummaryLabel>Commande</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
-                      {ticket.order.reference ?? 'Reference indisponible'}
+                      {ticket.order.reference ?? 'Référence indisponible'}
                     </MyTicketsSummaryValue>
                   </MyTicketsSummaryItem>
                   <MyTicketsSummaryItem>
-                    <MyTicketsSummaryLabel>Montant paye</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryLabel>Montant payé</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
                       {formatCurrency(ticket.amount, ticket.order.currency)}
                     </MyTicketsSummaryValue>
@@ -535,13 +535,13 @@ export function MyTicketsPage() {
                       type="button"
                       onClick={() => navigate(`/events/${ticket.event.id}`)}
                     >
-                      Voir l&apos;evenement
+                      Voir l&apos;évènement
                     </MyTicketsSecondaryButton>
                   ) : null}
                 </MyTicketsActions>
 
                 <MyTicketsStatusMessage>
-                  Ce billet est individuel et peut etre
+                  Ce billet est individuel et peut être
                   ouvert depuis cette carte.
                 </MyTicketsStatusMessage>
               </MyTicketsCardBody>

@@ -85,7 +85,7 @@ final class MyTicketController extends AbstractController
         $ticketType = $ticket->getTicketType();
         $event = $ticketType?->getEvent();
         $location = $event?->getLocation();
-        $venue = $location?->getAddress() ?? $location?->getCity() ?? 'Lieu a confirmer';
+        $venue = $location?->getAddress() ?? $location?->getCity() ?? 'Lieu à confirmer';
 
         return [
             'id' => $ticket->getId(),

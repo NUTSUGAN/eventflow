@@ -52,7 +52,7 @@ const initialForm: OrganizerApplicationPayload = {
 function getStatusLabel(status: OrganizerApplicationStatus): string {
   switch (status) {
     case 'APPROVED':
-      return 'Approuvee'
+      return 'Approuvée'
     case 'REJECTED':
       return 'A reprendre'
     default:
@@ -123,7 +123,7 @@ export function OrganizerAccessPage() {
           setUser(null)
           setApplication(null)
           setErrorMessage(
-            'Connecte-toi d abord pour preparer ta demande organisateur.',
+            'Connecte-toi d’abord pour préparer ta demande organisateur.',
           )
         }
       } finally {
@@ -161,10 +161,10 @@ export function OrganizerAccessPage() {
       ) {
         setErrorMessage(
           (error as { response?: { data?: { message?: string } } }).response?.data
-            ?.message ?? 'Impossible denvoyer la demande pour le moment.',
+            ?.message ?? 'Impossible d’envoyer la demande pour le moment.',
         )
       } else {
-        setErrorMessage('Impossible denvoyer la demande pour le moment.')
+        setErrorMessage('Impossible d’envoyer la demande pour le moment.')
       }
     } finally {
       setIsSubmitting(false)
@@ -177,13 +177,13 @@ export function OrganizerAccessPage() {
   return (
     <OrganizerAccessSection>
       <OrganizerAccessCard>
-        <OrganizerAccessEyebrow>Acces organisateur</OrganizerAccessEyebrow>
+        <OrganizerAccessEyebrow>Accès organisateur</OrganizerAccessEyebrow>
         <OrganizerAccessTitle>
-          {hasOrganizerAccess ? 'Ton espace organisateur est actif' : 'Demande ton acces organisateur'}
+          {hasOrganizerAccess ? 'Ton espace organisateur est actif' : 'Demande ton accès organisateur'}
         </OrganizerAccessTitle>
 
         {isLoading ? (
-          <OrganizerAccessState>Verification de ton compte et de ta demande en cours...</OrganizerAccessState>
+          <OrganizerAccessState>Vérification de ton compte et de ta demande en cours...</OrganizerAccessState>
         ) : errorMessage && !user ? (
           <>
             <OrganizerAccessErrorState>{errorMessage}</OrganizerAccessErrorState>
@@ -192,14 +192,14 @@ export function OrganizerAccessPage() {
                 type="button"
                 onClick={() => navigate('/auth?mode=register&intent=organizer')}
               >
-                Se connecter / S inscrire
+                Se connecter / S’inscrire
               </OrganizerAccessPrimaryButton>
             </OrganizerAccessActions>
           </>
         ) : hasOrganizerAccess ? (
           <>
             <OrganizerAccessSuccessState>
-              Ton profil dispose deja d un acces organisateur valide. On te fait maintenant entrer dans un espace dedie, separe du formulaire de demande.
+              Ton profil dispose déjà d’un accès organisateur valide. On te fait maintenant entrer dans un espace dédié, séparé du formulaire de demande.
             </OrganizerAccessSuccessState>
             <OrganizerAccessActions>
               <OrganizerAccessPrimaryButton
@@ -221,7 +221,7 @@ export function OrganizerAccessPage() {
         ) : (
           <>
             <OrganizerAccessText>
-              Renseigne les liens publics et les informations qui permettront a l equipe EventFlow de verifier que ton activite est bien reelle. Une fois ta demande envoyee, un admin la relira avant activation de ton acces organisateur.
+              Renseigne les liens publics et les informations qui permettront à l’équipe EventFlow de vérifier que ton activité est bien réelle. Une fois ta demande envoyée, un admin la relira avant activation de ton accès organisateur.
             </OrganizerAccessText>
 
             {application ? (
@@ -247,15 +247,15 @@ export function OrganizerAccessPage() {
 
             {application?.status === 'PENDING' ? (
               <OrganizerAccessState>
-                Ta demande est en attente de verification. Tu peux encore ajuster les informations ci-dessous si tu veux la completer.
+                Ta demande est en attente de vérification. Tu peux encore ajuster les informations ci-dessous si tu veux la compléter.
               </OrganizerAccessState>
             ) : null}
 
             {application?.status === 'REJECTED' ? (
               <OrganizerAccessErrorState>
                 {application.reviewNote
-                  ? `Retour de l equipe: ${application.reviewNote}`
-                  : 'La demande doit etre completee avant une nouvelle verification.'}
+                  ? `Retour de l’équipe: ${application.reviewNote}`
+                  : 'La demande doit être complétée avant une nouvelle vérification.'}
               </OrganizerAccessErrorState>
             ) : null}
 
@@ -392,10 +392,10 @@ export function OrganizerAccessPage() {
               </OrganizerAccessField>
 
               <OrganizerAccessField>
-                <OrganizerAccessFieldLabel>Presentation de l activite</OrganizerAccessFieldLabel>
+                <OrganizerAccessFieldLabel>Presentation de l’activité</OrganizerAccessFieldLabel>
                 <OrganizerAccessTextarea
                   value={form.motivation}
-                  placeholder="Decris ton activite, le type d evenements organises et ce que tu veux publier sur EventFlow."
+                  placeholder="Decris ton activité, le type d’évènements organises et ce que tu veux publiér sur EventFlow."
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
@@ -407,7 +407,7 @@ export function OrganizerAccessPage() {
               </OrganizerAccessField>
 
               <OrganizerAccessHint>
-                Les liens publics restent optionnels, mais ils peuvent aider l equipe EventFlow a verifier ton activite plus rapidement.
+                Les liens publics restent optionnels, mais’ils peuvent aider l’équipe EventFlow à vérifier ton activité plus rapidement.
               </OrganizerAccessHint>
 
               <OrganizerAccessActions>
@@ -415,14 +415,14 @@ export function OrganizerAccessPage() {
                   {isSubmitting
                     ? 'Envoi en cours...'
                     : application
-                      ? 'Mettre a jour ma demande'
+                      ? 'Mettre à jour ma demande'
                       : 'Envoyer ma demande'}
                 </OrganizerAccessPrimaryButton>
                 <OrganizerAccessSecondaryButton
                   type="button"
                   onClick={() => navigate('/account')}
                 >
-                  Revenir a mon profil
+                  Revenir à mon profil
                 </OrganizerAccessSecondaryButton>
               </OrganizerAccessActions>
             </OrganizerAccessForm>

@@ -38,7 +38,7 @@ final class OrganizerEventController extends AbstractController
         ],
         [
             'name' => 'Conference',
-            'description' => 'Conferences, talks et evenements professionnels.',
+            'description' => 'Conferences, talks et évènements professionnels.',
         ],
         [
             'name' => 'Atelier',
@@ -54,7 +54,7 @@ final class OrganizerEventController extends AbstractController
         ],
         [
             'name' => 'Sport',
-            'description' => 'Rencontres sportives, tournois et evenements fitness.',
+            'description' => 'Rencontres sportives, tournois et évènements fitness.',
         ],
     ];
 
@@ -73,7 +73,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -104,7 +104,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -135,7 +135,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -219,7 +219,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -262,13 +262,13 @@ final class OrganizerEventController extends AbstractController
 
         if (!is_numeric($capacity) || (int) $capacity <= 0) {
             return $this->json([
-                'message' => 'La capacite doit etre un entier positif.',
+                'message' => 'La capacité doit être un entier positif.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if (!in_array($status, self::ALLOWED_STATUSES, true)) {
             return $this->json([
-                'message' => 'Le statut doit etre draft ou published.',
+                'message' => 'Le statut doit être draft ou published.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -277,7 +277,7 @@ final class OrganizerEventController extends AbstractController
             (!$this->isLatitudeValid($locationLatitude))
         ) {
             return $this->json([
-                'message' => 'La latitude doit etre comprise entre -90 et 90.',
+                'message' => 'La latitude doit être comprise entre -90 et 90.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -286,7 +286,7 @@ final class OrganizerEventController extends AbstractController
             (!$this->isLongitudeValid($locationLongitude))
         ) {
             return $this->json([
-                'message' => 'La longitude doit etre comprise entre -180 et 180.',
+                'message' => 'La longitude doit être comprise entre -180 et 180.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -295,7 +295,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$startDatetime || !$endDatetime) {
             return $this->json([
-                'message' => 'Les dates startDatetime et endDatetime sont obligatoires et doivent etre valides.',
+                'message' => 'Les dates startDatetime et endDatetime sont obligatoires et doivent être valides.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -303,13 +303,13 @@ final class OrganizerEventController extends AbstractController
 
         if ($startDatetime < $now) {
             return $this->json([
-                'message' => 'La date de debut ne peut pas etre dans le passe.',
+                'message' => 'La date de début ne peut pas être dans le passé.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($endDatetime <= $startDatetime) {
             return $this->json([
-                'message' => 'La date de fin doit etre posterieure a la date de debut.',
+                'message' => 'La date de fin doit être postérieure à la date de début.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -319,7 +319,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$category instanceof Category) {
             return $this->json([
-                'message' => 'Categorie introuvable.',
+                'message' => 'Catégorie introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -330,7 +330,7 @@ final class OrganizerEventController extends AbstractController
             return $this->json([
                 'message' => $exception->getMessage() !== ''
                     ? $exception->getMessage()
-                    : 'Impossible de traiter les images envoyees.',
+                    : 'Impossible de traiter les images envoyées.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -361,7 +361,7 @@ final class OrganizerEventController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Evenement cree avec succes.',
+            'message' => 'l’évènement crée avec succès.',
             'event' => $this->serializeEvent($event),
         ], Response::HTTP_CREATED);
     }
@@ -383,7 +383,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -391,7 +391,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -426,7 +426,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -434,7 +434,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -468,13 +468,13 @@ final class OrganizerEventController extends AbstractController
 
         if (!is_numeric($capacity) || (int) $capacity <= 0) {
             return $this->json([
-                'message' => 'La capacite doit etre un entier positif.',
+                'message' => 'La capacité doit être un entier positif.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if (!in_array($status, self::ALLOWED_STATUSES, true)) {
             return $this->json([
-                'message' => 'Le statut doit etre draft ou published.',
+                'message' => 'Le statut doit être draft ou published.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -483,7 +483,7 @@ final class OrganizerEventController extends AbstractController
             (!$this->isLatitudeValid($locationLatitude))
         ) {
             return $this->json([
-                'message' => 'La latitude doit etre comprise entre -90 et 90.',
+                'message' => 'La latitude doit être comprise entre -90 et 90.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -492,7 +492,7 @@ final class OrganizerEventController extends AbstractController
             (!$this->isLongitudeValid($locationLongitude))
         ) {
             return $this->json([
-                'message' => 'La longitude doit etre comprise entre -180 et 180.',
+                'message' => 'La longitude doit être comprise entre -180 et 180.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -501,7 +501,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$startDatetime || !$endDatetime) {
             return $this->json([
-                'message' => 'Les dates startDatetime et endDatetime sont obligatoires et doivent etre valides.',
+                'message' => 'Les dates startDatetime et endDatetime sont obligatoires et doivent être valides.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -514,13 +514,13 @@ final class OrganizerEventController extends AbstractController
 
         if ($startDatetime < $now && !$isKeepingExistingPastStartDatetime) {
             return $this->json([
-                'message' => 'La date de debut ne peut pas etre dans le passe.',
+                'message' => 'La date de début ne peut pas être dans le passé.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($endDatetime <= $startDatetime) {
             return $this->json([
-                'message' => 'La date de fin doit etre posterieure a la date de debut.',
+                'message' => 'La date de fin doit être postérieure à la date de début.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -530,7 +530,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$category instanceof Category) {
             return $this->json([
-                'message' => 'Categorie introuvable.',
+                'message' => 'Catégorie introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -539,7 +539,7 @@ final class OrganizerEventController extends AbstractController
         if ($allocatedTicketStock > (int) $capacity) {
             return $this->json([
                 'message' => sprintf(
-                    'La capacite de l evenement (%d) ne peut pas etre inferieure au stock deja alloue aux billets (%d).',
+                    'La capacité de l’l’évènement (%d) ne peut pas être inférieure au stock déjà alloue aux billets (%d).',
                     (int) $capacity,
                     $allocatedTicketStock
                 ),
@@ -563,25 +563,25 @@ final class OrganizerEventController extends AbstractController
 
         if (null !== $thumbnailFile && !$thumbnailFile instanceof UploadedFile) {
             return $this->json([
-                'message' => 'La miniature envoyee est invalide.',
+                'message' => 'La miniature envoyée est invalide.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if (null !== $coverFile && !$coverFile instanceof UploadedFile) {
             return $this->json([
-                'message' => 'La cover envoyee est invalide.',
+                'message' => 'La cover envoyée est invalide.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if (null !== $eventVideoFile && !$eventVideoFile instanceof UploadedFile) {
             return $this->json([
-                'message' => 'La video envoyee est invalide.',
+                'message' => 'La vidéo envoyée est invalide.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($eventVideoFile instanceof UploadedFile && $endDatetime >= $now) {
             return $this->json([
-                'message' => 'La video souvenir peut etre ajoutee uniquement quand l evenement est termine.',
+                'message' => 'La vidéo souvenir peut être ajoutee uniquement quand l’l’évènement est terminé.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -601,7 +601,7 @@ final class OrganizerEventController extends AbstractController
             return $this->json([
                 'message' => $exception->getMessage() !== ''
                     ? $exception->getMessage()
-                    : 'Impossible de traiter les images envoyees.',
+                    : 'Impossible de traiter les images envoyées.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -631,7 +631,7 @@ final class OrganizerEventController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'La fiche evenement a ete mise a jour avec succes.',
+            'message' => 'La fiche l’évènement a été mise à jour avec succès.',
             'event' => $this->serializeEvent($event),
         ]);
     }
@@ -653,7 +653,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -661,7 +661,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -670,7 +670,7 @@ final class OrganizerEventController extends AbstractController
             $event->getOrganizer()?->getId() !== $user->getId()
         ) {
             return $this->json([
-                'message' => 'Tu ne peux modifier que le statut de tes propres evenements.',
+                'message' => 'Tu ne peux modifier que le statut de tes propres évènements.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -679,13 +679,13 @@ final class OrganizerEventController extends AbstractController
 
         if (!in_array($status, self::ALLOWED_STATUSES, true)) {
             return $this->json([
-                'message' => 'Le statut doit etre draft ou published.',
+                'message' => 'Le statut doit être draft ou published.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($event->getStatus() === $status) {
             return $this->json([
-                'message' => 'Le statut de cet evenement est deja a jour.',
+                'message' => 'Le statut de cet l’évènement est déjà à jour.',
                 'event' => $this->serializeEvent($event),
             ]);
         }
@@ -694,7 +694,7 @@ final class OrganizerEventController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Le statut de l evenement a ete mis a jour.',
+            'message' => 'Le statut de l’l’évènement a été mis à jour.',
             'event' => $this->serializeEvent($event),
         ]);
     }
@@ -825,7 +825,7 @@ final class OrganizerEventController extends AbstractController
         $mimeType = $file->getClientMimeType() ?? '';
 
         if (!str_starts_with($mimeType, 'image/')) {
-            throw new \RuntimeException('Le fichier envoye doit etre une image.');
+            throw new \RuntimeException('Le fichier envoyé doit être une image.');
         }
 
         $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/events';
@@ -848,7 +848,7 @@ final class OrganizerEventController extends AbstractController
             $file->move($uploadDir, $filename);
         } catch (FileException $exception) {
             throw new \RuntimeException(
-                "Impossible d'enregistrer l'image envoyee pour le moment."
+                "Impossible d'enregistrer l’image envoyée pour le moment."
             );
         }
 
@@ -858,13 +858,13 @@ final class OrganizerEventController extends AbstractController
     private function uploadVideo(UploadedFile $file): string
     {
         if (!$file->isValid()) {
-            throw new \RuntimeException('La video envoyee est invalide ou trop lourde.');
+            throw new \RuntimeException('La vidéo envoyée est invalide ou trop lourde.');
         }
 
         $mimeType = $file->getClientMimeType() ?? '';
 
-        if (!str_starts_with($mimeType, 'video/')) {
-            throw new \RuntimeException('Le fichier envoye doit etre une video.');
+        if (!str_starts_with($mimeType, 'vidéo/')) {
+            throw new \RuntimeException('Le fichier envoyé doit être une vidéo.');
         }
 
         $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/events/videos';
@@ -887,7 +887,7 @@ final class OrganizerEventController extends AbstractController
             $file->move($uploadDir, $filename);
         } catch (FileException) {
             throw new \RuntimeException(
-                "Impossible d'enregistrer la video envoyee pour le moment."
+                "Impossible d'enregistrer la vidéo envoyée pour le moment."
             );
         }
 
@@ -897,13 +897,13 @@ final class OrganizerEventController extends AbstractController
     private function getUploadErrorMessage(int $errorCode): string
     {
         return match ($errorCode) {
-            \UPLOAD_ERR_INI_SIZE, \UPLOAD_ERR_FORM_SIZE => 'L image envoyee est trop lourde pour le serveur. Essaie un fichier plus leger.',
-            \UPLOAD_ERR_PARTIAL => 'L image n a ete envoyee que partiellement. Reessaie l envoi.',
-            \UPLOAD_ERR_NO_FILE => 'Aucune image n a ete envoyee. Selectionne une image puis reessaie.',
-            \UPLOAD_ERR_NO_TMP_DIR => 'Le serveur ne trouve pas le dossier temporaire pour recevoir l image.',
-            \UPLOAD_ERR_CANT_WRITE => 'Le serveur n a pas pu enregistrer l image envoyee.',
-            \UPLOAD_ERR_EXTENSION => 'Une extension du serveur a bloque l envoi de l image.',
-            default => 'Le fichier image envoye est invalide ou incomplet.',
+            \UPLOAD_ERR_INI_SIZE, \UPLOAD_ERR_FORM_SIZE => 'L’image envoyée est trop lourde pour le serveur. Essaie un fichier plus léger.',
+            \UPLOAD_ERR_PARTIAL => 'L’image n’a été envoyée que partiellement. Réessaie l’envoi.',
+            \UPLOAD_ERR_NO_FILE => 'Aucune image n’a été envoyée. Sélectionne une image puis réessaie.',
+            \UPLOAD_ERR_NO_TMP_DIR => 'Le serveur ne trouve pas le dossier temporaire pour recevoir l’image.',
+            \UPLOAD_ERR_CANT_WRITE => 'Le serveur n’a pas pu enregistrer l’image envoyée.',
+            \UPLOAD_ERR_EXTENSION => 'Une extension du serveur a bloqué l’envoi de l’image.',
+            default => 'Le fichier image envoyé est invalide ou incomplet.',
         };
     }
 
@@ -1258,7 +1258,7 @@ final class OrganizerEventController extends AbstractController
                 $ticketSalesStartAt >= $startDatetime
             ) {
                 return sprintf(
-                    'Le billet "%s" commence a se vendre apres le nouveau debut de l evenement. Ajuste ses dates de vente ou la date de l evenement.',
+                    'Le billet "%s" commence à se vendre après le nouveau début de l’évènement. Ajuste ses dates de vente ou la date de l’évènement.',
                     $ticketType->getName() ?? 'Sans nom'
                 );
             }
@@ -1268,7 +1268,7 @@ final class OrganizerEventController extends AbstractController
                 $ticketSalesEndAt > $startDatetime
             ) {
                 return sprintf(
-                    'Le billet "%s" se vend encore apres le nouveau debut de l evenement. Ajuste ses dates de vente ou la date de l evenement.',
+                    'Le billet "%s" se vend encore apres le nouveau début de l’l’évènement. Ajuste ses dates de vente ou la date de l’l’évènement.',
                     $ticketType->getName() ?? 'Sans nom'
                 );
             }

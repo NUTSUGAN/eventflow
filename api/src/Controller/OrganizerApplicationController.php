@@ -58,7 +58,7 @@ final class OrganizerApplicationController extends AbstractController
 
         if (in_array($user->getRole(), [User::ROLE_ORGANIZER, User::ROLE_ADMIN], true)) {
             return $this->json([
-                'message' => 'Ton acces organisateur est deja actif.',
+                'message' => 'Ton accès organisateur est déjà actif.',
             ], 409);
         }
 
@@ -84,7 +84,7 @@ final class OrganizerApplicationController extends AbstractController
 
         if ($application->getStatus() === OrganizerApplication::STATUS_APPROVED) {
             return $this->json([
-                'message' => 'Ta demande organisateur a deja ete approuvee.',
+                'message' => 'Ta demande organisateur a déjà ete approuvée.',
                 'application' => $this->serializeApplication($application),
             ], 409);
         }
@@ -118,8 +118,8 @@ final class OrganizerApplicationController extends AbstractController
 
         return $this->json([
             'message' => $isNewApplication
-                ? 'Ta demande organisateur a bien ete envoyee.'
-                : 'Ta demande organisateur a bien ete mise a jour et renvoyee.',
+                ? 'Ta demande organisateur a bien été envoyée.'
+                : 'Ta demande organisateur a bien été mise à jour et renvoyée.',
             'application' => $this->serializeApplication($application),
         ], $isNewApplication ? 201 : 200);
     }
@@ -139,7 +139,7 @@ final class OrganizerApplicationController extends AbstractController
                     ->to($reviewEmail)
                     ->subject('Nouvelle demande organisateur EventFlow')
                     ->text(
-                        "Nouvelle demande organisateur recue.\n\n".
+                        "Nouvelle demande organisateur reçue.\n\n".
                         "Compte: {$fullName}\n".
                         "Email: {$user->getEmail()}\n".
                         "Structure: {$application->getOrganizationName()}\n".
@@ -158,11 +158,11 @@ final class OrganizerApplicationController extends AbstractController
                     (new Email())
                         ->from('no-reply@eventflow.local')
                         ->to((string) $user->getEmail())
-                        ->subject('Ta demande organisateur EventFlow a ete recue')
+                        ->subject('Ta demande organisateur EventFlow a été reçue')
                         ->text(
                             "Bonjour {$fullName},\n\n".
-                            "Nous avons bien recu ta demande organisateur pour {$application->getOrganizationName()}.\n".
-                            "Notre equipe va verifier les informations publiques envoyees puis revenir vers toi par email.\n"
+                            "Nous avons bien reçu ta demande organisateur pour {$application->getOrganizationName()}.\n".
+                            "Notre équipe va vérifier les informations publiques envoyées puis revenir vers toi par email.\n"
                         )
                 );
             }

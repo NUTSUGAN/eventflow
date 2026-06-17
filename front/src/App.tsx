@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar/Navbar'
 import { CookieConsentBanner } from './components/CookieConsentBanner/CookieConsentBanner'
 import { AccountPage } from './pages/AccountPage/AccountPage'
 import { AccountEmailChangeConfirmPage } from './pages/AccountPage/AccountEmailChangeConfirmPage'
+import { ContactPage } from './pages/ContactPage/ContactPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminOrganizerApplicationsPage } from './pages/AdminOrganizerApplicationsPage/AdminOrganizerApplicationsPage'
 import { AdminOrdersPage } from './pages/AdminOrdersPage/AdminOrdersPage'
@@ -17,6 +18,7 @@ import { EventDetailPage } from './pages/EventDetailPage/EventDetailPage'
 import { ExplorerPage } from './pages/ExplorerPage/ExplorerPage'
 import { EventsListPage } from './pages/EventsListPage/EventsListPage'
 import { GuestTicketPage } from './pages/GuestTicketPage/GuestTicketPage'
+import { LegalPage, legalPages } from './pages/LegalPage/LegalPage'
 import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
 import { OrderPreparationPage } from './pages/OrderPreparationPage/OrderPreparationPage'
 import { OrderCheckoutPage } from './pages/OrderCheckoutPage/OrderCheckoutPage'
@@ -103,6 +105,15 @@ function App() {
           />
           <Route path="/staff/scan" element={<StaffScanPage />} />
           <Route path="/organizers/:organizerId" element={<OrganizerProfilePage />} />
+          <Route
+            path="/conditions-utilisation"
+            element={<LegalPage {...legalPages.conditions} />}
+          />
+          <Route path="/mentions-legales" element={<LegalPage {...legalPages.mentions} />} />
+          <Route path="/confidentialite" element={<LegalPage {...legalPages.privacy} />} />
+          <Route path="/qui-sommes-nous" element={<LegalPage {...legalPages.about} />} />
+          <Route path="/aide" element={<LegalPage {...legalPages.help} />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

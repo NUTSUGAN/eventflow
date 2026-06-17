@@ -26,7 +26,7 @@ final class OrganizerStaffController extends AbstractController
 
         if (!$user->canManageStaff()) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs pour la gestion du staff.',
+                'message' => 'Accès réservé aux organisateurs pour la gestion du staff.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -58,7 +58,7 @@ final class OrganizerStaffController extends AbstractController
 
         if (!$user->canManageStaff()) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs pour la gestion du staff.',
+                'message' => 'Accès réservé aux organisateurs pour la gestion du staff.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -80,8 +80,8 @@ final class OrganizerStaffController extends AbstractController
 
         return $this->json([
             'message' => $wasReactivated
-                ? 'Le membre du staff a ete remis en service.'
-                : 'Membre du staff ajoute avec succes.',
+                ? 'Le membre du staff a été remis en service.'
+                : 'Membre du staff ajoute avec succès.',
             'staffMember' => $organizerStaffService->serializeMembership($membership),
             'count' => $organizerStaffService->countMembers($user),
             'totalCount' => count($organizerStaffService->listMembers($user)),
@@ -104,7 +104,7 @@ final class OrganizerStaffController extends AbstractController
 
         if (!$user->canManageStaff()) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs pour la gestion du staff.',
+                'message' => 'Accès réservé aux organisateurs pour la gestion du staff.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -117,7 +117,7 @@ final class OrganizerStaffController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Le membre a ete passe hors service.',
+            'message' => 'Le membre a été passe hors service.',
             'staffMember' => $organizerStaffService->serializeMembership($membership),
             'count' => $organizerStaffService->countMembers($user),
             'totalCount' => count($organizerStaffService->listMembers($user)),

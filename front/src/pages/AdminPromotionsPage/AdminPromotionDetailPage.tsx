@@ -115,7 +115,7 @@ export function AdminPromotionDetailPage() {
       const updated = await updatePromotionChannel(campaign.id, channelId, draft)
       setCampaign(updated)
       setDrafts(draftsFrom(updated))
-      setMessage('Suivi enregistre. L organisateur voit maintenant ces informations.')
+      setMessage('Suivi enregistré. L’organisateur voit maintenant ces informations.')
     } catch (nextError) {
       setError(apiMessage(nextError))
     } finally {
@@ -127,14 +127,14 @@ export function AdminPromotionDetailPage() {
     <AdminPromotionPage>
       <AdminPromotionActions>
         <AdminPromotionButton type="button" onClick={() => navigate('/admin/promotions')}>
-          Retour aux campagnes
+          Retour cux campagnes
         </AdminPromotionButton>
       </AdminPromotionActions>
 
       <AdminPromotionHeader>
         <div>
           <AdminPromotionTitle>Suivi de la campagne</AdminPromotionTitle>
-          <AdminPromotionText>Le contenu enregistre ici est visible par l organisateur.</AdminPromotionText>
+          <AdminPromotionText>Le contenu enregistré ici est visible par l’organisateur.</AdminPromotionText>
         </div>
       </AdminPromotionHeader>
 
@@ -164,7 +164,7 @@ export function AdminPromotionDetailPage() {
           </AdminPromotionStats>
 
           {campaign.status !== 'active' ? (
-            <AdminPromotionMessage>Le suivi devient modifiable apres confirmation du paiement.</AdminPromotionMessage>
+            <AdminPromotionMessage>Le suivi devient modifiable après confirmation du paiement.</AdminPromotionMessage>
           ) : null}
 
           <AdminPromotionChannelGrid>
@@ -176,7 +176,7 @@ export function AdminPromotionDetailPage() {
                 <AdminPromotionChannel key={channel.id}>
                   <AdminPromotionCardTitle>{channelLabels[channel.channelCode]}</AdminPromotionCardTitle>
                   <AdminPromotionField>
-                    <span>Information visible par l organisateur</span>
+                    <span>Information visible par l’organisateur</span>
                     <AdminPromotionTextarea
                       value={draft.adminBrief}
                       disabled={campaign.status !== 'active'}
@@ -188,7 +188,7 @@ export function AdminPromotionDetailPage() {
                     />
                   </AdminPromotionField>
                   <AdminPromotionField>
-                    <span>Etat de diffusion</span>
+                    <span>État de diffusion</span>
                     <AdminPromotionSelect
                       value={draft.deliveryStatus}
                       disabled={campaign.status !== 'active'}
@@ -201,9 +201,9 @@ export function AdminPromotionDetailPage() {
                       }))}
                     >
                       <option value="pending">En attente</option>
-                      <option value="scheduled">Planifie</option>
+                      <option value="scheduled">Planifié</option>
                       <option value="active">En diffusion</option>
-                      <option value="delivered">Livre</option>
+                      <option value="delivered">Livré</option>
                       <option value="cancelled">Annule</option>
                     </AdminPromotionSelect>
                   </AdminPromotionField>
@@ -218,7 +218,7 @@ export function AdminPromotionDetailPage() {
                           [channel.id]: { ...draft, isFeatured: event.target.checked },
                         }))}
                       />
-                      Mettre cet evenement en avant sur l accueil et Explorer
+                      Mettre cet évènement en avant sur l’accueil et Explorer
                     </AdminPromotionCheckbox>
                   ) : null}
                   <AdminPromotionButton

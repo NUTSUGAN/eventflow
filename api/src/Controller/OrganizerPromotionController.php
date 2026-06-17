@@ -39,7 +39,7 @@ final class OrganizerPromotionController extends AbstractController
         $duration = strtolower((string) $request->query->get('duration', PromotionCampaign::DURATION_7_DAYS));
 
         if (!in_array($duration, PromotionCampaign::DURATIONS, true)) {
-            return $this->json(['message' => 'Duree de promotion invalide.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Durée de promotion invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
         $startsAt = new \DateTimeImmutable();
@@ -76,7 +76,7 @@ final class OrganizerPromotionController extends AbstractController
 
         if ('published' !== strtolower((string) $event->getStatus())) {
             return $this->json([
-                'message' => 'Publie cet evenement avant de demander une promotion.',
+                'message' => 'Publie cet l’évènement avant de demander une promotion.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
@@ -121,7 +121,7 @@ final class OrganizerPromotionController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'La demande de promotion a ete envoyee a EventFlow.',
+            'message' => 'La demande de promotion a été envoyée a EventFlow.',
             'campaign' => $campaignService->serialize($campaign),
         ], Response::HTTP_CREATED);
     }
@@ -139,7 +139,7 @@ final class OrganizerPromotionController extends AbstractController
         }
 
         if (!$user->isOrganizerOrAdmin()) {
-            return $this->json(['message' => 'Acces reserve aux organisateurs.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Accès réservé aux organisateurs.'], Response::HTTP_FORBIDDEN);
         }
 
         $page = max(1, (int) $request->query->get('page', 1));
@@ -214,11 +214,7 @@ final class OrganizerPromotionController extends AbstractController
     #[Route('/promotions/{id<\d+>}/confirm-payment', name: 'api_organizer_promotion_payment_confirm', methods: ['POST'])]
     public function confirmPayment(
         PromotionCampaign $campaign,
-        Request $request,
         PromotionCampaignService $campaignService,
-        PromotionNotificationService $notificationService,
-        StripePaymentService $stripePaymentService,
-        EntityManagerInterface $entityManager,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -232,34 +228,15 @@ final class OrganizerPromotionController extends AbstractController
 
         if (PromotionCampaign::STATUS_ACTIVE === $campaign->getStatus() && null !== $campaign->getPaidAt()) {
             return $this->json([
-                'message' => 'Le paiement est deja confirme.',
+                'message' => 'Le paiement est déjà confirmé.',
                 'campaign' => $campaignService->serialize($campaign),
             ]);
         }
 
-        try {
-            $data = $request->toArray();
-            $session = $stripePaymentService->retrievePromotionCheckoutSession((string) ($data['sessionId'] ?? ''));
-            $stripePaymentService->assertPaidPromotionSession($session, $campaign);
-            $campaignService->assertLaunchPackAvailable($campaign);
-            $campaignService->activatePaidCampaign($campaign, (string) $session->id);
-            $stripePaymentService->recordPromotionOrder($campaign, $session);
-            $entityManager->flush();
-            $notificationService->notifyPaymentConfirmed($campaign);
-        } catch (\InvalidArgumentException $exception) {
-            return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
-        } catch (\LogicException $exception) {
-            return $this->json(['message' => $exception->getMessage()], Response::HTTP_CONFLICT);
-        } catch (\Throwable) {
-            return $this->json([
-                'message' => 'Impossible de verifier le paiement aupres de Stripe pour le moment.',
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
-
         return $this->json([
-            'message' => 'Paiement confirme. La campagne est maintenant en suivi.',
+            'message' => 'Paiement Stripe reçu par le navigateur. EventFlow attend le webhook Stripe signe pour confirmer la campagne.',
             'campaign' => $campaignService->serialize($campaign),
-        ]);
+        ], Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -274,17 +251,17 @@ final class OrganizerPromotionController extends AbstractController
         }
 
         if (!$user->isOrganizerOrAdmin()) {
-            return $this->json(['message' => 'Acces reserve aux organisateurs.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Accès réservé aux organisateurs.'], Response::HTTP_FORBIDDEN);
         }
 
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
-            return $this->json(['message' => 'Evenement introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
         if (User::ROLE_ADMIN !== $user->getBaseRole() && $event->getOrganizer()?->getId() !== $user->getId()) {
-            return $this->json(['message' => 'Vous ne pouvez promouvoir que vos evenements.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Vous ne pouvez promouvoir que vos évènements.'], Response::HTTP_FORBIDDEN);
         }
 
         return [$event, $user];

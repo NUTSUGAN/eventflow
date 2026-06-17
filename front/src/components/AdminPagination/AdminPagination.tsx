@@ -77,7 +77,7 @@ export function AdminPagination({
             type="button"
             $active={token === page}
             onClick={() => onPageChange(token)}
-            aria-label={`Aller a la page ${token}`}
+            aria-label={`Aller à la page ${token}`}
           >
             {token}
           </AdminDashboardPaginationButton>

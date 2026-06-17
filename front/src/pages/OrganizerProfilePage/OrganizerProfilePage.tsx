@@ -41,7 +41,7 @@ function getOrganizerInitials(fullName: string): string {
 
 function formatJoinDate(date: string | null): string {
   if (!date) {
-    return 'Date d arrivee a confirmer'
+    return 'Date d’arrivée à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -63,7 +63,7 @@ export function OrganizerProfilePage() {
     async function loadProfile() {
       if (!organizerId) {
         if (isMounted) {
-          setErrorMessage("Impossible de retrouver l'organisateur demande.")
+          setErrorMessage("Impossible de retrouver l’organisateur demande.")
           setIsLoading(false)
         }
 
@@ -125,7 +125,7 @@ export function OrganizerProfilePage() {
       )
     } catch {
       setErrorMessage(
-        "Impossible de mettre a jour l'abonnement EventFlow pour le moment.",
+        "Impossible de mettre à jour l'abonnement EventFlow pour le moment.",
       )
     } finally {
       setIsFollowLoading(false)
@@ -151,7 +151,7 @@ export function OrganizerProfilePage() {
     return (
       <ProfileSection>
         <ProfileStateBox>
-          {errorMessage ?? "Le profil organisateur n'est pas disponible."}
+          {errorMessage ?? "Le profil organisateur n’est pas disponible."}
         </ProfileStateBox>
       </ProfileSection>
     )
@@ -169,10 +169,10 @@ export function OrganizerProfilePage() {
             </ProfileAvatar>
 
             <ProfileTitleGroup>
-              <ProfileEyebrow>Profil organisateur</ProfileEyebrow>
+              <ProfileEyebrow>Profil’organisateur</ProfileEyebrow>
               <ProfileTitle>{profile.organizer.fullName}</ProfileTitle>
               <ProfileLead>
-                Retrouvez ses evenements publies et suivez ses prochaines annonces.
+                Retrouvez ses évènements publiés et suivez ses prochaines annonces.
               </ProfileLead>
             </ProfileTitleGroup>
           </ProfileIdentity>
@@ -186,8 +186,8 @@ export function OrganizerProfilePage() {
                 $active={profile.subscription.isFollowing}
               >
                 {profile.subscription.isFollowing
-                  ? "Abonné à l'organisateur"
-                  : "S'abonner à l'organisateur"}
+                  ? "Abonné à l’organisateur"
+                  : "S'abonner à l’organisateur"}
               </ProfileActionButton>
             ) : null}
 
@@ -201,7 +201,7 @@ export function OrganizerProfilePage() {
 
         <ProfileMetaRow>
           <ProfileMetaBadge>
-            {profile.organizer.publishedEventCount} evenement(s) publie(s)
+            {profile.organizer.publishedEventCount} évènement(s) publié(s)
           </ProfileMetaBadge>
           <ProfileMetaBadge>
             Present sur EventFlow depuis {formatJoinDate(profile.organizer.createdAt)}
@@ -210,16 +210,16 @@ export function OrganizerProfilePage() {
 
         {profile.subscription.requiresAuth ? (
           <ProfileActionNote>
-            Connecte-toi ou crée un compte pour t'abonner EventFlow depuis son profil.
+            Connecte-toi ou crée un compte pour t’abonner EventFlow depuis son profil.
           </ProfileActionNote>
         ) : null}
       </ProfileHero>
 
       <ProfileBlock>
         <ProfileBlockHeader>
-          <ProfileBlockTitle>Ses evenements publies</ProfileBlockTitle>
+          <ProfileBlockTitle>Ses évènements publiés</ProfileBlockTitle>
           <ProfileBlockCaption>
-            Clique sur un evenement pour ouvrir sa fiche detail.
+            Clique sur un évènement pour ouvrir sa fiche détail.
           </ProfileBlockCaption>
         </ProfileBlockHeader>
 
@@ -231,7 +231,7 @@ export function OrganizerProfilePage() {
           </ProfileCardsGrid>
         ) : (
           <ProfileStateBox>
-            Aucun evenement publie n&apos;est disponible pour cet organisateur.
+            Aucun évènement publié n&apos;est disponible pour cet organisateur.
           </ProfileStateBox>
         )}
       </ProfileBlock>

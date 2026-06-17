@@ -73,7 +73,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 function formatEventDate(date: string | null): string {
   if (!date) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -86,7 +86,7 @@ function formatEventDate(date: string | null): string {
 
 function formatEventTimeRange(start: string | null, end: string | null): string {
   if (!start) {
-    return 'Horaire a confirmer'
+    return 'Horaire à confirmer'
   }
 
   const startTime = new Intl.DateTimeFormat('fr-FR', {
@@ -108,7 +108,7 @@ function formatEventTimeRange(start: string | null, end: string | null): string 
 
 function formatTicketPrice(price: number | null): string {
   if (price === null) {
-    return 'Tarif a venir'
+    return 'Tarif à venir'
   }
 
   return new Intl.NumberFormat('fr-FR', {
@@ -191,14 +191,14 @@ function getTicketReserveHintText(ticketType: EventDetail['ticketTypes'][number]
   }
 
   if (state === 'upcoming') {
-    return 'La vente de ce billet n a pas encore commence.'
+    return 'La vente de ce billet n’a pas encore commence.'
   }
 
   if (state === 'ended') {
-    return 'La vente de ce billet est terminee.'
+    return 'La vente de ce billet est terminée.'
   }
 
-  return 'Tu choisiras la quantite juste apres.'
+  return 'Tu choisiras la quantité juste après.'
 }
 
 function getOrganizerInitials(fullName: string): string {
@@ -225,7 +225,7 @@ const eventStatusOptions = [
   { value: 'pending', label: 'En attente' },
   { value: 'published', label: 'Public' },
   { value: 'cancelled', label: 'Annule' },
-  { value: 'completed', label: 'Termine' },
+  { value: 'complétéd', label: 'Termine' },
 ]
 
 function normalizeStatusValue(status: string): string {
@@ -239,7 +239,7 @@ function normalizeStatusValue(status: string): string {
 const eventReportReasonOptions = [
   { value: 'Fraude ou arnaque', label: 'Fraude ou arnaque' },
   { value: 'Contenu interdit', label: 'Contenu interdit' },
-  { value: 'Mauvaise categorie', label: 'Mauvaise categorie' },
+  { value: 'Mauvaise catégorie', label: 'Mauvaise catégorie' },
   { value: 'Informations trompeuses', label: 'Informations trompeuses' },
   { value: 'Image ou visuel inapproprie', label: 'Image ou visuel inapproprie' },
   { value: 'Autre raison', label: 'Autre raison' },
@@ -267,7 +267,7 @@ export function EventDetailPage() {
     async function loadEventDetail() {
       if (!eventId) {
         if (isMounted) {
-          setErrorMessage("Impossible de retrouver l'evenement demande.")
+          setErrorMessage("Impossible de retrouver l’évènement demande.")
           setIsLoading(false)
         }
         return
@@ -285,7 +285,7 @@ export function EventDetailPage() {
       } catch {
         if (isMounted) {
           setErrorMessage(
-            "Impossible de charger la fiche evenement pour le moment.",
+            "Impossible de charger la fiche évènement pour le moment.",
           )
         }
       } finally {
@@ -404,7 +404,7 @@ export function EventDetailPage() {
   }, [event])
 
   async function handleFollowToggle() {
-    if (!event?.organizer || !event.subscription.canFollow || isFollowLoading) {
+    if (!event || !event.organizer || !event.subscription.canFollow || isFollowLoading) {
       return
     }
 
@@ -426,7 +426,7 @@ export function EventDetailPage() {
       )
     } catch {
       setFollowErrorMessage(
-        "Impossible de mettre a jour l'abonnement EventFlow pour le moment.",
+        "Impossible de mettre à jour l'abonnement EventFlow pour le moment.",
       )
     } finally {
       setIsFollowLoading(false)
@@ -478,7 +478,7 @@ export function EventDetailPage() {
 
       if (status?.status === 401) {
         handleAuthPrompt()
-        setReportErrorMessage('Connecte-toi pour envoyer un signalement a l equipe EventFlow.')
+        setReportErrorMessage('Connecte-toi pour envoyer un signalement à l’équipe EventFlow.')
       } else {
         setReportErrorMessage(
           status?.data?.message ??
@@ -494,9 +494,9 @@ export function EventDetailPage() {
     return (
       <DetailSection>
         <DetailStateBox>
-          <DetailPanelTitle>Chargement de la fiche evenement...</DetailPanelTitle>
+          <DetailPanelTitle>Chargement de la fiche évènement...</DetailPanelTitle>
           <DetailText>
-            On recupere les informations de l&apos;evenement et de l&apos;organisateur.
+            On récupère les informations de l&apos;évènement et de l&apos;organisateur.
           </DetailText>
         </DetailStateBox>
       </DetailSection>
@@ -507,8 +507,8 @@ export function EventDetailPage() {
     return (
       <DetailSection>
         <DetailStateBox>
-          <DetailPanelTitle>La fiche evenement n&apos;est pas disponible.</DetailPanelTitle>
-          <DetailText>{errorMessage ?? "Une erreur inconnue s'est produite."}</DetailText>
+          <DetailPanelTitle>La fiche évènement n&apos;est pas disponible.</DetailPanelTitle>
+          <DetailText>{errorMessage ?? "Une erreur inconnue s’est produite."}</DetailText>
         </DetailStateBox>
       </DetailSection>
     )
@@ -526,14 +526,14 @@ export function EventDetailPage() {
       <DetailHero>
         <DetailHeroCover $imageUrl={coverImageUrl}>
           {event.isSponsored ? (
-            <DetailSponsoredBadge src="/assets/badge-sponsorise-eventflow.png" alt="Evenement sponsorise" />
+            <DetailSponsoredBadge src="/assets/badge-sponsorise-eventflow.png" alt="évènement sponsorise" />
           ) : null}
         </DetailHeroCover>
 
         <DetailHeroContent>
           <DetailHeroTop>
             <DetailMetaBadgeRow>
-              <DetailMetaBadge>{event.category?.name ?? 'Evenement'}</DetailMetaBadge>
+              <DetailMetaBadge>{event.category?.name ?? 'évènement'}</DetailMetaBadge>
               <DetailMetaBadge>{formatEventDate(event.startsAt)}</DetailMetaBadge>
               <DetailMetaBadge>{formatEventTimeRange(event.startsAt, event.endsAt)}</DetailMetaBadge>
             </DetailMetaBadgeRow>
@@ -545,26 +545,26 @@ export function EventDetailPage() {
             <DetailInfoGrid>
               <DetailInfoItem>
                 <DetailInfoLabel>Ville</DetailInfoLabel>
-                <DetailInfoValue>{event.location?.city ?? 'A confirmer'}</DetailInfoValue>
+                <DetailInfoValue>{event.location?.city ?? 'À confirmer'}</DetailInfoValue>
               </DetailInfoItem>
 
               <DetailInfoItem>
                 <DetailInfoLabel>Adresse</DetailInfoLabel>
                 <DetailInfoValue>
-                  {event.location?.address ?? 'Adresse a confirmer'}
+                  {event.location?.address ?? 'Adresse à confirmer'}
                 </DetailInfoValue>
               </DetailInfoItem>
 
               <DetailInfoItem>
-                <DetailInfoLabel>Capacite</DetailInfoLabel>
+                <DetailInfoLabel>Capacité</DetailInfoLabel>
                 <DetailInfoValue>
-                  {event.capacity !== null ? `${event.capacity} places` : 'Non renseignee'}
+                  {event.capacity !== null ? `${event.capacity} places` : 'Non renseignée'}
                 </DetailInfoValue>
               </DetailInfoItem>
 
               <DetailInfoItem>
                 <DetailInfoLabel>Statut</DetailInfoLabel>
-                <DetailInfoSelect defaultValue={statusValue} disabled aria-label="Statut de l'evenement">
+                <DetailInfoSelect defaultValue={statusValue} disabled aria-label="Statut de l’évènement">
                   {eventStatusOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -581,9 +581,9 @@ export function EventDetailPage() {
         <DetailEventVideoPanel>
           <DetailPanelHeader>
             <div>
-              <DetailPanelTitle>Video souvenir</DetailPanelTitle>
+              <DetailPanelTitle>Vidéo souvenir</DetailPanelTitle>
               <DetailCaption>
-                Un apercu de cet evenement passe, partage par l organisateur.
+                Un’aperçu de cet évènement passé, partagé par l’organisateur.
               </DetailCaption>
             </div>
           </DetailPanelHeader>
@@ -595,7 +595,7 @@ export function EventDetailPage() {
         <DetailBody>
           <DetailPanel>
             <DetailPanelHeader>
-              <DetailPanelTitle>A propos de cet evenement</DetailPanelTitle>
+              <DetailPanelTitle>A propos de cet évènement</DetailPanelTitle>
             </DetailPanelHeader>
             <DetailText>{event.description}</DetailText>
           </DetailPanel>
@@ -654,14 +654,14 @@ export function EventDetailPage() {
               </DetailTicketList>
             ) : (
               <DetailEmptyText>
-                Les billets ne sont pas encore affiches pour cet evenement.
+                Les billets ne sont pas encore affichés pour cet évènement.
               </DetailEmptyText>
             )}
           </DetailPanel>
 
           <DetailPanel>
             <DetailPanelHeader>
-              <DetailPanelTitle>Lieu et acces</DetailPanelTitle>
+              <DetailPanelTitle>Lieu et accès</DetailPanelTitle>
               {mapLink ? (
                 <DetailMapLink href={mapLink} target="_blank" rel="noreferrer">
                   Ouvrir dans Maps
@@ -685,7 +685,7 @@ export function EventDetailPage() {
                 />
               ) : (
                 <DetailEmptyText>
-                  La carte sera disponible des que les informations de localisation seront completes.
+                  La carte sera disponible des que les informations de localisation seront complétés.
                 </DetailEmptyText>
               )}
             </DetailMapCard>
@@ -710,7 +710,7 @@ export function EventDetailPage() {
                   <div>
                     <DetailOrganizerName>{event.organizer.fullName}</DetailOrganizerName>
                     <DetailOrganizerNote>
-                      Retrouvez ses prochains evenements et suivez ses nouvelles publications.
+                      Retrouvez ses prochains évènements et suivez ses nouvelles publications.
                     </DetailOrganizerNote>
                   </div>
                 </DetailOrganizerIdentity>
@@ -730,8 +730,8 @@ export function EventDetailPage() {
                         />
                       </FollowIcon>
                       {event.subscription.isFollowing
-                        ? "Abonné à l'organisateur"
-                        : "S'abonner à l'organisateur"}
+                        ? "Abonné à l’organisateur"
+                        : "S'abonner à l’organisateur"}
                     </FollowButton>
                   ) : null}
 
@@ -744,7 +744,7 @@ export function EventDetailPage() {
 
                 {event.subscription.requiresAuth ? (
                   <DetailOrganizerNote>
-                    Connecte-toi ou cree un compte pour t'abonner EventFlow.
+                    Connecte-toi ou créé un compte pour t’abonner EventFlow.
                   </DetailOrganizerNote>
                 ) : null}
                 {followErrorMessage ? (
@@ -764,7 +764,7 @@ export function EventDetailPage() {
             <DetailPanel>
               <DetailPanelHeader>
                 <div>
-                  <DetailPanelTitle>Signaler cet evenement</DetailPanelTitle>
+                  <DetailPanelTitle>Signaler cet évènement</DetailPanelTitle>
                   <DetailCaption>
                     Tu peux signaler cette fiche si elle te semble frauduleuse ou incorrecte.
                   </DetailCaption>
@@ -774,7 +774,7 @@ export function EventDetailPage() {
                   type="button"
                   onClick={() => setIsReportOpen((current) => !current)}
                 >
-                  {isReportOpen ? 'Fermer le signalement' : 'Signaler cet evenement'}
+                  {isReportOpen ? 'Fermer le signalement' : 'Signaler cet évènement'}
                 </DetailReportButton>
               </DetailPanelHeader>
 
@@ -791,8 +791,8 @@ export function EventDetailPage() {
               {isReportOpen ? (
                 <DetailReportCard>
                   <DetailText>
-                    Tu signales ici l&apos;evenement. L&apos;organisateur n&apos;est ajoute
-                    qu&apos;en contexte pour aider l&apos;equipe EventFlow a traiter ton retour.
+                    Tu signales ici l&apos;évènement. L&apos;organisateur n&apos;est ajouté
+                    qu&apos;en contexte pour aider l&apos;équipe EventFlow à traiter ton retour.
                   </DetailText>
 
                   <DetailField>
@@ -816,14 +816,14 @@ export function EventDetailPage() {
                     <DetailReportTextarea
                       value={reportDetails}
                       onChange={(event) => setReportDetails(event.target.value)}
-                      placeholder="Ajoute ici le contexte utile pour l'equipe admin."
+                      placeholder="Ajoute ici le contexte utile pour l’équipe admin."
                       maxLength={1500}
                     />
                   </DetailField>
 
                   {event.subscription.requiresAuth ? (
                     <DetailInlineMessage $tone="danger">
-                      Connecte-toi pour envoyer un signalement a l&apos;equipe EventFlow.
+                      Connecte-toi pour envoyer un signalement à l&apos;équipe EventFlow.
                     </DetailInlineMessage>
                   ) : null}
 
@@ -843,7 +843,7 @@ export function EventDetailPage() {
                     </TicketReserveButton>
 
                     <TicketReserveHint>
-                      L&apos;equipe EventFlow recevra ton motif et tes details.
+                      L&apos;équipe EventFlow recevra ton motif et tes détails.
                     </TicketReserveHint>
                   </DetailActionRow>
                 </DetailReportCard>
@@ -855,8 +855,8 @@ export function EventDetailPage() {
 
       <DetailPanel>
         <DetailPanelHeader>
-          <DetailPanelTitle>Dans la meme categorie</DetailPanelTitle>
-          <DetailCaption>3 evenements publies a afficher ensuite</DetailCaption>
+          <DetailPanelTitle>Dans la meme catégorie</DetailPanelTitle>
+          <DetailCaption>3 évènements publiés à afficher ensuite</DetailCaption>
         </DetailPanelHeader>
 
         {relatedEvents.length > 0 ? (
@@ -867,7 +867,7 @@ export function EventDetailPage() {
           </DetailRelatedGrid>
         ) : (
           <DetailEmptyText>
-            D'autres evenements de cette categorie seront proposes ici au fur et a mesure des publications.
+            D'autres évènements de cette catégorie seront proposes ici au fur et a mesure des publications.
           </DetailEmptyText>
         )}
       </DetailPanel>

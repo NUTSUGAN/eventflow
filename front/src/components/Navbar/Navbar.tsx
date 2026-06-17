@@ -321,7 +321,7 @@ export function Navbar() {
   return (
     <NavbarContainer>
       <NavbarInner>
-        <Brand to="/" aria-label="Retour a l'accueil EventFlow">
+        <Brand to="/" aria-label="Retour à l’accueil EventFlow">
           <picture>
             <source media="(max-width: 840px)" srcSet="/eventflow-logo-mobile.png" />
             <BrandImage src="/eventflow-logo.png" alt="EventFlow" />
@@ -329,7 +329,7 @@ export function Navbar() {
         </Brand>
 
         <SearchBox ref={searchBoxRef}>
-          <SearchForm role="search" aria-label="Recherche d'evenements" onSubmit={handleSearchSubmit}>
+          <SearchForm role="search" aria-label="Recherche d’évènements" onSubmit={handleSearchSubmit}>
             <SearchField>
               <SearchIcon viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -340,7 +340,7 @@ export function Navbar() {
               <SearchInput
                 type="search"
                 value={searchQuery}
-                placeholder="Rechercher un evenement ou un organisateur"
+                placeholder="Rechercher un évènement ou un organisateur"
                 onChange={(event) => {
                   const nextQuery = event.target.value
                   setSearchQuery(nextQuery)
@@ -358,7 +358,7 @@ export function Navbar() {
                     setIsSearchOpen(true)
                   }
                 }}
-                aria-label="Rechercher un evenement ou un organisateur"
+                aria-label="Rechercher un évènement ou un organisateur"
                 aria-autocomplete="list"
                 aria-expanded={isSearchOpen}
                 aria-controls="site-search-suggestions"
@@ -370,7 +370,7 @@ export function Navbar() {
             <SearchSuggestionsPanel id="site-search-suggestions">
               {searchQuery.trim().length < 3 ? (
                 <SearchSuggestionStatus>
-                  Saisis au moins 3 lettres pour voir des suggestions d&apos;evenements et d&apos;organisateurs.
+                  Saisis au moins 3 lettres pour voir des suggestions d&apos;évènements et d&apos;organisateurs.
                 </SearchSuggestionStatus>
               ) : isSearchLoading ? (
                 <SearchSuggestionStatus>
@@ -380,7 +380,7 @@ export function Navbar() {
                 <>
                   {eventSuggestions.length > 0 ? (
                     <SearchSuggestionSection>
-                      <SearchSuggestionHeading>Evenements</SearchSuggestionHeading>
+                      <SearchSuggestionHeading>évènements</SearchSuggestionHeading>
                       <SearchSuggestionList>
                         {eventSuggestions.map((eventSuggestion) => (
                           <SearchSuggestionButton
@@ -435,7 +435,7 @@ export function Navbar() {
                                 {organizerSuggestion.fullName}
                               </SearchSuggestionTitle>
                               <SearchSuggestionMeta>
-                                Voir son profil public et ses evenements publies
+                                Voir son profil public et ses évènements publiés
                               </SearchSuggestionMeta>
                             </SearchSuggestionContent>
                           </SearchSuggestionButton>
@@ -522,7 +522,7 @@ export function Navbar() {
                   </ProfileDropdownAction>
                 ) : null}
                 <ProfileDropdownAction type="button" onClick={handleLogout}>
-                  Se deconnecter
+                  Se déconnecter
                 </ProfileDropdownAction>
               </ProfileDropdown>
             ) : null}
@@ -602,7 +602,7 @@ export function Navbar() {
                 </MobileMenuLink>
               ) : null}
               <MobileMenuAuthButton type="button" onClick={handleLogout}>
-                Se deconnecter
+                Se déconnecter
               </MobileMenuAuthButton>
             </MobileMenuProfileCard>
           ) : null}

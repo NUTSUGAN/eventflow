@@ -31,23 +31,23 @@ final class PromotionNotificationService
             $this->reviewEmail,
             'Nouvelle demande Booster EventFlow',
             "Une nouvelle demande Booster attend une validation.\n\n".
-            "Evenement: {$event?->getTitle()}\n".
-            "Organisateur: {$organizer?->getFirstName()} {$organizer?->getLastName()}\n".
-            "Email: {$organizer?->getEmail()}\n".
-            "Canaux: {$channels}\n".
-            "Duree: {$campaign->getDuration()}\n".
-            "Montant: {$campaign->getTotalPrice()} {$campaign->getCurrency()}\n\n".
+            "L’évènement : {$event?->getTitle()}\n".
+            "Organisateur : {$organizer?->getFirstName()} {$organizer?->getLastName()}\n".
+            "Email : {$organizer?->getEmail()}\n".
+            "Canaux : {$channels}\n".
+            "Durée : {$campaign->getDuration()}\n".
+            "Montant : {$campaign->getTotalPrice()} {$campaign->getCurrency()}\n\n".
             "Ouvrir les campagnes: {$this->frontendUrl('/admin/promotions')}\n"
         );
 
         $this->send(
             $organizer?->getEmail(),
-            'Ta demande Booster a bien ete recue',
+            'Ta demande Booster a bien été reçue',
             "Bonjour {$organizer?->getFirstName()},\n\n".
-            "Ta demande Booster pour {$event?->getTitle()} a bien ete transmise a notre equipe.\n".
-            "Canaux: {$channels}\n".
-            "Montant calcule: {$campaign->getTotalPrice()} {$campaign->getCurrency()}\n\n".
-            "Tu recevras un email des que l admin aura donne sa reponse.\n"
+            "Ta demande Booster pour {$event?->getTitle()} a bien été transmise à notre équipe.\n".
+            "Canaux : {$channels}\n".
+            "Montant calculé : {$campaign->getTotalPrice()} {$campaign->getCurrency()}\n\n".
+            "Tu recevras un email dès que l’admin aura donné sa réponse.\n"
         );
     }
 
@@ -56,19 +56,19 @@ final class PromotionNotificationService
         $event = $campaign->getEvent();
         $organizer = $campaign->getOrganizer();
         $subject = $approved
-            ? 'Ta campagne Booster est approuvee'
-            : 'Reponse a ta demande Booster';
+            ? 'Ta campagne Booster est approuvée'
+            : 'Réponse à ta demande Booster';
         $decision = $approved
-            ? "Ta campagne est approuvee. Tu peux maintenant effectuer le paiement depuis ton espace Booster."
-            : "Ta campagne a ete refusee. Motif: ".($campaign->getAdminComment() ?? 'Aucun motif precise.');
+            ? "Ta campagne est approuvée. Tu peux maintenant effectuer le paiement depuis ton espace Booster."
+            : "Ta campagne a été refusée. Motif : ".($campaign->getAdminComment() ?? 'Aucun motif précisé.');
 
         $this->send(
             $organizer?->getEmail(),
             $subject,
             "Bonjour {$organizer?->getFirstName()},\n\n".
-            "Evenement: {$event?->getTitle()}\n".
+            "L’évènement : {$event?->getTitle()}\n".
             "{$decision}\n\n".
-            "Consulter la campagne: {$this->frontendUrl('/organizer/promotions')}\n"
+            "Consulter la campagne : {$this->frontendUrl('/organizer/promotions')}\n"
         );
     }
 
@@ -80,22 +80,51 @@ final class PromotionNotificationService
 
         $this->send(
             $organizer?->getEmail(),
-            'Paiement Booster confirme',
+            'Paiement Booster confirmé',
             "Bonjour {$organizer?->getFirstName()},\n\n".
-            "Le paiement de {$amount} pour {$event?->getTitle()} est confirme.\n".
-            "La campagne est maintenant suivie par l equipe EventFlow. Utilise le bouton SUIVRE pour voir les informations ajoutees par l admin.\n\n".
-            "Suivre la campagne: {$this->frontendUrl('/organizer/promotions/'.(string) $campaign->getId())}\n"
+            "Le paiement de {$amount} pour {$event?->getTitle()} est confirmé.\n".
+            "La campagne est maintenant suivie par l’équipe EventFlow. Utilise le bouton SUIVRE pour voir les informations ajoutées par l’admin.\n\n".
+            "Suivre la campagne : {$this->frontendUrl('/organizer/promotions/'.(string) $campaign->getId())}\n"
         );
 
         $this->send(
             $this->reviewEmail,
-            'Paiement Booster recu',
-            "Un paiement Booster vient d etre confirme.\n\n".
-            "Evenement: {$event?->getTitle()}\n".
-            "Organisateur: {$organizer?->getFirstName()} {$organizer?->getLastName()}\n".
-            "Montant: {$amount}\n".
-            "Canaux: {$this->channelLabels($campaign)}\n\n".
-            "Completer le suivi: {$this->frontendUrl('/admin/promotions/'.(string) $campaign->getId())}\n"
+            'Paiement Booster reçu',
+            "Un paiement Booster vient d’être confirmé.\n\n".
+            "L’évènement : {$event?->getTitle()}\n".
+            "Organisateur : {$organizer?->getFirstName()} {$organizer?->getLastName()}\n".
+            "Montant : {$amount}\n".
+            "Canaux : {$this->channelLabels($campaign)}\n\n".
+            "Compléter le suivi : {$this->frontendUrl('/admin/promotions/'.(string) $campaign->getId())}\n"
+        );
+    }
+
+    public function notifyTrackingUpdated(PromotionCampaign $campaign, PromotionCampaignChannel $channel): void
+    {
+        $event = $campaign->getEvent();
+        $organizer = $campaign->getOrganizer();
+        $adminBrief = $channel->getAdminBrief();
+
+        $body = "Bonjour {$organizer?->getFirstName()},\n\n".
+            "Le suivi Booster de ton événement a été mis à jour.\n\n".
+            "Événement : {$event?->getTitle()}\n".
+            "Canal : {$this->channelLabel($channel)}\n".
+            "État : {$this->deliveryStatusLabel($channel->getDeliveryStatus())}\n";
+
+        if (null !== $adminBrief) {
+            $body .= "\nInformation EventFlow :\n{$adminBrief}\n";
+        }
+
+        if ($channel->isFeatured()) {
+            $body .= "\nTon événement est actuellement mis en avant par EventFlow.\n";
+        }
+
+        $body .= "\nSuivre la campagne : {$this->frontendUrl('/organizer/promotions/'.(string) $campaign->getId())}\n";
+
+        $this->send(
+            $organizer?->getEmail(),
+            'Suivi Booster mis à jour',
+            $body
         );
     }
 
@@ -128,14 +157,31 @@ final class PromotionNotificationService
         $labels = [];
 
         foreach ($campaign->getChannels() as $channel) {
-            $labels[] = match ($channel->getChannelCode()) {
-                PromotionCampaignChannel::CHANNEL_LAUNCH_PACK => 'Pack Lancement',
-                PromotionCampaignChannel::CHANNEL_SOCIAL_INFLUENCER => 'Reseaux sociaux / influenceurs',
-                PromotionCampaignChannel::CHANNEL_NEWSLETTER => 'Newsletter',
-                default => (string) $channel->getChannelCode(),
-            };
+            $labels[] = $this->channelLabel($channel);
         }
 
         return implode(', ', $labels);
+    }
+
+    private function channelLabel(PromotionCampaignChannel $channel): string
+    {
+        return match ($channel->getChannelCode()) {
+            PromotionCampaignChannel::CHANNEL_LAUNCH_PACK => 'Pack Lancement',
+            PromotionCampaignChannel::CHANNEL_SOCIAL_INFLUENCER => 'Réseaux sociaux / influenceurs',
+            PromotionCampaignChannel::CHANNEL_NEWSLETTER => 'Newsletter',
+            default => (string) $channel->getChannelCode(),
+        };
+    }
+
+    private function deliveryStatusLabel(string $deliveryStatus): string
+    {
+        return match ($deliveryStatus) {
+            PromotionCampaignChannel::DELIVERY_PENDING => 'En attente',
+            PromotionCampaignChannel::DELIVERY_SCHEDULED => 'Planifié',
+            PromotionCampaignChannel::DELIVERY_ACTIVE => 'En diffusion',
+            PromotionCampaignChannel::DELIVERY_DELIVERED => 'Livré',
+            PromotionCampaignChannel::DELIVERY_CANCELLED => 'Annulé',
+            default => $deliveryStatus,
+        };
     }
 }

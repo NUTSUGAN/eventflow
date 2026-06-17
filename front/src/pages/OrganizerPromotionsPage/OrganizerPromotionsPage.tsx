@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import {
-  confirmPromotionPayment,
   getOrganizerPromotions,
   startPromotionCheckout,
 } from '../../api/promotions'
@@ -25,16 +24,16 @@ import {
 
 const statusLabels: Record<string, string> = {
   pending: 'En attente de validation',
-  approved: 'A payer',
-  active: 'Paiement confirme',
-  expired: 'Terminee',
+  approved: 'À payer',
+  active: 'Paiement confirmé',
+  expired: 'Terminée',
   rejected: 'Refusee',
   cancelled: 'Annulee',
 }
 
 const channelLabels: Record<string, string> = {
   LAUNCH_PACK: 'Pack Lancement',
-  SOCIAL_INFLUENCER: 'Reseaux / influenceurs',
+  SOCIAL_INFLUENCER: 'Réseaux / influenceurs',
   NEWSLETTER: 'Newsletter',
 }
 
@@ -57,7 +56,6 @@ export function OrganizerPromotionsPage() {
   const [payingId, setPayingId] = useState<number | null>(null)
   const payment = searchParams.get('payment')
   const returnedCampaignId = Number(searchParams.get('campaignId'))
-  const returnedSessionId = searchParams.get('session_id') ?? ''
 
   useEffect(() => {
     let mounted = true
@@ -74,21 +72,6 @@ export function OrganizerPromotionsPage() {
           return null
         }
 
-        if (
-          payment === 'success'
-          && Number.isInteger(returnedCampaignId)
-          && returnedCampaignId > 0
-          && returnedSessionId !== ''
-        ) {
-          await confirmPromotionPayment(returnedCampaignId, returnedSessionId)
-
-          if (mounted) {
-            navigate(`/organizer/promotions/${returnedCampaignId}?payment=success`, { replace: true })
-          }
-
-          return null
-        }
-
         return getOrganizerPromotions(page, 10)
       })
       .then((data) => {
@@ -97,23 +80,16 @@ export function OrganizerPromotionsPage() {
         setTotal(data.total)
         setTotalPages(data.totalPages)
       })
-      .catch((nextError) => {
+      .catch(() => {
         if (!mounted) return
-
-        if (payment === 'success') {
-          setError(apiMessage(nextError))
-          return
-        }
 
         navigate('/auth?mode=login&intent=organizer', { replace: true })
       })
 
     return () => { mounted = false }
-  }, [navigate, page, payment, returnedCampaignId, returnedSessionId])
+  }, [navigate, page])
 
   useEffect(() => {
-    if (payment === 'success') return
-
     let mounted = true
 
     const refreshCampaigns = async () => {
@@ -145,7 +121,7 @@ export function OrganizerPromotionsPage() {
       window.removeEventListener('focus', refreshWhenVisible)
       document.removeEventListener('visibilitychange', refreshWhenVisible)
     }
-  }, [page, payment])
+  }, [page])
 
   async function pay(campaignId: number) {
     setPayingId(campaignId)
@@ -164,11 +140,16 @@ export function OrganizerPromotionsPage() {
       <PromotionPageHeader>
         <div>
           <PromotionPageTitle>Mes campagnes Booster</PromotionPageTitle>
-          <PromotionPageText>Retrouve la validation, le paiement et les informations ajoutees par EventFlow.</PromotionPageText>
+          <PromotionPageText>Retrouve la validation, le paiement et les informations ajoutées par EventFlow.</PromotionPageText>
         </div>
       </PromotionPageHeader>
 
-      {payment === 'cancelled' ? <PromotionMessage $error>Paiement annule. La campagne reste disponible au paiement.</PromotionMessage> : null}
+      {payment === 'cancelled' ? <PromotionMessage $error>Paiement annulé. La campagne reste disponible au paiement.</PromotionMessage> : null}
+      {payment === 'success' && Number.isInteger(returnedCampaignId) && returnedCampaignId > 0 ? (
+        <PromotionMessage>
+          Paiement terminé côté Stripe. EventFlow attend maintenant le webhook signé pour confirmer la campagne.
+        </PromotionMessage>
+      ) : null}
       {error ? <PromotionMessage $error>{error}</PromotionMessage> : null}
 
       <PromotionList>
@@ -203,7 +184,7 @@ export function OrganizerPromotionsPage() {
                   <PromotionMeta>En attente de la validation EventFlow</PromotionMeta>
                 ) : null}
                 {campaign.status === 'rejected' ? (
-                  <PromotionMeta>Demande refusee</PromotionMeta>
+                  <PromotionMeta>Demande refusée</PromotionMeta>
                 ) : null}
               </PromotionActions>
             </PromotionCard>

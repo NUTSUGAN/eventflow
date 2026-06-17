@@ -49,7 +49,7 @@ type OrganizerEventsFilter = 'all' | 'published' | 'draft' | 'past'
 
 function formatOrganizerEventDate(date: string | null): string {
   if (!date) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -145,7 +145,7 @@ export function OrganizerEventsPage() {
       } catch {
         if (isMounted) {
           setErrorMessage(
-            "Impossible de charger tes evenements organisateur pour le moment.",
+            "Impossible de charger tes évènements organisateur pour le moment.",
           )
         }
       } finally {
@@ -197,7 +197,7 @@ export function OrganizerEventsPage() {
         )
       } else {
         setErrorMessage(
-          "Impossible de mettre a jour le statut de l'evenement pour le moment.",
+          "Impossible de mettre à jour le statut de l’évènement pour le moment.",
         )
       }
     } finally {
@@ -210,30 +210,30 @@ export function OrganizerEventsPage() {
       <OrganizerEventsPageShell>
         <OrganizerEventsPageHero>
           <OrganizerEventsPageEyebrow>Espace organisateur</OrganizerEventsPageEyebrow>
-          <OrganizerEventsPageTitle>Mes evenements</OrganizerEventsPageTitle>
+          <OrganizerEventsPageTitle>Mes évènements</OrganizerEventsPageTitle>
           <OrganizerEventsPageText>
             {currentUser
-              ? `${currentUser.firstName}, tu peux maintenant piloter tes fiches evenement sur une vraie page de gestion, puis ouvrir chaque evenement pour modifier ses informations legeres.`
-              : "Retrouve ici tous tes evenements, leur statut de publication et l'acces a chaque fiche detail."}
+              ? `${currentUser.firstName}, tu peux maintenant piloter tes fiches événement sur une vraie page de gestion, puis ouvrir chaque événement pour modifier ses informations légères.`
+              : "Retrouve ici tous tes évènements, leur statut de publication et l’accès à chaque fiche détail."}
           </OrganizerEventsPageText>
           <OrganizerEventsPageActions>
             <OrganizerEventsPagePrimaryButton
               type="button"
               onClick={() => navigate('/organizer/events/new')}
             >
-              Creer un evenement
+              Créer un évènement
             </OrganizerEventsPagePrimaryButton>
             <OrganizerEventsPageSecondaryButton
               type="button"
               onClick={() => navigate('/organizer/dashboard')}
             >
-              Revenir au dashboard
+              Revenir cu dashboard
             </OrganizerEventsPageSecondaryButton>
             <OrganizerEventsPageSecondaryButton
               type="button"
               onClick={() => navigate('/explorer')}
             >
-              Voir les evenements publics
+              Voir les évènements publics
             </OrganizerEventsPageSecondaryButton>
           </OrganizerEventsPageActions>
         </OrganizerEventsPageHero>
@@ -247,10 +247,10 @@ export function OrganizerEventsPage() {
           <OrganizerEventsPageToolbarTop>
             <div>
               <OrganizerEventsPageToolbarTitle>
-                {filteredEvents.length} evenement(s) affiche(s)
+                {filteredEvents.length} évènement(s) affiché(s)
               </OrganizerEventsPageToolbarTitle>
               <OrganizerEventsPageToolbarText>
-                Filtre par statut ou par temporalite, puis ouvre la fiche d un evenement pour ajuster le titre, le lieu, les dates ou la categorie.
+                Filtre par statut ou par temporalité, puis ouvre la fiche d'un évènement pour ajuster le titre, le lieu, les dates ou la catégorie.
               </OrganizerEventsPageToolbarText>
             </div>
           </OrganizerEventsPageToolbarTop>
@@ -282,14 +282,14 @@ export function OrganizerEventsPage() {
               $active={activeFilter === 'past'}
               onClick={() => setActiveFilter('past')}
             >
-              Passe
+              Passé
             </OrganizerEventsPageFilter>
           </OrganizerEventsPageFilters>
         </OrganizerEventsPageToolbar>
 
         {isLoading ? (
           <OrganizerEventsPageState>
-            Chargement de tes evenements organisateur...
+            Chargement de tes évènements organisateur...
           </OrganizerEventsPageState>
         ) : (
           <OrganizerEventsPageGrid>
@@ -333,7 +333,7 @@ export function OrganizerEventsPage() {
                     </OrganizerEventsPageCardTitleButton>
 
                     <OrganizerEventsPageMeta>
-                      {event.category.name ?? 'Categorie'} - {event.location.city ?? 'Ville'}
+                      {event.category.name ?? 'Catégorie'} - {event.location.city ?? 'Ville'}
                     </OrganizerEventsPageMeta>
                     <OrganizerEventsPageMeta>
                       {formatOrganizerEventDate(event.startDatetime)}
@@ -345,9 +345,9 @@ export function OrganizerEventsPage() {
                     <OrganizerEventsPageFooter>
                       <OrganizerEventsPageMeta>
                         {isPastEvent(event)
-                          ? 'Evenement deja passe'
+                          ? 'évènement déjà passé'
                           : event.status === 'published'
-                            ? 'Visible dans l espace public'
+                            ? 'Visible dans l’espace public'
                             : 'Encore en brouillon'}
                       </OrganizerEventsPageMeta>
                       <OrganizerEventsPageOpenButton
@@ -363,8 +363,8 @@ export function OrganizerEventsPage() {
             ) : (
               <OrganizerEventsPageState>
                 {events.length === 0
-                  ? "Tu n'as pas encore cree d'evenement. Lance la premiere fiche pour enchaîner ensuite sur les billets."
-                  : "Aucun evenement ne correspond au filtre en cours. Essaie un autre statut ou reviens sur l'onglet Tous."}
+                  ? "Tu n’as pas encore créé d’évènement. Lance la première fiche pour enchaîner ensuite sur les billets."
+                  : "Aucun évènement ne correspond au filtre en cours. Essaie un’autre statut ou reviens sur l’onglet Tous."}
               </OrganizerEventsPageState>
             )}
           </OrganizerEventsPageGrid>

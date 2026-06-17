@@ -26,7 +26,7 @@ final class StaffScanController extends AbstractController
 
         if (!$user->canAccessStaffTools()) {
             return $this->json([
-                'message' => 'Acces reserve au staff et aux organisateurs.',
+                'message' => 'Accès réservé au staff et aux organisateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -50,7 +50,7 @@ final class StaffScanController extends AbstractController
 
         if (!$user->canAccessStaffTools()) {
             return $this->json([
-                'message' => 'Acces reserve au staff et aux organisateurs.',
+                'message' => 'Accès réservé au staff et aux organisateurs.',
             ], Response::HTTP_FORBIDDEN);
         }
 

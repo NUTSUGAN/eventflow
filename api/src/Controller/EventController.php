@@ -45,7 +45,7 @@ class EventController extends AbstractController
 
             if (!$dateFilter instanceof \DateTimeImmutable) {
                 return $this->json([
-                    'message' => 'Le filtre date doit etre au format YYYY-MM-DD.',
+                    'message' => 'Le filtre date doit être au format YYYY-MM-DD.',
                 ], Response::HTTP_BAD_REQUEST);
             }
         }
@@ -116,7 +116,7 @@ class EventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -239,16 +239,16 @@ class EventController extends AbstractController
             $minPrice = null === $minPrice ? $floatPrice : min($minPrice, $floatPrice);
         }
 
-        $venue = $event->getLocation()?->getAddress() ?? $event->getLocation()?->getCity() ?? 'Lieu a confirmer';
+        $venue = $event->getLocation()?->getAddress() ?? $event->getLocation()?->getCity() ?? 'Lieu à confirmer';
 
         return [
             'id' => $event->getId(),
             'title' => $event->getTitle(),
             'shortDescription' => $this->createExcerpt($event->getDescription()),
-            'city' => $event->getLocation()?->getCity() ?? 'Ville a confirmer',
+            'city' => $event->getLocation()?->getCity() ?? 'Ville à confirmer',
             'venue' => $venue,
             'startsAt' => $this->formatDateTimeForFrontend($event->getStartDatetime()),
-            'category' => $event->getCategory()?->getName() ?? 'Evenement',
+            'category' => $event->getCategory()?->getName() ?? 'évènement',
             'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
             'currency' => 'EUR',
@@ -316,7 +316,7 @@ class EventController extends AbstractController
         $text = trim(preg_replace('/\s+/', ' ', (string) $text) ?? '');
 
         if ('' === $text) {
-            return 'Informations a venir pour cet evenement.';
+            return 'Informations à venir pour cet l’évènement.';
         }
 
         if (mb_strlen($text) <= $maxLength) {

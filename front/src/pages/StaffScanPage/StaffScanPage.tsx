@@ -50,7 +50,7 @@ import {
 
 function formatDateLabel(value: string | null): string {
   if (!value) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -84,27 +84,27 @@ function translateScannerMessage(message: string): string {
   if (
     normalizedMessage.includes('No MultiFormat Readers were able to detect the code')
   ) {
-    return 'Aucun QR code lisible n a ete detecte dans cette image.'
+    return 'Aucun QR code lisible n’a été détecté dans cette image.'
   }
 
   if (
     normalizedMessage.includes('HTML Element with id=staff-scan-camera-region not found')
   ) {
-    return 'Le module de lecture QR n a pas pu s initialiser correctement. Recharge la page puis reessaie.'
+    return 'Le module de lecture QR n’a pas pu s’initialiser correctement. Recharge la page puis réessaie.'
   }
 
   if (
     normalizedMessage.includes('Permission denied') ||
     normalizedMessage.includes('NotAllowedError')
   ) {
-    return 'L acces a la camera a ete refuse. Autorise la webcam puis reessaie.'
+    return 'L’accès à la caméra a été refusé. Autorise la webcam puis réessaie.'
   }
 
   if (
     normalizedMessage.includes('Requested device not found') ||
     normalizedMessage.includes('NotFoundError')
   ) {
-    return 'Aucune camera compatible n a ete detectee sur cet appareil.'
+    return 'Aucune caméra compatible n’a été détectée sur cet appareil.'
   }
 
   if (
@@ -112,9 +112,9 @@ function translateScannerMessage(message: string): string {
     normalizedMessage.includes('Device in use') ||
     normalizedMessage.includes('device in use') ||
     normalizedMessage.includes('TrackStartError') ||
-    normalizedMessage.includes('Could not start video source')
+    normalizedMessage.includes('Could not start vidéo source')
   ) {
-    return 'La camera est deja utilisee par une autre application.'
+    return 'La caméra est déjà utilisée par une autre application.'
   }
 
   return normalizedMessage
@@ -163,7 +163,7 @@ function describeInputSource(source: ScanInputSource): string {
     case 'keyboard_enter':
       return 'Scanner clavier'
     case 'camera':
-      return 'Camera'
+      return 'Caméra'
     case 'image':
       return 'Image locale'
     default:
@@ -230,7 +230,7 @@ export function StaffScanPage() {
 
         setStatusTone('danger')
         setStatusMessage(
-          readApiMessage(error, 'Impossible de charger les evenements de scan.'),
+          readApiMessage(error, 'Impossible de charger les évènements de scan.'),
         )
       } finally {
         if (isMounted) {
@@ -319,13 +319,13 @@ export function StaffScanPage() {
           tone: response.result === 'valid' ? 'success' : 'danger',
           label:
             response.result === 'already_used'
-              ? 'Billet deja utilise'
+              ? 'Billet déjà utilisé'
               : response.result === 'invalid'
                 ? 'Billet invalide'
-                : 'Scan traite',
-          title: selectedEvent?.title ?? 'Resultat du scan',
+                : 'Scan traité',
+          title: selectedEvent?.title ?? 'Résultat du scan',
           message: response.message,
-          details: 'Aucun billet detaille n a pu etre rattache a ce scan.',
+          details: 'Aucun billet détaillé n’a pu être rattaché a ce scan.',
         })
       }
     } catch (error) {
@@ -338,8 +338,8 @@ export function StaffScanPage() {
       setStatusMessage(translatedMessage)
       setScanPanelNotice({
         tone: 'danger',
-        label: 'Scan refuse',
-        title: selectedEvent?.title ?? 'Resultat du scan',
+        label: 'Scan refusé',
+        title: selectedEvent?.title ?? 'Résultat du scan',
         message: translatedMessage,
       })
     } finally {
@@ -424,11 +424,11 @@ export function StaffScanPage() {
       setScanResult(null)
       setScanPanelNotice({
         tone: 'danger',
-        label: 'Camera indisponible',
-        title: selectedEvent?.title ?? 'Lecture camera impossible',
-        message: 'Cette machine ne propose pas de camera web exploitable.',
+        label: 'Caméra indisponible',
+        title: selectedEvent?.title ?? 'Lecture caméra impossible',
+        message: 'Cette machine ne propose pas de caméra web exploitable.',
       })
-      setStatusMessage('Cette machine ne propose pas de camera web exploitable.')
+      setStatusMessage('Cette machine ne propose pas de caméra web exploitable.')
       return
     }
 
@@ -445,7 +445,7 @@ export function StaffScanPage() {
       const cameras = await Html5Qrcode.getCameras()
 
       if (cameras.length === 0) {
-        throw new Error('Aucune camera detectee sur cet appareil.')
+        throw new Error('Aucune caméra détectée sur cet appareil.')
       }
 
       const preferredCamera =
@@ -468,17 +468,17 @@ export function StaffScanPage() {
       )
 
       setIsCameraActive(true)
-      setCameraMessage('Camera active. Vise le QR code du billet.')
+      setCameraMessage('Caméra active. Vise le QR code du billet.')
     } catch (error) {
       const translatedMessage = readCameraMessage(
         error,
-        'Impossible de demarrer la camera pour le scan.',
+        'Impossible de démarrer la caméra pour le scan.',
       )
       setScanResult(null)
       setScanPanelNotice({
         tone: 'danger',
-        label: 'Camera indisponible',
-        title: selectedEvent?.title ?? 'Lecture camera impossible',
+        label: 'Caméra indisponible',
+        title: selectedEvent?.title ?? 'Lecture caméra impossible',
         message: translatedMessage,
       })
       setStatusTone('danger')
@@ -511,7 +511,7 @@ export function StaffScanPage() {
       const scanner = await ensureScanner()
       const decodedText = await scanner.scanFile(imageFile, false)
 
-      setCameraMessage('QR detecte depuis une image locale.')
+      setCameraMessage('QR détecté depuis une image locale.')
       await submitScan(decodedText, 'image')
     } catch (error) {
       const translatedMessage = readCameraMessage(
@@ -524,7 +524,7 @@ export function StaffScanPage() {
         label: 'Image illisible',
         title: selectedEvent?.title ?? 'Lecture image impossible',
         message: translatedMessage,
-        details: 'Utilise une capture plus nette, bien centree, avec un QR contraste sur fond clair.',
+        details: 'Utilise une capture plus nette, bien centrée, avec un QR contrasté sur fond clair.',
       })
       setStatusTone('danger')
       setStatusMessage(translatedMessage)
@@ -536,18 +536,18 @@ export function StaffScanPage() {
   return (
     <StaffScanSection>
       <StaffScanHero>
-        <StaffScanEyebrow>Controle d acces</StaffScanEyebrow>
+        <StaffScanEyebrow>Contrôle d’accès</StaffScanEyebrow>
         <StaffScanTitle>Scanner les billets</StaffScanTitle>
         <StaffScanText>
-          Choisis l evenement, garde le poste pret a recevoir la douchette, puis
-          controle les entrees en temps reel avec validation API.
+          Choisis l’évènement, garde le poste prêt à recevoir la douchette, puis
+          contrôle les entrées en temps réel avec validation API.
         </StaffScanText>
 
         <StaffScanGrid>
           <StaffScanPanel>
             <StaffScanPanelTitle>Poste de scan</StaffScanPanelTitle>
             <StaffScanField>
-              <StaffScanLabel htmlFor="staff-scan-event">Evenement actif</StaffScanLabel>
+              <StaffScanLabel htmlFor="staff-scan-event">évènement actif</StaffScanLabel>
               <StaffScanSelect
                 id="staff-scan-event"
                 value={selectedEventId ?? ''}
@@ -558,7 +558,7 @@ export function StaffScanPage() {
               >
                 {events.map((event) => (
                   <option key={event.id} value={event.id}>
-                    {event.title ?? 'Evenement sans titre'} - {event.organizer.displayName}
+                    {event.title ?? 'évènement sans titre'} - {event.organizer.displayName}
                   </option>
                 ))}
               </StaffScanSelect>
@@ -581,7 +581,7 @@ export function StaffScanPage() {
                   void submitScan(undefined, 'keyboard_enter')
                 }
               }}
-              aria-label="Reception du scan QR"
+              aria-label="Réception du scan QR"
               autoComplete="off"
               spellCheck={false}
               disabled={!selectedEventId || isSubmitting || isLoading}
@@ -605,14 +605,14 @@ export function StaffScanPage() {
                 disabled={!selectedEventId || isCameraStarting || isFileScanning}
               >
                 {isCameraActive
-                  ? 'Arreter la camera'
+                  ? 'Arrêter la caméra'
                   : isCameraStarting
-                    ? 'Demarrage camera...'
-                    : 'Scanner avec la camera'}
+                    ? 'Démarrage caméra...'
+                    : 'Scanner avec la caméra'}
               </StaffScanSecondaryButton>
               <StaffScanSecondaryButton
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                    onClick={() => fileInputRef.current?.click()}
                 disabled={!selectedEventId || isSubmitting || isCameraStarting || isFileScanning}
               >
                 {isFileScanning ? 'Lecture image...' : 'Scanner depuis une image'}
@@ -622,7 +622,7 @@ export function StaffScanPage() {
                   type="button"
                   onClick={() => navigate('/organizer/staff')}
                 >
-                  Gerer le staff
+                  Gérer le staff
                 </StaffScanSecondaryButton>
               ) : null}
             </StaffScanActions>
@@ -633,11 +633,11 @@ export function StaffScanPage() {
                 <StaffScanDiagnosticsItem>
                   <StaffScanDiagnosticsLabel>Focus clavier</StaffScanDiagnosticsLabel>
                   <StaffScanDiagnosticsValue $tone={hasKeyboardFocus ? 'active' : 'muted'}>
-                    {hasKeyboardFocus ? 'Pret' : 'A reactiver'}
+                    {hasKeyboardFocus ? 'Prêt' : 'À réactiver'}
                   </StaffScanDiagnosticsValue>
                 </StaffScanDiagnosticsItem>
                 <StaffScanDiagnosticsItem>
-                  <StaffScanDiagnosticsLabel>Mode detecte</StaffScanDiagnosticsLabel>
+                  <StaffScanDiagnosticsLabel>Mode détecté</StaffScanDiagnosticsLabel>
                   <StaffScanDiagnosticsValue>
                     {describeInputSource(lastInputSource)}
                   </StaffScanDiagnosticsValue>
@@ -669,7 +669,7 @@ export function StaffScanPage() {
 
             <StaffScanInlineText>
               En secours, tu peux utiliser la webcam ou importer une capture du
-              billet quand le QR n est pas disponible sur papier.
+              billet quand le QR n’est pas disponible sur papier.
             </StaffScanInlineText>
           </StaffScanPanel>
 
@@ -685,23 +685,23 @@ export function StaffScanPage() {
               {scanResult?.result === 'valid'
                 ? 'Billet valide'
                 : scanResult?.result === 'already_used'
-                  ? 'Billet deja utilise'
+                  ? 'Billet déjà utilisé'
                   : scanResult?.result === 'invalid'
                     ? 'Billet invalide'
-                    : scanPanelNotice?.label ?? 'Pret a scanner'}
+                    : scanPanelNotice?.label ?? 'Prêt à scanner'}
             </StaffScanStatusPill>
 
             {isLoading ? (
               <StaffScanInlineText>Chargement du contexte de scan...</StaffScanInlineText>
             ) : events.length === 0 ? (
               <StaffScanInlineText>
-                Aucun evenement accessible pour le moment. Ajoute un membre au
-                staff ou ouvre un evenement organisateur a scanner.
+                Aucun évènement accessible pour le moment. Ajoute un membre au
+                staff ou ouvre un évènement organisateur à scanner.
               </StaffScanInlineText>
             ) : scanResult?.ticket ? (
               <StaffScanResultCard>
                 <StaffScanResultTitle>
-                  {scanResult.ticket.event.title ?? 'Evenement sans titre'}
+                  {scanResult.ticket.event.title ?? 'évènement sans titre'}
                 </StaffScanResultTitle>
                 <StaffScanResultMeta>
                   {scanResult.ticket.ticketType.name ?? 'Billet EventFlow'} -{' '}
@@ -723,17 +723,17 @@ export function StaffScanPage() {
                   <StaffScanResultItem>
                     <StaffScanResultLabel>Commande</StaffScanResultLabel>
                     <StaffScanResultValue>
-                      {scanResult.ticket.order.reference ?? 'Reference indisponible'}
+                      {scanResult.ticket.order.reference ?? 'Référence indisponible'}
                     </StaffScanResultValue>
                   </StaffScanResultItem>
                   <StaffScanResultItem>
                     <StaffScanResultLabel>Lieu</StaffScanResultLabel>
                     <StaffScanResultValue>
-                      {scanResult.ticket.event.venue ?? scanResult.ticket.event.city ?? 'Lieu a confirmer'}
+                      {scanResult.ticket.event.venue ?? scanResult.ticket.event.city ?? 'Lieu à confirmer'}
                     </StaffScanResultValue>
                   </StaffScanResultItem>
                   <StaffScanResultItem>
-                    <StaffScanResultLabel>Debut</StaffScanResultLabel>
+                    <StaffScanResultLabel>Début</StaffScanResultLabel>
                     <StaffScanResultValue>
                       {formatDateLabel(scanResult.ticket.event.startsAt)}
                     </StaffScanResultValue>
@@ -759,8 +759,8 @@ export function StaffScanPage() {
             ) : (
               <StaffScanInlineText>
                 {selectedEvent
-                  ? `Poste pret pour ${selectedEvent.title ?? 'cet evenement'}.`
-                  : 'Choisis un evenement puis scanne un billet.'}
+                  ? `Poste prêt pour ${selectedEvent.title ?? 'cet évènement'}.`
+                  : 'Choisis un évènement puis scanné un billet.'}
               </StaffScanInlineText>
             )}
           </StaffScanPanel>

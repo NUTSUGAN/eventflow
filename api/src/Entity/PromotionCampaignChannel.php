@@ -163,7 +163,7 @@ class PromotionCampaignChannel
     public function setIsFeatured(bool $isFeatured): static
     {
         if ($isFeatured && self::CHANNEL_LAUNCH_PACK !== $this->channelCode) {
-            throw new \InvalidArgumentException('Seul le Pack Lancement peut etre mis en avant.');
+            throw new \InvalidArgumentException('Seul le Pack Lancement peut être mis en avant.');
         }
 
         $this->isFeatured = $isFeatured;

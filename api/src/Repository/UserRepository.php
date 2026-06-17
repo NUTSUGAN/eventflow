@@ -55,6 +55,31 @@ class UserRepository extends ServiceEntityRepository
         ;
     }
 
+    /**
+     * @return list<User>
+     */
+    public function findPublicOrganizers(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('user')
+            ->distinct()
+            ->innerJoin('user.organizedEvents', 'event')
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->andWhere(
+                '(
+                    (event.endDatetime IS NOT NULL AND event.endDatetime >= :publicReferenceNow)
+                    OR (event.endDatetime IS NULL AND event.startDatetime IS NOT NULL AND event.startDatetime >= :publicReferenceNow)
+                )'
+            )
+            ->setParameter('publishedStatus', 'published')
+            ->setParameter('publicReferenceNow', new \DateTimeImmutable())
+            ->orderBy('user.lastName', 'ASC')
+            ->addOrderBy('user.firstName', 'ASC')
+            ->setMaxResults(max(1, min(12, $limit)))
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     public function findOneByEmailInsensitive(string $email): ?User
     {
         $normalizedEmail = mb_strtolower(trim($email));

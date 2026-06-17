@@ -97,7 +97,7 @@ export function OrderCheckoutPage() {
     async function loadOrderOnce(showFallback = true) {
       if (!orderId) {
         if (isMounted && showFallback) {
-          setErrorMessage('Impossible de retrouver la commande a payer.')
+          setErrorMessage('Impossible de retrouver la commande À payer.')
           setIsLoading(false)
         }
 
@@ -136,7 +136,7 @@ export function OrderCheckoutPage() {
       }
 
       if (!loadedOrder) {
-        setErrorMessage('Impossible de verifier cette commande apres le paiement.')
+        setErrorMessage('Impossible de vérifier cette commande après le paiement.')
         setIsLoading(false)
 
         return
@@ -199,14 +199,14 @@ export function OrderCheckoutPage() {
           <OrderPreparationEyebrow>Paiement</OrderPreparationEyebrow>
           <OrderPreparationTitle>Commande introuvable</OrderPreparationTitle>
           <OrderPreparationError>
-            Impossible de retrouver la commande a payer pour le moment.
+            Impossible de retrouver la commande À payer pour le moment.
           </OrderPreparationError>
           <OrderPreparationActions>
             <OrderPreparationSecondaryButton
               type="button"
               onClick={() => navigate('/explorer')}
             >
-              Retour a Explorer
+              Retour à Explorer
             </OrderPreparationSecondaryButton>
           </OrderPreparationActions>
         </OrderPreparationHero>
@@ -224,7 +224,7 @@ export function OrderCheckoutPage() {
           </OrderPreparationTitle>
           <OrderPreparationState>
             {isSuccessReturn
-              ? 'On attend la confirmation finale de Stripe pour mettre a jour la commande.'
+              ? 'On’attend la confirmation finale de Stripe pour mettre à jour la commande.'
               : 'On recharge ta commande avant de lancer le paiement.'}
           </OrderPreparationState>
         </OrderPreparationHero>
@@ -246,7 +246,7 @@ export function OrderCheckoutPage() {
               type="button"
               onClick={() => navigate('/explorer')}
             >
-              Retour a Explorer
+              Retour à Explorer
             </OrderPreparationSecondaryButton>
           </OrderPreparationActions>
         </OrderPreparationHero>
@@ -263,7 +263,7 @@ export function OrderCheckoutPage() {
         <OrderPreparationTitle>
           {isSuccessReturn
             ? paymentAlreadyCompleted
-              ? 'Paiement confirme'
+              ? 'Paiement confirmé'
               : 'Confirmation en cours'
             : isCancelReturn
               ? 'Paiement interrompu'
@@ -272,30 +272,30 @@ export function OrderCheckoutPage() {
         <OrderPreparationText>
           {isSuccessReturn
             ? paymentAlreadyCompleted
-              ? `Le paiement Stripe de la commande ${order.reference} a bien ete confirme.`
-              : `Stripe a bien renvoye le navigateur, mais la commande ${order.reference} attend encore sa confirmation finale.`
+              ? `Le paiement Stripe de la commande ${order.reference} a bien été confirmé.`
+              : `Stripe a bien renvoyé le navigateur, mais la commande ${order.reference} attend encore sa confirmation finale.`
             : isCancelReturn
               ? `Tu peux relancer le paiement Stripe pour la commande ${order.reference} quand tu veux.`
-              : `La commande ${order.reference} est prete. On peut maintenant la rediriger vers Stripe pour payer les billets.`}
+              : `La commande ${order.reference} est prête. On peut maintenant la rediriger vers Stripe pour payer les billets.`}
         </OrderPreparationText>
 
         {errorMessage ? <OrderPreparationError>{errorMessage}</OrderPreparationError> : null}
 
         {isSuccessReturn && paymentAlreadyCompleted ? (
           <OrderPreparationSuccess>
-            Paiement recu. Le statut de la commande est maintenant a jour.
+            Paiement reçu. Le statut de la commande est maintenant à jour.
           </OrderPreparationSuccess>
         ) : null}
 
         {isCancelReturn ? (
           <OrderPreparationHint>
-            Aucun billet nest confirme tant que Stripe na pas valide le paiement.
+            Aucun billet nest confirmé tant que Stripe na pas valide le paiement.
           </OrderPreparationHint>
         ) : null}
 
         {!isSuccessReturn && !isCancelReturn ? (
           <OrderPreparationSuccess>
-            Le stock reste non deduit tant que Stripe na pas confirme le paiement.
+            Le stock reste non deduit tant que Stripe na pas confirmé le paiement.
           </OrderPreparationSuccess>
         ) : null}
 
@@ -311,8 +311,8 @@ export function OrderCheckoutPage() {
               <OrderPreparationValue>{order.reference}</OrderPreparationValue>
             </OrderPreparationListRow>
             <OrderPreparationListRow>
-              <OrderPreparationLabel>Evenement</OrderPreparationLabel>
-              <OrderPreparationValue>{order.event.title ?? 'A confirmer'}</OrderPreparationValue>
+              <OrderPreparationLabel>évènement</OrderPreparationLabel>
+              <OrderPreparationValue>{order.event.title ?? 'À confirmer'}</OrderPreparationValue>
             </OrderPreparationListRow>
             <OrderPreparationListRow>
               <OrderPreparationLabel>Statut</OrderPreparationLabel>
@@ -343,11 +343,11 @@ export function OrderCheckoutPage() {
 
           {paymentAlreadyCompleted ? (
             <OrderPreparationHint>
-              Tu peux maintenant revenir a l evenement ou poursuivre ailleurs dans EventFlow.
+              Tu peux maintenant revenir à l’évènement ou poursuivre ailleurs dans EventFlow.
             </OrderPreparationHint>
           ) : order.canStartCheckout ? (
             <OrderPreparationHint>
-              Le paiement est gere sur la page Stripe hebergee, puis on revient ici pour la confirmation.
+              Le paiement est g?re sur la page Stripe hebergee, puis on revient ici pour la confirmation.
             </OrderPreparationHint>
           ) : (
             <OrderPreparationState>
@@ -372,7 +372,7 @@ export function OrderCheckoutPage() {
                       : navigate('/explorer')
                   }
                 >
-                  Retour a l evenement
+                  Retour à l’évènement
                 </OrderPreparationSecondaryButton>
               </>
             ) : (

@@ -5,6 +5,7 @@ import type {
   EventReportPayload,
   EventReportResponse,
   OrganizerProfile,
+  PublicOrganizersResponse,
   SearchSuggestionsResponse,
   OrganizerFollowResponse,
   PublicEventsResponse,
@@ -72,6 +73,11 @@ export async function getOrganizerProfile(
     `/api/organizers/${organizerId}`,
   )
 
+  return response.data
+}
+
+export async function getPublicOrganizers(): Promise<PublicOrganizersResponse> {
+  const response = await apiClient.get<PublicOrganizersResponse>('/api/organizers')
   return response.data
 }
 

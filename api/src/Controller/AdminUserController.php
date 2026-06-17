@@ -63,7 +63,7 @@ final class AdminUserController extends AbstractController
 
         if (null === $role) {
             return $this->json([
-                'message' => 'Le role doit etre ROLE_CLIENT, ROLE_ORGANIZER ou ROLE_ADMIN.',
+                'message' => 'Le role doit être ROLE_CLIENT, ROLE_ORGANIZER ou ROLE_ADMIN.',
             ], 400);
         }
 
@@ -75,7 +75,7 @@ final class AdminUserController extends AbstractController
             User::ROLE_ADMIN !== $role
         ) {
             return $this->json([
-                'message' => 'Tu ne peux pas retirer ton propre role administrateur.',
+                'message' => 'Tu ne peux pas retirer ton propre rôle administrateur.',
             ], 409);
         }
 
@@ -87,7 +87,7 @@ final class AdminUserController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Role utilisateur mis a jour.',
+            'message' => 'Rôle utilisateur mis à jour.',
             'user' => $this->serializeUser($user),
         ]);
     }
@@ -108,7 +108,7 @@ final class AdminUserController extends AbstractController
 
         if (null === $accountStatus) {
             return $this->json([
-                'message' => 'Le statut doit etre active, disabled ou blocked.',
+                'message' => 'Le statut doit être active, disabled ou blocked.',
             ], 400);
         }
 
@@ -120,7 +120,7 @@ final class AdminUserController extends AbstractController
             User::ACCOUNT_STATUS_ACTIVE !== $accountStatus
         ) {
             return $this->json([
-                'message' => 'Tu ne peux pas desactiver ou bloquer ton propre compte admin.',
+                'message' => 'Tu ne peux pas désactiver ou bloquer ton propre compte admin.',
             ], 409);
         }
 
@@ -129,7 +129,7 @@ final class AdminUserController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Statut du compte mis a jour.',
+            'message' => 'Statut du compte mis à jour.',
             'user' => $this->serializeUser($user),
         ]);
     }
@@ -294,7 +294,7 @@ final class AdminUserController extends AbstractController
                 ->setReviewedAt($now)
                 ->setReviewNote(
                     $application->getReviewNote()
-                        ?: 'Role organisateur attribue depuis la gestion utilisateurs.'
+                        ?: 'Rôle organisateur attribué depuis la gestion utilisateurs.'
                 )
             ;
 
@@ -309,7 +309,7 @@ final class AdminUserController extends AbstractController
             $application
                 ->setStatus(OrganizerApplication::STATUS_REJECTED)
                 ->setReviewedAt($now)
-                ->setReviewNote('Role organisateur retire depuis la gestion utilisateurs.')
+                ->setReviewNote('Rôle organisateur retiré depuis la gestion utilisateurs.')
             ;
         }
     }

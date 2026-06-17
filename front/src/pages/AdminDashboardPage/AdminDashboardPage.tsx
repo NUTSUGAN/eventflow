@@ -66,7 +66,7 @@ const emptyCategoryForm: CategoryFormState = {
 
 function formatDate(value: string | null): string {
   if (!value) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -197,7 +197,7 @@ export function AdminDashboardPage() {
           }
 
           setErrorMessage(
-            readApiMessage(error, "Impossible de charger l'espace admin."),
+            readApiMessage(error, "Impossible de charger l’espace admin."),
           )
         }
       } finally {
@@ -309,7 +309,7 @@ export function AdminDashboardPage() {
       setStatusMessage(response.message)
     } catch (error) {
       setErrorMessage(
-        readApiMessage(error, "Impossible de mettre a jour le statut de l'evenement."),
+        readApiMessage(error, "Impossible de mettre à jour le statut de l’évènement."),
       )
     } finally {
       setUpdatingEventId(null)
@@ -324,7 +324,7 @@ export function AdminDashboardPage() {
     }
 
     if (categoryForm.name.trim() === '' || categoryForm.description.trim() === '') {
-      setErrorMessage('Renseigne le nom et la description de la categorie.')
+      setErrorMessage('Renseigne le nom et la description de la catégorie.')
       return
     }
 
@@ -343,7 +343,7 @@ export function AdminDashboardPage() {
       setStatusMessage(response.message)
     } catch (error) {
       setErrorMessage(
-        readApiMessage(error, 'Impossible de creer cette categorie.'),
+        readApiMessage(error, 'Impossible de créer cette catégorie.'),
       )
     } finally {
       setIsSavingCategory(false)
@@ -357,8 +357,8 @@ export function AdminDashboardPage() {
           <AdminDashboardEyebrow>Administration</AdminDashboardEyebrow>
           <AdminDashboardTitle>Console EventFlow</AdminDashboardTitle>
           <AdminDashboardText>
-            Pilote les demandes organisateur, les evenements publies, les categories
-            et les indicateurs de la plateforme depuis un point d entree unique.
+            Pilote les demandes organisateur, les évènements publiés, les catégories
+            et les indicateurs de la plateforme depuis un point d’entrée unique.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>
@@ -390,7 +390,7 @@ export function AdminDashboardPage() {
             type="button"
             onClick={() => navigate('/organizer/events/new')}
           >
-            Creer un evenement
+            Créer un évènement
           </AdminDashboardPrimaryButton>
           <AdminDashboardSecondaryButton
             type="button"
@@ -404,8 +404,8 @@ export function AdminDashboardPage() {
       <AdminDashboardTabs>
         {[
           ['overview', 'Vue globale'],
-          ['events', 'Evenements'],
-          ['categories', 'Categories'],
+          ['events', 'évènements'],
+          ['categories', 'Catégories'],
         ].map(([tabId, label]) => (
           <AdminDashboardTab
             key={tabId}
@@ -440,9 +440,9 @@ export function AdminDashboardPage() {
           <AdminDashboardPanel>
             <AdminDashboardPanelHeader>
               <div>
-                <AdminDashboardPanelTitle>Demandes a traiter</AdminDashboardPanelTitle>
+                <AdminDashboardPanelTitle>Demandes à traiter</AdminDashboardPanelTitle>
                 <AdminDashboardText>
-                  Les demandes encore en attente de validation admin.
+                  Les demandes encore en’attente de validation’admin.
                 </AdminDashboardText>
               </div>
               <AdminDashboardSecondaryButton
@@ -474,7 +474,7 @@ export function AdminDashboardPage() {
               ))}
               {pendingApplications.length === 0 ? (
                 <AdminDashboardMessage $tone="neutral">
-                  Aucune demande organisateur en attente.
+                  Aucune demande organisateur en’attente.
                 </AdminDashboardMessage>
               ) : null}
             </AdminDashboardList>
@@ -483,9 +483,9 @@ export function AdminDashboardPage() {
           <AdminDashboardPanel>
             <AdminDashboardPanelHeader>
               <div>
-                <AdminDashboardPanelTitle>Prochains evenements</AdminDashboardPanelTitle>
+                <AdminDashboardPanelTitle>Prochains évènements</AdminDashboardPanelTitle>
                 <AdminDashboardText>
-                  Les evenements actifs les plus proches dans le calendrier.
+                  Les évènements actifs les plus proches dans le calendrier.
                 </AdminDashboardText>
               </div>
             </AdminDashboardPanelHeader>
@@ -498,28 +498,28 @@ export function AdminDashboardPage() {
         <AdminDashboardPanel>
           <AdminDashboardPanelHeader>
             <div>
-              <AdminDashboardPanelTitle>Evenements</AdminDashboardPanelTitle>
+              <AdminDashboardPanelTitle>évènements</AdminDashboardPanelTitle>
               <AdminDashboardText>
-                Change rapidement le statut d un evenement ou ouvre sa fiche
+                Change rapidement le statut d'un évènement ou ouvre sa fiche
                 organisateur.
               </AdminDashboardText>
               <AdminDashboardText>
-                {filteredEvents.length} evenement(s) affiche(s) sur {events.length}.
+                {filteredEvents.length} évènement(s) affiché(s) sur {events.length}.
               </AdminDashboardText>
             </div>
           </AdminDashboardPanelHeader>
           <AdminDashboardField>
-            <AdminDashboardLabel>Recherche evenement</AdminDashboardLabel>
+            <AdminDashboardLabel>Recherche évènement</AdminDashboardLabel>
             <AdminDashboardInput
               value={eventSearchQuery}
               onChange={(event) => setEventSearchQuery(event.target.value)}
-              placeholder="Nom, organisateur, ville, categorie, statut..."
+              placeholder="Nom, organisateur, ville, catégorie, statut..."
             />
           </AdminDashboardField>
           {renderEventList(
             eventPagination.paginatedItems,
             eventSearchQuery.trim() !== ''
-              ? 'Aucun evenement ne correspond a cette recherche.'
+              ? 'Aucun évènement ne correspond à cette recherche.'
               : undefined,
           )}
           <AdminPagination
@@ -527,7 +527,7 @@ export function AdminDashboardPage() {
             pageSize={eventPagination.pageSize}
             totalItems={filteredEvents.length}
             totalPages={eventPagination.totalPages}
-            itemLabel="evenements"
+            itemLabel="évènements"
             onPageChange={eventPagination.setPage}
           />
         </AdminDashboardPanel>
@@ -537,9 +537,9 @@ export function AdminDashboardPage() {
         <AdminDashboardPanel>
           <AdminDashboardPanelHeader>
             <div>
-              <AdminDashboardPanelTitle>Categories</AdminDashboardPanelTitle>
+              <AdminDashboardPanelTitle>Catégories</AdminDashboardPanelTitle>
               <AdminDashboardText>
-                Ajoute une categorie disponible pour les futurs evenements.
+                Ajoute une catégorie disponible pour les futurs évènements.
               </AdminDashboardText>
             </div>
           </AdminDashboardPanelHeader>
@@ -567,11 +567,11 @@ export function AdminDashboardPage() {
                     description: event.target.value,
                   }))
                 }
-                placeholder="Evenements professionnels et talks"
+                placeholder="évènements professionnels et talks"
               />
             </AdminDashboardField>
             <AdminDashboardPrimaryButton type="submit" disabled={isSavingCategory}>
-              {isSavingCategory ? 'Creation...' : 'Ajouter'}
+              {isSavingCategory ? 'Création...' : 'Ajouter'}
             </AdminDashboardPrimaryButton>
           </AdminDashboardForm>
           <AdminDashboardList>
@@ -593,7 +593,7 @@ export function AdminDashboardPage() {
             pageSize={categoryPagination.pageSize}
             totalItems={categories.length}
             totalPages={categoryPagination.totalPages}
-            itemLabel="categories"
+            itemLabel="catégories"
             onPageChange={categoryPagination.setPage}
           />
         </AdminDashboardPanel>
@@ -603,7 +603,7 @@ export function AdminDashboardPage() {
 
   function renderEventList(
     renderedEvents: AdminEventSummary[],
-    emptyMessage = 'Aucun evenement a afficher pour le moment.',
+    emptyMessage = 'Aucun évènement à afficher pour le moment.',
   ) {
     if (renderedEvents.length === 0) {
       return (
@@ -620,7 +620,7 @@ export function AdminDashboardPage() {
             <AdminDashboardRowMain>
               <AdminDashboardRowTitle>{event.title}</AdminDashboardRowTitle>
               <AdminDashboardRowText>
-                {formatDate(event.startDatetime)} - {event.location.city ?? 'Ville a confirmer'}
+                {formatDate(event.startDatetime)} - {event.location.city ?? 'Ville à confirmer'}
               </AdminDashboardRowText>
               <AdminDashboardRowText>
                 {getOrganizerName(event)}
@@ -670,7 +670,7 @@ export function AdminDashboardPage() {
             <AdminDashboardMetricValue>{organizerUsers.length}</AdminDashboardMetricValue>
           </AdminDashboardMetric>
           <AdminDashboardMetric>
-            <AdminDashboardMetricLabel>Evenements publics</AdminDashboardMetricLabel>
+            <AdminDashboardMetricLabel>évènements publics</AdminDashboardMetricLabel>
             <AdminDashboardMetricValue>{publishedEvents.length}</AdminDashboardMetricValue>
           </AdminDashboardMetric>
           <AdminDashboardMetric>
@@ -688,7 +688,7 @@ export function AdminDashboardPage() {
     if (activeTab === 'categories') {
       return (
         <AdminDashboardMetric>
-          <AdminDashboardMetricLabel>Categories</AdminDashboardMetricLabel>
+          <AdminDashboardMetricLabel>Catégories</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>{categories.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
       )
@@ -703,7 +703,7 @@ export function AdminDashboardPage() {
           </AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>
-          <AdminDashboardMetricLabel>Demandes en attente</AdminDashboardMetricLabel>
+          <AdminDashboardMetricLabel>Demandes en’attente</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>{pendingApplications.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>

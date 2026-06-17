@@ -45,11 +45,11 @@ final class OrganizerGuestTicketController extends AbstractController
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
-            return $this->json(['message' => 'Evenement introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
         if (!$this->canManageEvent($user, $event)) {
-            return $this->json(['message' => 'Vous ne pouvez gerer que vos propres invitations.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Vous ne pouvez gérer que vos propres invitations.'], Response::HTTP_FORBIDDEN);
         }
 
         return $this->json([
@@ -82,11 +82,11 @@ final class OrganizerGuestTicketController extends AbstractController
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
-            return $this->json(['message' => 'Evenement introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
         if (!$this->canManageEvent($user, $event)) {
-            return $this->json(['message' => 'Vous ne pouvez inviter que sur vos propres evenements.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Vous ne pouvez inviter que sur vos propres évènements.'], Response::HTTP_FORBIDDEN);
         }
 
         $payload = $request->toArray();
@@ -99,16 +99,16 @@ final class OrganizerGuestTicketController extends AbstractController
         }
 
         if ($ticketTypeId <= 0) {
-            return $this->json(['message' => 'Choisis le type de billet a envoyer.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Choisis le type de billet à envoyer.'], Response::HTTP_BAD_REQUEST);
         }
 
         $ticketType = $ticketTypeRepository->find($ticketTypeId);
 
         if (
             !$ticketType instanceof TicketType
-            || $ticketType->getEvent()?->getId() !== $event->getId()
+            || $ticketType->getEvent()?->getId() !== $event?->getId()
         ) {
-            return $this->json(['message' => 'Ce type de billet ne correspond pas a cet evenement.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Ce type de billet ne correspond pas à cet l’évènement.'], Response::HTTP_BAD_REQUEST);
         }
 
         if (!$ticketType->isActive()) {
@@ -219,7 +219,7 @@ final class OrganizerGuestTicketController extends AbstractController
                 ->subject('Ton invitation EventFlow')
                 ->text(sprintf(
                     "Bonjour %s,\n\n".
-                    "Tu as recu une invitation pour l'événement : %s.\n\n".
+                    "Tu as reçu une invitation pour l'événement : %s.\n\n".
                     "Date : %s\n".
                     "Lieu : %s\n".
                     "Billet : %s\n".

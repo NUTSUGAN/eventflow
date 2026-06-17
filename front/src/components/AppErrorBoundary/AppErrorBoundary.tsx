@@ -68,11 +68,11 @@ export class AppErrorBoundary extends Component<
               Front EventFlow
             </span>
             <h1 style={{ margin: 0, fontSize: '2rem' }}>
-              Une erreur a bloque l affichage
+              Une erreur a bloqué l’affichage
             </h1>
             <p style={{ margin: 0, color: 'rgba(255,255,255,0.72)', lineHeight: 1.7 }}>
-              La page a plante pendant le rendu. Recharge la page pour retenter,
-              puis regarde le message ci-dessous si le probleme revient.
+              La page a planté pendant le rendu. Recharge la page pour réténter,
+              puis regarde le message ci-dessous si le problème revient.
             </p>
             <code
               style={{

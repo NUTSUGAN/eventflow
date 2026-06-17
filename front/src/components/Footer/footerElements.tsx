@@ -1,15 +1,15 @@
 import styled from 'styled-components'
 
 export const FooterContainer = styled.footer`
-  margin-top: 28px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: #1b1816;
+  margin-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #171412;
 `
 
 export const FooterTop = styled.section`
-  width: min(1480px, calc(100% - 96px));
+  width: min(1280px, calc(100% - 64px));
   margin: 0 auto;
-  padding: 28px 0 24px;
+  padding: 26px 0 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
   @media (max-width: 640px) {
@@ -20,82 +20,90 @@ export const FooterTop = styled.section`
 
 export const FooterTrustTitle = styled.h2`
   margin: 0 0 16px;
-  text-align: center;
   color: var(--color-text);
   font-family: var(--font-heading);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
+  text-align: center;
 `
 
 export const FooterTrustList = styled.div`
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1024px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 560px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `
 
 export const FooterTrustItem = styled.div`
-  min-height: 58px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.72);
-  font-weight: 700;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.9rem;
+  font-weight: 800;
   text-align: center;
-  padding: 0 12px;
 `
 
 export const FooterMain = styled.section`
-  width: min(1480px, calc(100% - 96px));
+  width: min(1280px, calc(100% - 64px));
   margin: 0 auto;
-  padding: 36px 0 30px;
+  padding: 28px 0 22px;
 
   @media (max-width: 640px) {
     width: min(100%, calc(100% - 28px));
-    padding: 28px 0 24px;
   }
 `
 
-export const FooterBrand = styled.div`
+export const FooterBrand = styled.a`
+  display: inline-flex;
+  margin-bottom: 12px;
   color: var(--color-text);
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  margin-bottom: 18px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  text-decoration: none;
 `
 
 export const FooterTopAction = styled.button`
-  min-height: 48px;
-  padding: 0 20px;
-  border-radius: 10px;
-  border: 1px solid rgba(248, 143, 82, 0.28);
-  background: rgba(255, 255, 255, 0.02);
+  min-height: 42px;
+  margin: 0 0 22px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(248, 143, 82, 0.4);
+  background: rgba(248, 143, 82, 0.09);
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  margin-bottom: 26px;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(248, 143, 82, 0.72);
+    background: rgba(248, 143, 82, 0.16);
+  }
 `
 
 export const FooterColumns = styled.div`
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 28px;
-  padding: 22px 0 34px;
+  gap: 24px;
+  padding: 18px 0 22px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1080px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 560px) {
     grid-template-columns: 1fr;
   }
 `
@@ -103,24 +111,34 @@ export const FooterColumns = styled.div`
 export const FooterColumn = styled.div`
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 9px;
+  min-width: 0;
 `
 
 export const FooterColumnTitle = styled.h3`
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   color: var(--color-text);
   font-family: var(--font-heading);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
 `
 
 export const FooterLink = styled.button`
+  width: fit-content;
+  max-width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--color-text-muted);
   text-align: left;
-  font-size: 1rem;
+  font: inherit;
+  font-size: 0.94rem;
+  line-height: 1.35;
   cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-secondary);
+  }
 `
 
 export const SocialLinks = styled.div`
@@ -129,24 +147,53 @@ export const SocialLinks = styled.div`
   gap: 10px;
 `
 
-export const FooterSocialLink = styled.button`
-  min-height: 38px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
+export const FooterSocialLink = styled.a`
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--color-text);
-  cursor: pointer;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(248, 143, 82, 0.52);
+    color: var(--color-secondary);
+    transform: translateY(-1px);
+  }
 `
 
 export const FooterBottom = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
   padding-top: 16px;
 `
 
-export const FooterLegal = styled.span`
+export const FooterCopyright = styled.p`
+  margin: 0;
   color: var(--color-text-soft);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+`
+
+export const FooterExternalLink = styled.a`
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 700;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-secondary);
+  }
 `

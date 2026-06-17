@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:promotions:reconcile-payments',
-    description: 'Reconcile les campagnes approuvees avec les paiements Stripe confirmes.',
+    description: 'Réconcilie les campagnes approuvées avec les paiements Stripe confirmés.',
 )]
 final class ReconcilePromotionPaymentsCommand extends Command
 {
@@ -55,14 +55,14 @@ final class ReconcilePromotionPaymentsCommand extends Command
                 ++$reconciled;
             } catch (\Throwable $exception) {
                 $io->warning(sprintf(
-                    'Campagne #%d non reconciliee: %s',
+                    'Campagne #%d non réconciliée : %s',
                     (int) $campaign->getId(),
                     $exception->getMessage(),
                 ));
             }
         }
 
-        $io->success(sprintf('%d paiement(s) Booster reconcilie(s).', $reconciled));
+        $io->success(sprintf('%d paiement(s) Booster réconcilié(s).', $reconciled));
 
         return Command::SUCCESS;
     }

@@ -300,12 +300,12 @@ export function AdminUsersPage() {
       ])
 
     if (rows.length === 0) {
-      setErrorMessage('Aucun abonne EventFlow a exporter.')
+      setErrorMessage('Aucun’abonne EventFlow à exporter.')
       return
     }
 
     const csv = [
-      ['Prenom', 'Nom', 'Nom complet', 'Email', 'Role', 'Organisateurs suivis', 'Date inscription'],
+      ['Prénom', 'Nom', 'Nom complet', 'Email', 'Role', 'Organisateurs suivis', 'Date inscription'],
       ...rows,
     ]
       .map((row) => row.map(escapeCsvValue).join(';'))
@@ -315,12 +315,12 @@ export function AdminUsersPage() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = 'abonnes-eventflow.csv'
+    link.download = 'abonnés-eventflow.csv'
     document.body.appendChild(link)
     link.click()
     link.remove()
     URL.revokeObjectURL(url)
-    setStatusMessage('Export abonnes EventFlow genere.')
+    setStatusMessage('Export abonnés EventFlow généré.')
   }
 
   return (
@@ -330,7 +330,7 @@ export function AdminUsersPage() {
           <AdminDashboardEyebrow>Administration</AdminDashboardEyebrow>
           <AdminDashboardTitle>Gestion utilisateurs</AdminDashboardTitle>
           <AdminDashboardText>
-            Comptes, roles et historique utile pour suivre l activite plateforme.
+            Comptes, roles et historique utile pour suivre l’activité plateforme.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>
@@ -359,7 +359,7 @@ export function AdminUsersPage() {
       <AdminDashboardTabs>
         {[
           ['users', 'Utilisateurs'],
-          ['subscribers', 'Abonnes'],
+          ['subscribers', 'Abonnés'],
         ].map(([tabId, label]) => (
           <AdminDashboardTab
             key={tabId}
@@ -378,7 +378,7 @@ export function AdminUsersPage() {
           <AdminDashboardMetricValue>{users.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>
-          <AdminDashboardMetricLabel>Abonnes EventFlow</AdminDashboardMetricLabel>
+          <AdminDashboardMetricLabel>Abonnés EventFlow</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>{eventflowSubscribers.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
       </AdminDashboardGrid>
@@ -437,8 +437,8 @@ export function AdminUsersPage() {
                 <AdminDashboardRowTitle>{user.fullName}</AdminDashboardRowTitle>
                 <AdminDashboardRowText>{user.email ?? 'Email inconnu'}</AdminDashboardRowText>
                 <AdminDashboardRowText>
-                  Cree le {formatDate(user.createdAt)} - {user.ordersCount} commande(s),
-                  {' '}{user.ticketsCount} billet(s), {user.organizedEventsCount} evenement(s)
+                  Crée le {formatDate(user.createdAt)} - {user.ordersCount} commande(s),
+                  {' '}{user.ticketsCount} billet(s), {user.organizedEventsCount} évènement(s)
                 </AdminDashboardRowText>
                 <AdminDashboardRowText>
                   Newsletter: {user.newsletterSubscribed ? 'oui' : 'non'}
@@ -522,7 +522,7 @@ export function AdminUsersPage() {
         <AdminDashboardPanel>
           <AdminDashboardPanelHeader>
             <div>
-              <AdminDashboardPanelTitle>Abonnes EventFlow</AdminDashboardPanelTitle>
+              <AdminDashboardPanelTitle>Abonnés EventFlow</AdminDashboardPanelTitle>
               <AdminDashboardText>
                 {eventflowSubscribers.length} compte(s) suivent au moins un organisateur EventFlow.
               </AdminDashboardText>
@@ -537,7 +537,7 @@ export function AdminUsersPage() {
           </AdminDashboardPanelHeader>
           {eventflowSubscribers.length === 0 ? (
             <AdminDashboardMessage $tone="neutral">
-              Aucun abonne EventFlow dans cette selection.
+              Aucun’abonne EventFlow dans cette selection.
             </AdminDashboardMessage>
           ) : (
             <AdminDashboardList>
@@ -565,7 +565,7 @@ export function AdminUsersPage() {
             pageSize={eventflowSubscriberPagination.pageSize}
             totalItems={eventflowSubscribers.length}
             totalPages={eventflowSubscriberPagination.totalPages}
-            itemLabel="abonnes"
+            itemLabel="abonnés"
             onPageChange={eventflowSubscriberPagination.setPage}
           />
         </AdminDashboardPanel>

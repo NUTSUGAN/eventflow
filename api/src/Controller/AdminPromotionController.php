@@ -79,7 +79,7 @@ final class AdminPromotionController extends AbstractController
             return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
-        return $this->json(['message' => 'Tarif mis a jour.']);
+        return $this->json(['message' => 'Tarif mis à jour.']);
     }
 
     #[Route('/{id<\d+>}', name: 'api_admin_promotion_show', methods: ['GET'])]
@@ -97,11 +97,11 @@ final class AdminPromotionController extends AbstractController
         EntityManagerInterface $entityManager,
     ): JsonResponse {
         if (PromotionCampaign::STATUS_PENDING !== $campaign->getStatus()) {
-            return $this->json(['message' => 'Seule une campagne en attente peut etre approuvee.'], Response::HTTP_CONFLICT);
+            return $this->json(['message' => 'Seule une campagne en attente peut être approuvée.'], Response::HTTP_CONFLICT);
         }
 
         if ('published' !== strtolower((string) $campaign->getEvent()?->getStatus())) {
-            return $this->json(['message' => 'Cet evenement nest plus publie.'], Response::HTTP_CONFLICT);
+            return $this->json(['message' => 'Cet évènement n’est plus publié.'], Response::HTTP_CONFLICT);
         }
 
         try {
@@ -124,7 +124,7 @@ final class AdminPromotionController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'La campagne est approuvee et peut maintenant etre payee.',
+            'message' => 'La campagne est approuvée et peut maintenant etre payée.',
             'campaign' => $campaignService->serialize($campaign),
         ]);
     }
@@ -138,7 +138,7 @@ final class AdminPromotionController extends AbstractController
         EntityManagerInterface $entityManager,
     ): JsonResponse {
         if (PromotionCampaign::STATUS_PENDING !== $campaign->getStatus()) {
-            return $this->json(['message' => 'Seule une campagne en attente peut etre refusee.'], Response::HTTP_CONFLICT);
+            return $this->json(['message' => 'Seule une campagne en attente peut être refusée.'], Response::HTTP_CONFLICT);
         }
 
         $data = $request->toArray();
@@ -166,7 +166,7 @@ final class AdminPromotionController extends AbstractController
         $notificationService->notifyDecision($campaign, false);
 
         return $this->json([
-            'message' => 'La campagne a ete refusee.',
+            'message' => 'La campagne a été refusée.',
             'campaign' => $campaignService->serialize($campaign),
         ]);
     }
@@ -177,6 +177,7 @@ final class AdminPromotionController extends AbstractController
         int $channelId,
         Request $request,
         PromotionCampaignService $campaignService,
+        PromotionNotificationService $notificationService,
         EntityManagerInterface $entityManager,
     ): JsonResponse {
         $target = null;
@@ -200,6 +201,9 @@ final class AdminPromotionController extends AbstractController
 
         try {
             $data = $request->toArray();
+            $previousStatus = $target->getDeliveryStatus();
+            $previousBrief = $target->getAdminBrief();
+            $previousFeatured = $target->isFeatured();
             $status = (string) ($data['deliveryStatus'] ?? $target->getDeliveryStatus());
             $isFeatured = array_key_exists('isFeatured', $data)
                 ? (bool) $data['isFeatured']
@@ -232,6 +236,13 @@ final class AdminPromotionController extends AbstractController
             }
 
             $entityManager->flush();
+            $trackingChanged = $previousStatus !== $target->getDeliveryStatus()
+                || $previousBrief !== $target->getAdminBrief()
+                || $previousFeatured !== $target->isFeatured();
+
+            if ($trackingChanged) {
+                $notificationService->notifyTrackingUpdated($campaign, $target);
+            }
         } catch (\InvalidArgumentException $exception) {
             return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         } catch (\LogicException $exception) {
@@ -239,7 +250,7 @@ final class AdminPromotionController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Le suivi du canal a ete mis a jour.',
+            'message' => 'Le suivi du canal a été mis à jour.',
             'campaign' => $campaignService->serialize($campaign),
         ]);
     }

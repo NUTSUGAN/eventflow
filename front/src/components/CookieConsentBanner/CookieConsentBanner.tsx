@@ -47,8 +47,8 @@ export function CookieConsentBanner() {
     <CookieConsentWrapper aria-live="polite" aria-label="Preference cookies EventFlow">
       <CookieConsentTitle>Cookies EventFlow</CookieConsentTitle>
       <CookieConsentText>
-        EventFlow utilise des cookies essentiels pour maintenir ta session et
-        des cookies optionnels pour ameliorer l experience. Tu peux accepter
+        EventFlow utilis? des cookies essentiels pour maintenir ta session et
+        des cookies optionnels pour améliorer l’expérience. Tu peux accepter
         ou refuser ces cookies optionnels maintenant.
       </CookieConsentText>
       <CookieConsentActions>

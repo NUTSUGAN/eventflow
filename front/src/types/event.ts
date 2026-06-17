@@ -158,6 +158,14 @@ export type OrganizerProfile = {
   events: EventSummary[]
 }
 
+export type PublicOrganizerSummary = OrganizerIdentity & {
+  publishedEventCount: number
+}
+
+export type PublicOrganizersResponse = {
+  items: PublicOrganizerSummary[]
+}
+
 export type EventReportPayload = {
   reason: string
   details: string

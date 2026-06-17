@@ -1,12 +1,13 @@
+import { FaInstagram, FaSnapchat, FaTiktok } from 'react-icons/fa6'
 import { useNavigate } from 'react-router-dom'
 import {
-  FooterBrand,
   FooterBottom,
   FooterColumn,
   FooterColumnTitle,
   FooterColumns,
   FooterContainer,
-  FooterLegal,
+  FooterCopyright,
+  FooterExternalLink,
   FooterLink,
   FooterMain,
   FooterSocialLink,
@@ -18,41 +19,6 @@ import {
   SocialLinks,
 } from './footerElements'
 
-const aboutLinks = [
-  'Je suis organisateur',
-  'Billetterie EventFlow',
-  'Kit presse',
-  'Carrieres',
-  'Aide',
-]
-
-const cityLinks = ['Paris', 'Lyon', 'Lille', 'Toulouse', 'Montpellier', 'Voir tout']
-
-const organizerLinks = [
-  'Grand Palais',
-  'La Sucriere',
-  'Studio Lumiere',
-  'Maison des Arts',
-  'Voir tout',
-]
-
-const supportLinks = [
-  'Centre daide',
-  'Nous contacter',
-  'Signaler un contenu',
-  'Politique de confidentialite',
-  'Conditions dutilisation',
-]
-
-const trustedNames = [
-  'IPSSI PARIS',
-  'IPSSI PARIS',
-  'IPSSI PARIS',
-  'IPSSI PARIS',
-  'IPSSI PARIS',
-  'IPSSI PARIS',
-]
-
 export function SiteFooter() {
   const navigate = useNavigate()
 
@@ -61,85 +27,137 @@ export function SiteFooter() {
       <FooterTop>
         <FooterTrustTitle>Des organisateurs nous font confiance</FooterTrustTitle>
         <FooterTrustList>
-          {trustedNames.map((name, index) => (
-            <FooterTrustItem key={`${name}-${index}`}>{name}</FooterTrustItem>
-          ))}
+          <FooterTrustItem>IPSSI PARIS</FooterTrustItem>
+          <FooterTrustItem>IPSSI PARIS</FooterTrustItem>
+          <FooterTrustItem>IPSSI PARIS</FooterTrustItem>
+          <FooterTrustItem>IPSSI PARIS</FooterTrustItem>
+          <FooterTrustItem>IPSSI PARIS</FooterTrustItem>
+          <FooterTrustItem>IPSSI PARIS</FooterTrustItem>
         </FooterTrustList>
       </FooterTop>
 
       <FooterMain>
-        <FooterBrand>EventFlow</FooterBrand>
         <FooterTopAction
           type="button"
           onClick={() => navigate('/auth?mode=register&intent=publish')}
         >
-          Publie ton evenement
+          Publier ton évènement
         </FooterTopAction>
+
         <FooterColumns>
           <FooterColumn>
-            <FooterColumnTitle>A propos</FooterColumnTitle>
-            {aboutLinks.map((link) => (
-              <FooterLink
-                key={link}
-                type="button"
-                onClick={
-                  link === 'Je suis organisateur'
-                    ? () => navigate('/auth?mode=register&intent=organizer')
-                    : undefined
-                }
-              >
-                {link}
-              </FooterLink>
-            ))}
+            <FooterColumnTitle>À propos</FooterColumnTitle>
+            <FooterLink type="button" onClick={() => navigate('/qui-sommes-nous')}>
+              Qui sommes-nous ?
+            </FooterLink>
+            <FooterLink
+              type="button"
+              onClick={() => navigate('/auth?mode=register&intent=organizer')}
+            >
+              Je suis organisateur
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/explorer')}>
+              Billetterie EventFlow
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/aide')}>
+              Aide
+            </FooterLink>
           </FooterColumn>
 
           <FooterColumn>
             <FooterColumnTitle>Villes</FooterColumnTitle>
-            {cityLinks.map((link) => (
-              <FooterLink key={link} type="button">
-                {link}
-              </FooterLink>
-            ))}
+            <FooterLink
+              type="button"
+              onClick={() => navigate(`/explorer?city=${encodeURIComponent('Melun')}`)}
+            >
+              Melun
+            </FooterLink>
+            <FooterLink
+              type="button"
+              onClick={() => navigate(`/explorer?city=${encodeURIComponent('Paris')}`)}
+            >
+              Paris
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/explorer')}>
+              Voir toutes les villes
+            </FooterLink>
           </FooterColumn>
 
           <FooterColumn>
             <FooterColumnTitle>Organisateurs</FooterColumnTitle>
-            {organizerLinks.map((link) => (
-              <FooterLink key={link} type="button">
-                {link}
-              </FooterLink>
-            ))}
+            <FooterLink type="button" onClick={() => navigate('/organizers/2')}>
+              AdminModif EventFlowModif
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/organizers/8')}>
+              ely Google
+            </FooterLink>
           </FooterColumn>
 
           <FooterColumn>
-            <FooterColumnTitle>Support</FooterColumnTitle>
-            {supportLinks.map((link) => (
-              <FooterLink key={link} type="button">
-                {link}
-              </FooterLink>
-            ))}
+            <FooterColumnTitle>Aide / légal</FooterColumnTitle>
+            <FooterLink type="button" onClick={() => navigate('/conditions-utilisation')}>
+              Conditions d’utilisation
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/mentions-legales')}>
+              Mentions légales
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/confidentialite')}>
+              Politique de confidentialité
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/aide')}>
+              Aide
+            </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/contact')}>
+              Contact EventFlow
+            </FooterLink>
           </FooterColumn>
 
           <FooterColumn>
-            <FooterColumnTitle>Sur les reseaux</FooterColumnTitle>
+            <FooterColumnTitle>Réseaux</FooterColumnTitle>
             <SocialLinks>
-              <FooterSocialLink type="button">Instagram</FooterSocialLink>
-              <FooterSocialLink type="button">TikTok</FooterSocialLink>
-              <FooterSocialLink type="button">Spotify</FooterSocialLink>
-              <FooterSocialLink type="button">LinkedIn</FooterSocialLink>
+              <FooterSocialLink
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                title="Instagram"
+              >
+                <FaInstagram aria-hidden="true" />
+              </FooterSocialLink>
+              <FooterSocialLink
+                href="https://www.tiktok.com/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="TikTok"
+                title="TikTok"
+              >
+                <FaTiktok aria-hidden="true" />
+              </FooterSocialLink>
+              <FooterSocialLink
+                href="https://www.snapchat.com/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Snapchat"
+                title="Snapchat"
+              >
+                <FaSnapchat aria-hidden="true" />
+              </FooterSocialLink>
             </SocialLinks>
           </FooterColumn>
         </FooterColumns>
 
         <FooterBottom>
-          <FooterLegal>Conditions dutilisation</FooterLegal>
-          <FooterLegal>Politique cookies</FooterLegal>
-          <FooterLegal>Mentions legales</FooterLegal>
-          <FooterLegal>Francais</FooterLegal>
-        </FooterBottom>
-
-        <FooterBottom>
-          <FooterLegal>© 2026 EventFlow. Tous droits reserves.</FooterLegal>
+          <FooterCopyright>
+            © 2026{' '}
+            <FooterExternalLink
+              href="https://nuriseweb.com/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              NURISEWEB
+            </FooterExternalLink>{' '}
+            Création de sites web & solutions digitales.
+          </FooterCopyright>
         </FooterBottom>
       </FooterMain>
     </FooterContainer>

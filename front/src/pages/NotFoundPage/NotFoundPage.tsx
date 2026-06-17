@@ -7,7 +7,7 @@ export function NotFoundPage() {
       <NotFoundText>
         Cette route n&apos;existe pas encore dans le front EventFlow.
       </NotFoundText>
-      <NotFoundAction to="/">Retour a la liste publique</NotFoundAction>
+      <NotFoundAction to="/">Retour à la liste publique</NotFoundAction>
     </NotFoundSection>
   )
 }

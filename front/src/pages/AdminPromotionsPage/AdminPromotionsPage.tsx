@@ -40,10 +40,10 @@ import {
 const filters: Array<{ value?: PromotionStatus; label: string }> = [
   { label: 'Toutes' },
   { value: 'pending', label: 'En attente' },
-  { value: 'approved', label: 'A payer' },
-  { value: 'active', label: 'Payees / en suivi' },
+  { value: 'approved', label: 'À payer' },
+  { value: 'active', label: 'Payées / en suivi' },
   { value: 'rejected', label: 'Refusees' },
-  { value: 'expired', label: 'Terminees' },
+  { value: 'expired', label: 'Terminées' },
 ]
 
 const channelLabels: Record<string, string> = {
@@ -57,7 +57,7 @@ function apiMessage(error: unknown): string {
     const message = (error as { response?: { data?: { message?: unknown } } }).response?.data?.message
     if (message) return String(message)
   }
-  return 'Une operation Booster a echoue.'
+  return 'Une opération Booster a échoué.'
 }
 
 export function AdminPromotionsPage() {
@@ -118,7 +118,7 @@ export function AdminPromotionsPage() {
     try {
       if (decision === 'approve') await approvePromotion(campaign.id, comments[campaign.id] ?? '')
       else await rejectPromotion(campaign.id, comments[campaign.id] ?? '')
-      setMessage(decision === 'approve' ? 'Campagne approuvee. Un email a ete envoye.' : 'Campagne refusee. Un email a ete envoye.')
+      setMessage(decision === 'approve' ? 'Campagne approuvée. Un email a été envoyé.' : 'Campagne refusée. Un email a été envoyé.')
       await load()
     } catch (nextError) {
       setError(apiMessage(nextError))
@@ -133,7 +133,7 @@ export function AdminPromotionsPage() {
 
     try {
       await updatePromotionRate(rateId, rateValues[rateId] ?? '')
-      setMessage('Tarif mis a jour.')
+      setMessage('Tarif mis à jour.')
       await load()
     } catch (nextError) {
       setError(apiMessage(nextError))
@@ -147,7 +147,7 @@ export function AdminPromotionsPage() {
       <AdminPromotionHeader>
         <div>
           <AdminPromotionTitle>Campagnes Booster</AdminPromotionTitle>
-          <AdminPromotionText>Valide les demandes, pilote chaque canal et partage les informations de suivi.</AdminPromotionText>
+          <AdminPromotionText>Valide les demandes, pilote chaque canal et partagé les informations de suivi.</AdminPromotionText>
         </div>
       </AdminPromotionHeader>
 
@@ -178,7 +178,7 @@ export function AdminPromotionsPage() {
                       <AdminPromotionMeta>{campaign.organizer.firstName} {campaign.organizer.lastName} - {campaign.organizer.email}</AdminPromotionMeta>
                       <AdminPromotionMeta>
                         {campaign.channels.map((channel) => channelLabels[channel.channelCode]).join(' + ')} - {' '}
-                        {campaign.duration.replace('_days', ' jours')} - {campaign.totalPrice} {campaign.currency}
+                        {campaign.duration.replace('_days', ' j')} - {campaign.totalPrice} {campaign.currency}
                       </AdminPromotionMeta>
                     </div>
                     <strong>{campaign.status}</strong>
@@ -213,7 +213,7 @@ export function AdminPromotionsPage() {
                   ) : null}
 
                   {campaign.status === 'approved' ? (
-                    <AdminPromotionMeta>En attente du paiement de l organisateur.</AdminPromotionMeta>
+                    <AdminPromotionMeta>En attente du paiement de l’organisateur.</AdminPromotionMeta>
                   ) : null}
                 </AdminPromotionCard>
             ))}

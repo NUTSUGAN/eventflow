@@ -84,14 +84,14 @@ export function MyOrdersPage() {
       <MyTicketsHero>
         <MyTicketsTitle>Mes commandes</MyTicketsTitle>
         <MyTicketsSubtitle>
-          Retrouve tous tes paiements confirmes pour la billetterie et les campagnes Booster.
+          Retrouve tous tes paiements confirmés pour la billetterie et les campagnes Booster.
         </MyTicketsSubtitle>
       </MyTicketsHero>
 
       {isLoading ? (
         <MyTicketsStateCard>
           <MyTicketsStateTitle>Chargement de tes commandes...</MyTicketsStateTitle>
-          <MyTicketsStateText>On rassemble tes achats EventFlow confirmes.</MyTicketsStateText>
+          <MyTicketsStateText>On rassemble tes achats EventFlow confirmés.</MyTicketsStateText>
         </MyTicketsStateCard>
       ) : error ? (
         <MyTicketsStateCard>
@@ -101,7 +101,7 @@ export function MyOrdersPage() {
       ) : orders.length === 0 ? (
         <MyTicketsStateCard>
           <MyTicketsStateTitle>Aucune commande effectuee</MyTicketsStateTitle>
-          <MyTicketsStateText>Les paiements confirmes apparaitront ici.</MyTicketsStateText>
+          <MyTicketsStateText>Les paiements confirmés apparaîtront ici.</MyTicketsStateText>
         </MyTicketsStateCard>
       ) : (
         <MyTicketsPendingList>
@@ -116,7 +116,7 @@ export function MyOrdersPage() {
                   </MyTicketsMetaRow>
                   <MyTicketsPendingTitle>{order.event.title ?? 'Commande EventFlow'}</MyTicketsPendingTitle>
                   <MyTicketsPendingText>
-                    Paiement confirme le {formatDateTime(order.paidAt ?? order.createdAt)}
+                    Paiement confirmé le {formatDateTime(order.paidAt ?? order.createdAt)}
                   </MyTicketsPendingText>
                 </MyTicketsPendingTitleGroup>
                 <MyTicketsTag>{formatCurrency(order.total, order.currency)}</MyTicketsTag>
@@ -132,7 +132,7 @@ export function MyOrdersPage() {
                   <MyTicketsSummaryValue>{orderTypeLabel(order)}</MyTicketsSummaryValue>
                 </MyTicketsSummaryItem>
                 <MyTicketsSummaryItem>
-                  <MyTicketsSummaryLabel>Montant paye</MyTicketsSummaryLabel>
+                  <MyTicketsSummaryLabel>Montant payé</MyTicketsSummaryLabel>
                   <MyTicketsSummaryValue>{formatCurrency(order.total, order.currency)}</MyTicketsSummaryValue>
                 </MyTicketsSummaryItem>
                 <MyTicketsSummaryItem>
@@ -158,7 +158,7 @@ export function MyOrdersPage() {
                 )}
                 {order.event.id ? (
                   <MyTicketsSecondaryButton type="button" onClick={() => navigate(`/events/${order.event.id}`)}>
-                    Voir l evenement
+                    Voir l’évènement
                   </MyTicketsSecondaryButton>
                 ) : null}
               </MyTicketsActions>

@@ -80,7 +80,7 @@ function getEventKey(ticket: AdminTicketSummary): string {
 }
 
 function getEventTitle(ticket: AdminTicketSummary): string {
-  return ticket.event.title ?? 'Evenement inconnu'
+  return ticket.event.title ?? 'évènement inconnu'
 }
 
 function getEventMeta(ticket: AdminTicketSummary): string {
@@ -291,7 +291,7 @@ export function AdminTicketsPage() {
           <AdminDashboardEyebrow>Administration</AdminDashboardEyebrow>
           <AdminDashboardTitle>Billets & check-ins</AdminDashboardTitle>
           <AdminDashboardText>
-            Audit des billets generes, QR masques et derniers scans.
+            Audit des billets générés, QR masques et derniers scans.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>
@@ -311,7 +311,7 @@ export function AdminTicketsPage() {
       <AdminDashboardPanel>
         <AdminDashboardPanelHeader>
           <div>
-            <AdminDashboardPanelTitle>Audit des billets par evenement</AdminDashboardPanelTitle>
+            <AdminDashboardPanelTitle>Audit des billets par évènement</AdminDashboardPanelTitle>
             <AdminDashboardText>
               {selectedEvent
                 ? `${filteredTickets.length} billet(s) affiche(s) pour ${selectedEvent.eventTitle}`
@@ -321,7 +321,7 @@ export function AdminTicketsPage() {
         </AdminDashboardPanelHeader>
 
         <AdminDashboardField>
-          <AdminDashboardLabel>Rechercher un evenement</AdminDashboardLabel>
+          <AdminDashboardLabel>Rechercher un évènement</AdminDashboardLabel>
           <AdminDashboardFilterBar>
             <AdminDashboardInput
               value={eventSearchQuery}
@@ -332,7 +332,7 @@ export function AdminTicketsPage() {
               type="button"
               onClick={() => handleEventSelection('all')}
             >
-              Tous les evenements
+              Tous les évènements
             </AdminDashboardSecondaryButton>
           </AdminDashboardFilterBar>
         </AdminDashboardField>
@@ -347,7 +347,7 @@ export function AdminTicketsPage() {
           </AdminDashboardPickerSelection>
         ) : (
           <AdminDashboardMessage $tone="neutral">
-            Vue globale active. Recherche un evenement pour filtrer cet audit.
+            Vue globale active. Recherche un évènement pour filtrer cet audit.
           </AdminDashboardMessage>
         )}
 
@@ -371,13 +371,13 @@ export function AdminTicketsPage() {
               ))}
               {filteredEventOptions.length > visibleEventOptions.length ? (
                 <AdminDashboardText>
-                  {visibleEventOptions.length} resultat(s) affiches sur {filteredEventOptions.length}.
+                  {visibleEventOptions.length} résultat(s) affichés sur {filteredEventOptions.length}.
                 </AdminDashboardText>
               ) : null}
             </AdminDashboardPickerList>
           ) : !isLoading ? (
             <AdminDashboardMessage $tone="neutral">
-              Aucun evenement ne correspond a cette recherche.
+              Aucun évènement ne correspond à cette recherche.
             </AdminDashboardMessage>
           ) : null
         ) : null}
@@ -387,7 +387,7 @@ export function AdminTicketsPage() {
           <AdminDashboardInput
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Evenement, client, commande, QR masque, scan..."
+            placeholder="évènement, client, commande, QR masque, scan..."
           />
         </AdminDashboardField>
 
@@ -401,7 +401,7 @@ export function AdminTicketsPage() {
           <AdminDashboardMessage $tone="neutral">
             {selectedEvent
               ? `Aucun billet ne correspond pour ${selectedEvent.eventTitle}.`
-              : 'Aucun billet ne correspond a la recherche.'}
+              : 'Aucun billet ne correspond à la recherche.'}
           </AdminDashboardMessage>
         ) : null}
 
@@ -428,7 +428,7 @@ export function AdminTicketsPage() {
                       QR: {ticket.qrTokenMasked} - commande {ticket.order.reference ?? 'inconnue'}
                     </AdminDashboardRowText>
                     <AdminDashboardRowText>
-                      Type: {ticket.ticketType.name ?? 'Non renseigne'} - emis le {formatDate(ticket.issuedAt)}
+                      Type: {ticket.ticketType.name ?? 'Non renseigné'} - émis le {formatDate(ticket.issuedAt)}
                     </AdminDashboardRowText>
                     <AdminDashboardRowText>
                       Dernier scan:{' '}
@@ -442,7 +442,7 @@ export function AdminTicketsPage() {
                       {ticket.status ?? 'inconnu'}
                     </AdminDashboardBadge>
                     <AdminDashboardBadge $tone={getCheckinTone(ticket.latestCheckin?.result ?? null)}>
-                      {ticket.latestCheckin?.result ?? 'non scanne'}
+                      {ticket.latestCheckin?.result ?? 'non scanné'}
                     </AdminDashboardBadge>
                   </AdminDashboardActions>
                   <span />

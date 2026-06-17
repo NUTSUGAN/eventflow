@@ -16,7 +16,7 @@ final class UserAccountStatusChecker implements UserCheckerInterface
         }
 
         throw new CustomUserMessageAccountStatusException(
-            'Ce compte est bloque. Contacte le support EventFlow.'
+            'Ce compte est bloqué. Contacte le support EventFlow.'
         );
     }
 

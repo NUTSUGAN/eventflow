@@ -40,13 +40,13 @@ class OrganizerSubscriptionController extends AbstractController
 
         if ($currentUser->getId() === $organizer->getId()) {
             return $this->json([
-                'message' => 'Vous ne pouvez pas vous abonner a votre propre profil.',
+                'message' => 'Vous ne pouvez pas vous abonner à votre propre profil.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if (!$this->isOrganizer($organizer)) {
             return $this->json([
-                'message' => 'Cet utilisateur ne peut pas etre suivi comme organisateur.',
+                'message' => 'Cet utilisateur ne peut pas être suivi comme organisateur.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -122,7 +122,7 @@ class OrganizerSubscriptionController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Abonnement Organisateur desactive.',
+            'message' => 'Abonnement Organisateur désactivé.',
             'subscription' => $this->buildSubscriptionPayload($subscription),
             'organizer' => $this->buildOrganizerPayload($organizer),
         ]);

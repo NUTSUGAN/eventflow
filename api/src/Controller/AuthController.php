@@ -32,7 +32,7 @@ class AuthController extends AbstractController
     private const GOOGLE_STATE_SESSION_KEY = 'auth.google.state';
     private const GOOGLE_PENDING_SESSION_KEY = 'auth.google.pending';
     private const PASSWORD_RESET_TTL_IN_SECONDS = 3600;
-    private const PASSWORD_REQUIREMENTS_MESSAGE = 'Le mot de passe doit contenir au moins 8 caracteres, une minuscule, une majuscule, un chiffre et un caractere special.';
+    private const PASSWORD_REQUIREMENTS_MESSAGE = 'Le mot de passe doit contenir au moins 8 caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.';
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(): JsonResponse
@@ -69,13 +69,13 @@ class AuthController extends AbstractController
 
         if (!$acceptTerms || !$acceptPrivacy) {
             return $this->json([
-                'message' => 'Le consentement aux conditions dutilisation et a la politique de confidentialite est obligatoire.',
+                'message' => 'Le consentement aux conditions d’utilisation et à la politique de confidentialité est obligatoire.',
             ], 400);
         }
 
         if ($userRepository->findOneBy(['email' => $data['email']])) {
             return $this->json([
-                'message' => 'Cet email existe deja.',
+                'message' => 'Cet email existe déjà.',
             ], 409);
         }
 
@@ -116,7 +116,7 @@ class AuthController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Utilisateur cree avec succes.',
+            'message' => 'Utilisateur crée avec succès.',
             'newsletterSubscribed' => $subscribeToNewsletter,
             'user' => $this->serializeUser($user),
         ], 201);
@@ -396,7 +396,7 @@ class AuthController extends AbstractController
 
         if (!$acceptTerms || !$acceptPrivacy) {
             return $this->json([
-                'message' => 'Le consentement aux conditions dutilisation et a la politique de confidentialite est obligatoire.',
+                'message' => 'Le consentement aux conditions d’utilisation et à la politique de confidentialité est obligatoire.',
             ], 400);
         }
 
@@ -409,7 +409,7 @@ class AuthController extends AbstractController
 
             if (!$user instanceof User) {
                 return $this->json([
-                    'message' => 'Le compte associe a cette demande Google est introuvable.',
+                    'message' => 'Le compte associé à cette demande Google est introuvable.',
                 ], 404);
             }
         }
@@ -475,14 +475,14 @@ class AuthController extends AbstractController
         $session->remove(self::GOOGLE_PENDING_SESSION_KEY);
         if (!$user->canAuthenticate()) {
             return $this->json([
-                'message' => 'Ce compte est desactive ou bloque. Contacte le support EventFlow.',
+                'message' => 'Ce compte est désactivé ou bloqué. Contacte le support EventFlow.',
             ], 403);
         }
 
         $security->login($user);
 
         return $this->json([
-            'message' => 'Compte Google finalise avec succes.',
+            'message' => 'Compte Google finalise avec succès.',
             'newsletterSubscribed' => $this->hasActiveNewsletterSubscription($user),
             'user' => $this->serializeUser($user),
         ], 200);
@@ -508,7 +508,7 @@ class AuthController extends AbstractController
         }
 
         $response = [
-            'message' => 'Si un compte existe pour cet email, un lien de reinitialisation a ete envoye.',
+            'message' => 'Si un compte existe pour cet email, un lien de réinitialisation a été envoyé.',
         ];
 
         $user = $userRepository->findOneBy(['email' => $email]);
@@ -541,17 +541,17 @@ class AuthController extends AbstractController
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to($email)
-                    ->subject('Reinitialisation de ton mot de passe EventFlow')
+                    ->subject('Réinitialisation de ton mot de passe EventFlow')
                     ->text(
                         "Bonjour,\n\n".
-                        "Voici ton lien de reinitialisation EventFlow :\n".
+                        "Voici ton lien de réinitialisation EventFlow :\n".
                         $resetUrl."\n\n".
                         "Ce lien est valable pendant 1 heure.\n"
                     )
             );
         } catch (\Throwable $exception) {
             return $this->json([
-                'message' => 'Impossible d envoyer l email de reinitialisation pour le moment.',
+                'message' => 'Impossible d’envoyer l’email de réinitialisation pour le moment.',
             ], 503);
         }
 
@@ -580,7 +580,7 @@ class AuthController extends AbstractController
 
             if ('' === $firstName) {
                 return $this->json([
-                    'message' => 'Le prenom ne peut pas etre vide.',
+                    'message' => 'Le prénom ne peut pas être vide.',
                 ], 400);
             }
 
@@ -592,7 +592,7 @@ class AuthController extends AbstractController
 
             if ('' === $lastName) {
                 return $this->json([
-                    'message' => 'Le nom ne peut pas etre vide.',
+                    'message' => 'Le nom ne peut pas être vide.',
                 ], 400);
             }
 
@@ -651,7 +651,7 @@ class AuthController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Ton profil a ete mis a jour.',
+            'message' => 'Ton profil a été mis à jour.',
             'user' => $this->serializeUser($user),
         ], 200);
     }
@@ -669,7 +669,7 @@ class AuthController extends AbstractController
 
         if ('' === $rawToken || '' === trim($newPassword)) {
             return $this->json([
-                'message' => 'Le token de reinitialisation et le nouveau mot de passe sont obligatoires.',
+                'message' => 'Le token de réinitialisation et le nouveau mot de passa sont obligatoires.',
             ], 400);
         }
 
@@ -688,7 +688,7 @@ class AuthController extends AbstractController
 
         if (!$resetRequest instanceof PasswordResetRequest || !$resetRequest->getUser() instanceof User) {
             return $this->json([
-                'message' => 'Le lien de reinitialisation est invalide ou expire.',
+                'message' => 'Le lien de réinitialisation est invalide ou expire.',
             ], 400);
         }
 
@@ -702,7 +702,7 @@ class AuthController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Ton mot de passe a ete reinitialise avec succes.',
+            'message' => 'Ton mot de passe a été réinitialisé avec succès.',
         ], 200);
     }
 
@@ -879,7 +879,7 @@ class AuthController extends AbstractController
         $mimeType = $file->getMimeType() ?? '';
 
         if (!str_starts_with($mimeType, 'image/')) {
-            throw new \RuntimeException('Le fichier envoye doit etre une image.');
+            throw new \RuntimeException('Le fichier envoyé doit être une image.');
         }
 
         $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/profiles';
@@ -907,7 +907,7 @@ class AuthController extends AbstractController
         $mimeType = strtolower((string) ($matches[1] ?? ''));
 
         if (!str_starts_with($mimeType, 'image/')) {
-            throw new \RuntimeException('La photo de profil doit etre une image.');
+            throw new \RuntimeException('La photo de profil doit être une image.');
         }
 
         $rawData = base64_decode((string) ($matches[2] ?? ''), true);

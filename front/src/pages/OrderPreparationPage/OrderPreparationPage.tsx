@@ -42,7 +42,7 @@ function formatCurrency(value: number): string {
 
 function formatDateTime(value: string | null): string {
   if (!value) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -101,7 +101,7 @@ export function OrderPreparationPage() {
     async function loadPreparation() {
       if (!eventId || !Number.isFinite(ticketTypeId) || ticketTypeId <= 0) {
         if (isMounted) {
-          setErrorMessage('Impossible de retrouver le billet a preparer.')
+          setErrorMessage('Impossible de retrouver le billet à préparer.')
           setIsLoading(false)
         }
         return
@@ -127,7 +127,7 @@ export function OrderPreparationPage() {
         }
       } catch {
         if (isMounted) {
-          setErrorMessage("Impossible de charger l'evenement pour cette commande.")
+          setErrorMessage("Impossible de charger l’évènement pour cette commande.")
         }
       } finally {
         if (isMounted) {
@@ -223,7 +223,7 @@ export function OrderPreparationPage() {
           ),
         )
       } else {
-        setErrorMessage('Impossible de preparer la commande pour le moment.')
+        setErrorMessage('Impossible de préparer la commande pour le moment.')
       }
     } finally {
       setIsSubmitting(false)
@@ -246,9 +246,9 @@ export function OrderPreparationPage() {
       <OrderPreparationSection>
         <OrderPreparationHero>
           <OrderPreparationEyebrow>Commande</OrderPreparationEyebrow>
-          <OrderPreparationTitle>Preparation de la commande...</OrderPreparationTitle>
+          <OrderPreparationTitle>Préparation de la commande...</OrderPreparationTitle>
           <OrderPreparationState>
-            On verifie ta session et le billet selectionne.
+            On verifie ta session et le billet sélectionné.
           </OrderPreparationState>
         </OrderPreparationHero>
       </OrderPreparationSection>
@@ -262,14 +262,14 @@ export function OrderPreparationPage() {
           <OrderPreparationEyebrow>Commande</OrderPreparationEyebrow>
           <OrderPreparationTitle>Billet introuvable</OrderPreparationTitle>
           <OrderPreparationError>
-            {errorMessage ?? "Le billet demande n'est pas disponible."}
+            {errorMessage ?? "Le billet demandé n’est pas disponible."}
           </OrderPreparationError>
           <OrderPreparationActions>
             <OrderPreparationSecondaryButton
               type="button"
               onClick={() => navigate('/explorer')}
             >
-              Retour a Explorer
+              Retour à Explorer
             </OrderPreparationSecondaryButton>
           </OrderPreparationActions>
         </OrderPreparationHero>
@@ -281,9 +281,9 @@ export function OrderPreparationPage() {
     <OrderPreparationSection>
       <OrderPreparationHero>
         <OrderPreparationEyebrow>Commande</OrderPreparationEyebrow>
-        <OrderPreparationTitle>Preparation de commande</OrderPreparationTitle>
+        <OrderPreparationTitle>Préparation de commande</OrderPreparationTitle>
         <OrderPreparationText>
-          On prepare ici la commande avant paiement pour <strong>{event.title}</strong>.
+          On prépare ici la commande avant paiement pour <strong>{event.title}</strong>.
         </OrderPreparationText>
 
         {errorMessage ? <OrderPreparationError>{errorMessage}</OrderPreparationError> : null}
@@ -293,14 +293,14 @@ export function OrderPreparationPage() {
 
         <OrderPreparationGrid>
           <OrderPreparationCard>
-            <OrderPreparationCardTitle>Billet selectionne</OrderPreparationCardTitle>
+            <OrderPreparationCardTitle>Billet sélectionné</OrderPreparationCardTitle>
             <OrderPreparationList>
               <OrderPreparationListRow>
                 <OrderPreparationLabel>Nom</OrderPreparationLabel>
                 <OrderPreparationValue>{selectedTicketType.name}</OrderPreparationValue>
               </OrderPreparationListRow>
               <OrderPreparationListRow>
-                <OrderPreparationLabel>Evenement</OrderPreparationLabel>
+                <OrderPreparationLabel>évènement</OrderPreparationLabel>
                 <OrderPreparationValue>{event.title}</OrderPreparationValue>
               </OrderPreparationListRow>
               <OrderPreparationListRow>
@@ -338,7 +338,7 @@ export function OrderPreparationPage() {
                   ? 'Ce billet est complet pour le moment.'
                   : selectedTicketType.maxPerOrder
                   ? `Maximum ${selectedTicketType.maxPerOrder} billet(s) par commande.`
-                  : 'Aucune limite specifique par commande sur ce billet.'}
+                  : 'Aucune limit specifique par commande sur ce billet.'}
               </OrderPreparationHint>
             </OrderPreparationField>
 
@@ -349,16 +349,16 @@ export function OrderPreparationPage() {
                 disabled={isSubmitting || !hasAvailableStock}
               >
                 {isSubmitting
-                  ? 'Preparation en cours...'
+                  ? 'Préparation en cours...'
                   : hasAvailableStock
-                    ? 'Preparer la commande'
+                    ? 'Préparer la commande'
                     : 'Billet indisponible'}
               </OrderPreparationPrimaryButton>
               <OrderPreparationSecondaryButton
                 type="button"
                 onClick={() => navigate(`/events/${event.id}`)}
               >
-                Retour a l evenement
+                Retour à l’évènement
               </OrderPreparationSecondaryButton>
             </OrderPreparationActions>
           </OrderPreparationCard>
@@ -379,14 +379,14 @@ export function OrderPreparationPage() {
               <OrderPreparationListRow>
                 <OrderPreparationLabel>Total estime</OrderPreparationLabel>
                 <OrderPreparationValue>
-                  {previewTotal !== null ? formatCurrency(previewTotal) : 'Tarif a venir'}
+                  {previewTotal !== null ? formatCurrency(previewTotal) : 'Tarif à venir'}
                 </OrderPreparationValue>
               </OrderPreparationListRow>
             </OrderPreparationList>
 
             {preparedOrder ? (
               <>
-                <OrderPreparationCardTitle>Commande creee</OrderPreparationCardTitle>
+                <OrderPreparationCardTitle>Commande créée</OrderPreparationCardTitle>
                 <OrderPreparationList>
                   <OrderPreparationListRow>
                     <OrderPreparationLabel>Reference</OrderPreparationLabel>
@@ -406,7 +406,7 @@ export function OrderPreparationPage() {
                   </OrderPreparationListRow>
                 </OrderPreparationList>
                 <OrderPreparationHint>
-                  Cette commande est prete. On peut maintenant ouvrir Stripe pour finaliser le paiement.
+                  Cette commande est prête. On peut maintenant ouvrir Stripe pour finaliser le paiement.
                 </OrderPreparationHint>
                 <OrderPreparationCheckoutButton
                   type="button"
@@ -417,7 +417,7 @@ export function OrderPreparationPage() {
               </>
             ) : (
               <OrderPreparationHint>
-                Le backend calculera le total final, verifiera le stock disponible et creera
+                Le backend calculera le total final, vérifiera le stock disponible et créera
                 la commande avant paiement.
               </OrderPreparationHint>
             )}

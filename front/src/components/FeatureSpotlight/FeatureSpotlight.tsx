@@ -20,11 +20,11 @@ export function FeatureSpotlight() {
   return (
     <FeatureSection>
       <FeatureContent>
-        <FeatureEyebrow>EventFlow en avant-premiere</FeatureEyebrow>
-        <FeatureTitle>Chope ton billet, cree des souvenirs</FeatureTitle>
+        <FeatureEyebrow>EventFlow en avant-première</FeatureEyebrow>
+        <FeatureTitle>Chope ton billet, créé des souvenirs</FeatureTitle>
         <FeatureDescription>
-          Explore les prochains evenements, retrouve les experiences les plus
-          attendues pres de chez toi et prepare deja ton parcours EventFlow.
+          Explore les prochains évènements, retrouve les expériences les plus
+          attendues près de chez toi et prépare déjà ton parcours EventFlow.
         </FeatureDescription>
         <FeatureActions>
           <FeatureAction type="button" onClick={() => navigate('/explorer')}>
@@ -35,7 +35,7 @@ export function FeatureSpotlight() {
             $secondary
             onClick={() => navigate('/auth?mode=register&intent=publish')}
           >
-            Publier un evenement
+            Publier un évènement
           </FeatureAction>
         </FeatureActions>
       </FeatureContent>
@@ -45,7 +45,7 @@ export function FeatureSpotlight() {
           <FeatureMediaImage src="/eventflow-logo.png" alt="Identite visuelle EventFlow" />
           <FeatureMediaBadge>Selection en direct</FeatureMediaBadge>
           <FeatureMediaSubtext>
-            Concerts, festivals, experiences culturelles et sorties locales dans une
+            Concerts, festivals, expériences culturelles et sorties locales dans une
             interface plus claire et plus immersive.
           </FeatureMediaSubtext>
         </FeatureMediaCard>

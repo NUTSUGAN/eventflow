@@ -26,9 +26,9 @@ const durationLabels: Record<PromotionDuration, string> = {
 }
 
 const channelContent: Record<PromotionChannelCode, { title: string; copy: string }> = {
-  LAUNCH_PACK: { title: 'Pack Lancement', copy: "Mise en avant sur l'accueil et priorite dans Explorer." },
-  SOCIAL_INFLUENCER: { title: 'Reseaux et influenceurs', copy: "Diffusion operee par l'equipe EventFlow sur les canaux sociaux." },
-  NEWSLETTER: { title: 'Newsletter', copy: 'Mise en avant aupres des abonnes EventFlow et de ton audience.' },
+  LAUNCH_PACK: { title: 'Pack Lancement', copy: "Mise en avant sur l’accueil et priorité dans Explorer." },
+  SOCIAL_INFLUENCER: { title: 'Réseaux et influenceurs', copy: "Diffusion operee par l’équipe EventFlow sur les canaux sociaux." },
+  NEWSLETTER: { title: 'Newsletter', copy: 'Mise en avant auprès des abonnés EventFlow et de ton audience.' },
 }
 
 function readApiMessage(error: unknown): string {
@@ -78,7 +78,7 @@ export function PromotionBoosterPanel({ eventId, eventStatus }: { eventId: numbe
     try {
       await createPromotionCampaign(eventId, { duration, channels: selectedChannels })
       setSelectedChannels([])
-      setMessage("Demande envoyee. L'equipe EventFlow doit maintenant la valider avant paiement.")
+      setMessage("Demande envoyée. L'équipe EventFlow doit maintenant la valider avant paiement.")
     } catch (nextError) {
       setError(readApiMessage(nextError))
     } finally {
@@ -90,8 +90,8 @@ export function PromotionBoosterPanel({ eventId, eventStatus }: { eventId: numbe
     <BoosterPanel>
       <BoosterHeader>
         <div>
-          <BoosterTitle>Booster cet evenement</BoosterTitle>
-          <BoosterText>Choisis une duree et les canaux utiles. Le tarif final est recalcule par EventFlow.</BoosterText>
+          <BoosterTitle>Booster cet évènement</BoosterTitle>
+          <BoosterText>Choisis une durée et les canaux utiles. Le tarif final est recalculé par EventFlow.</BoosterText>
         </div>
         <BoosterDuration>
           {(options?.durations ?? ['7_days', '14_days', '30_days']).map((item) => (
@@ -102,7 +102,7 @@ export function PromotionBoosterPanel({ eventId, eventStatus }: { eventId: numbe
         </BoosterDuration>
       </BoosterHeader>
 
-      {eventStatus !== 'published' ? <BoosterMessage $error>Publie d'abord cet evenement pour activer Booster.</BoosterMessage> : null}
+      {eventStatus !== 'published' ? <BoosterMessage $error>Publié d’abord cet évènement pour activer Booster.</BoosterMessage> : null}
       {error ? <BoosterMessage $error>{error}</BoosterMessage> : null}
       {message ? <BoosterMessage>{message}</BoosterMessage> : null}
 
@@ -116,7 +116,7 @@ export function PromotionBoosterPanel({ eventId, eventStatus }: { eventId: numbe
                 <input type="checkbox" checked={selectedChannels.includes(channel)} disabled={disabled} onChange={() => toggleChannel(channel)} />
                 {channelContent[channel].title}
               </BoosterChannelHead>
-              <BoosterChannelCopy>{disabled ? 'Les 3 emplacements sont deja reserves sur cette periode.' : channelContent[channel].copy}</BoosterChannelCopy>
+              <BoosterChannelCopy>{disabled ? 'Les 3 emplacements sont déjà réservés sur cette période.' : channelContent[channel].copy}</BoosterChannelCopy>
               <BoosterPrice>{rate ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: rate.currency }).format(Number(rate.priceAmount)) : 'Tarif indisponible'}</BoosterPrice>
             </BoosterChannel>
           )

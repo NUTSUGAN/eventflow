@@ -15,6 +15,23 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class PublicOrganizerController extends AbstractController
 {
+    #[Route('/api/organizers', name: 'api_public_organizer_list', methods: ['GET'])]
+    public function index(
+        Request $request,
+        UserRepository $userRepository,
+        EventRepository $eventRepository
+    ): JsonResponse {
+        $limit = max(1, min(12, (int) $request->query->get('limit', 5)));
+        $organizers = $userRepository->findPublicOrganizers($limit);
+
+        return $this->json([
+            'items' => array_map(
+                fn (User $organizer): array => $this->serializeOrganizerSummary($request, $eventRepository, $organizer),
+                $organizers
+            ),
+        ]);
+    }
+
     #[Route('/api/organizers/{id}', name: 'api_public_organizer_profile', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         int $id,
@@ -78,6 +95,21 @@ class PublicOrganizerController extends AbstractController
         ]);
     }
 
+    private function serializeOrganizerSummary(
+        Request $request,
+        EventRepository $eventRepository,
+        User $organizer
+    ): array {
+        return [
+            'id' => $organizer->getId(),
+            'firstName' => $organizer->getFirstName(),
+            'lastName' => $organizer->getLastName(),
+            'fullName' => trim(sprintf('%s %s', $organizer->getFirstName(), $organizer->getLastName())),
+            'profilePhoto' => $this->toPublicAssetUrl($request, $organizer->getProfilePhoto()),
+            'publishedEventCount' => $eventRepository->countPublishedByOrganizer($organizer->getId()),
+        ];
+    }
+
     private function serializeEventSummary(Request $request, Event $event): array
     {
         $minPrice = null;
@@ -97,16 +129,16 @@ class PublicOrganizerController extends AbstractController
             $minPrice = null === $minPrice ? $floatPrice : min($minPrice, $floatPrice);
         }
 
-        $venue = $event->getLocation()?->getAddress() ?? $event->getLocation()?->getCity() ?? 'Lieu a confirmer';
+        $venue = $event->getLocation()?->getAddress() ?? $event->getLocation()?->getCity() ?? 'Lieu à confirmer';
 
         return [
             'id' => $event->getId(),
             'title' => $event->getTitle(),
             'shortDescription' => $this->createExcerpt($event->getDescription()),
-            'city' => $event->getLocation()?->getCity() ?? 'Ville a confirmer',
+            'city' => $event->getLocation()?->getCity() ?? 'Ville à confirmer',
             'venue' => $venue,
             'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
-            'category' => $event->getCategory()?->getName() ?? 'Evenement',
+            'category' => $event->getCategory()?->getName() ?? 'évènement',
             'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
             'currency' => 'EUR',
@@ -118,7 +150,7 @@ class PublicOrganizerController extends AbstractController
         $text = trim(preg_replace('/\s+/', ' ', (string) $text) ?? '');
 
         if ('' === $text) {
-            return 'Informations a venir pour cet evenement.';
+            return 'Informations à venir pour cet l’évènement.';
         }
 
         if (mb_strlen($text) <= $maxLength) {

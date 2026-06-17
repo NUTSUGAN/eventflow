@@ -37,7 +37,7 @@ function formatDate(date: string): string {
 
 function formatPrice(price: number | null, currency: string): string {
   if (price === null) {
-    return 'Tarif a venir'
+    return 'Tarif à venir'
   }
 
   return new Intl.NumberFormat('fr-FR', {
@@ -77,7 +77,7 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
           {event.isSponsored ? (
             <SponsoredBadge
               src="/assets/badge-sponsorise-eventflow.png"
-              alt="Evenement sponsorise"
+              alt="évènement sponsorise"
             />
           ) : null}
         </CardCover>

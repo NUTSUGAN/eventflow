@@ -40,13 +40,13 @@ const emptyPublicEventsResponse: PublicEventsResponse = {
 
 function formatResultsCount(visibleCount: number, totalCount: number): string {
   if (totalCount <= 0) {
-    return 'Aucun evenement archive trouve'
+    return 'Aucun évènement archivé trouve'
   }
 
   const visibleLabel =
-    visibleCount > 1 ? `${visibleCount} evenements affiches` : `${visibleCount} evenement affiche`
+    visibleCount > 1 ? `${visibleCount} événements affichés` : `${visibleCount} événement affiché`
   const totalLabel =
-    totalCount > 1 ? `${totalCount} evenements archives` : `${totalCount} evenement archive`
+    totalCount > 1 ? `${totalCount} événements archivés` : `${totalCount} événement archive`
 
   return `${visibleLabel} sur ${totalLabel}`
 }
@@ -174,22 +174,22 @@ export function PastEventsPage() {
     <ExplorerSection>
       <ExplorerHeader>
         <ExplorerEyebrow>Corbeille publique</ExplorerEyebrow>
-        <ExplorerTitle>Evenements passes</ExplorerTitle>
+        <ExplorerTitle>évènements passés</ExplorerTitle>
         <ExplorerLead>
-          Les evenements termines quittent l&apos;Explorer et restent visibles ici,
-          pour montrer ce que les clients ont manque et garder une trace publique des sorties passees.
+          Les évènements terminés quittent l&apos;Explorer et restent visibles ici,
+          pour montrer ce que les clients ont manqué et garder une trace publique des sorties passées.
         </ExplorerLead>
-        {searchQuery ? <SearchBadge>Recherche archivee : {searchQuery}</SearchBadge> : null}
+        {searchQuery ? <SearchBadge>Recherche archivée : {searchQuery}</SearchBadge> : null}
       </ExplorerHeader>
 
       <FilterToolbar>
         <FilterGroup>
-          <FilterLabel>Rechercher un evenement passe</FilterLabel>
+          <FilterLabel>Rechercher un évènement passé</FilterLabel>
           <FilterTextInput
             type="text"
             value={searchQuery}
             onChange={(event) => updateSearch(event.target.value)}
-            placeholder="Titre, ville ou categorie..."
+            placeholder="Titre, ville ou catégorie..."
           />
         </FilterGroup>
       </FilterToolbar>
@@ -208,13 +208,13 @@ export function PastEventsPage() {
             </FilterResetButton>
           ) : null}
           <FilterResetButton type="button" onClick={() => navigate('/explorer')}>
-            Retour a Explorer
+            Retour à Explorer
           </FilterResetButton>
         </div>
       </FilterMetaRow>
 
       {isLoading ? (
-        <ExplorerStateText>Chargement des evenements passes...</ExplorerStateText>
+        <ExplorerStateText>Chargement des évènements passés...</ExplorerStateText>
       ) : errorMessage ? (
         <ExplorerErrorText>{errorMessage}</ExplorerErrorText>
       ) : events.length > 0 ? (
@@ -225,7 +225,7 @@ export function PastEventsPage() {
         </ExplorerCardsGrid>
       ) : (
         <ExplorerStateText>
-          Aucun evenement archive ne correspond a cette recherche pour le moment.
+          Aucun évènement archivé ne correspond à cette recherche pour le moment.
         </ExplorerStateText>
       )}
 
@@ -252,7 +252,7 @@ export function PastEventsPage() {
                   type="button"
                   $active={token === currentPage}
                   onClick={() => updatePage(token)}
-                  aria-label={`Aller a la page ${token}`}
+                  aria-label={`Aller à la page ${token}`}
                 >
                   {token}
                 </PaginationButton>

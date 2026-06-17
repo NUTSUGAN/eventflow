@@ -37,13 +37,14 @@ final class StripePaymentService
         }
 
         if (0 === $order->getOrderItems()->count()) {
-            throw new \LogicException('Cette commande ne contient aucun billet a payer.');
+            throw new \LogicException('Cette commande ne contient aucun billet à payer.');
         }
 
+        $this->assertWebhookConfigured();
         $frontendUrl = $this->getFrontendAppUrl();
 
         if (null === $frontendUrl) {
-            throw new \RuntimeException('FRONTEND_APP_URL nest pas configure.');
+            throw new \RuntimeException("FRONTEND_APP_URL n'est pas configuré.");
         }
 
         $payload = [
@@ -73,17 +74,18 @@ final class StripePaymentService
     public function createPromotionCheckoutSession(PromotionCampaign $campaign): Session
     {
         if (PromotionCampaign::STATUS_APPROVED !== $campaign->getStatus()) {
-            throw new \LogicException('Seule une campagne approuvee peut etre payee.');
+            throw new \LogicException('Seule une campagne approuvée peut être payée.');
         }
 
         if (null !== $campaign->getPaidAt()) {
-            throw new \LogicException('Cette campagne a deja ete payee.');
+            throw new \LogicException('Cette campagne a déjà ete payée.');
         }
 
+        $this->assertWebhookConfigured();
         $frontendUrl = $this->getFrontendAppUrl();
 
         if (null === $frontendUrl) {
-            throw new \RuntimeException('FRONTEND_APP_URL nest pas configure.');
+            throw new \RuntimeException("FRONTEND_APP_URL n'est pas configuré.");
         }
 
         $event = $campaign->getEvent();
@@ -111,7 +113,7 @@ final class StripePaymentService
                     'unit_amount' => $this->moneyStringToCents($campaign->getTotalPrice()),
                     'product_data' => [
                         'name' => 'Booster EventFlow',
-                        'description' => (string) ($event?->getTitle() ?? 'Promotion evenement'),
+                        'description' => (string) ($event?->getTitle() ?? 'Promotion l’évènement'),
                         'metadata' => [
                             'promotion_campaign_id' => (string) $campaignId,
                             'event_id' => (string) ($event?->getId() ?? ''),
@@ -140,7 +142,7 @@ final class StripePaymentService
         $webhookSecret = $this->getStripeWebhookSecret();
 
         if (null === $webhookSecret) {
-            throw new \RuntimeException('STRIPE_WEBHOOK_SECRET nest pas configure.');
+            throw new \RuntimeException("STRIPE_WEBHOOK_SECRET n'est pas configuré.");
         }
 
         if (null === $signatureHeader || '' === trim($signatureHeader)) {
@@ -148,6 +150,15 @@ final class StripePaymentService
         }
 
         return Webhook::constructEvent($payload, $signatureHeader, $webhookSecret);
+    }
+
+    private function assertWebhookConfigured(): void
+    {
+        if (null === $this->getStripeWebhookSecret()) {
+            throw new \RuntimeException(
+                "STRIPE_WEBHOOK_SECRET n'est pas configuré. Lance stripe listen et copie le whsec avant de lancer un paiement."
+            );
+        }
     }
 
     public function hydrateCheckoutSession(mixed $sessionObject): Session
@@ -212,7 +223,7 @@ final class StripePaymentService
     public function assertPaidPromotionSession(Session $session, PromotionCampaign $campaign): void
     {
         if ((int) $campaign->getId() !== $this->extractPromotionCampaignIdFromSession($session)) {
-            throw new \LogicException('Cette session Stripe ne correspond pas a la campagne.');
+            throw new \LogicException('Cette session Stripe ne correspond pas à la campagne.');
         }
 
         if ('paid' !== (string) $session->payment_status) {
@@ -220,11 +231,11 @@ final class StripePaymentService
         }
 
         if ($this->moneyStringToCents($campaign->getTotalPrice()) !== (int) ($session->amount_total ?? -1)) {
-            throw new \LogicException('Le montant confirme par Stripe ne correspond pas a la campagne.');
+            throw new \LogicException('Le montant confirmé par Stripe ne correspond pas à la campagne.');
         }
 
         if (strtolower($campaign->getCurrency()) !== strtolower((string) ($session->currency ?? ''))) {
-            throw new \LogicException('La devise confirmee par Stripe ne correspond pas a la campagne.');
+            throw new \LogicException('La devise confirmée par Stripe ne correspond pas à la campagne.');
         }
     }
 
@@ -399,7 +410,7 @@ final class StripePaymentService
         $secretKey = $this->getStripeSecretKey();
 
         if (null === $secretKey) {
-            throw new \RuntimeException('STRIPE_SECRET_KEY nest pas configure.');
+            throw new \RuntimeException("STRIPE_SECRET_KEY n'est pas configuré.");
         }
 
         return new StripeClient($secretKey);

@@ -224,7 +224,7 @@ export function AccountPage() {
 
       setStatusMessage(response.message)
     } catch {
-      setErrorMessage('Impossible de mettre a jour ton profil pour le moment.')
+      setErrorMessage('Impossible de mettre à jour ton profil pour le moment.')
     } finally {
       setIsSaving(false)
     }
@@ -255,7 +255,7 @@ export function AccountPage() {
           : null
 
       setEmailChangeErrorMessage(
-        responseMessage ?? "Impossible de lancer le changement d'email pour le moment.",
+        responseMessage ?? "Impossible de lancer le changement d’email pour le moment.",
       )
     } finally {
       setIsEmailChangeSubmitting(false)
@@ -289,7 +289,7 @@ export function AccountPage() {
         removeProfilePhoto: false,
       }))
     } catch {
-      setErrorMessage("Impossible de preparer cette image pour l'instant.")
+      setErrorMessage("Impossible de préparer cette image pour l'instant.")
       changeEvent.target.value = ''
     } finally {
       setIsPreparingPhoto(false)
@@ -326,7 +326,7 @@ export function AccountPage() {
       <AccountSection>
         <AccountStateCard>
           <AccountSectionTitle>Chargement du profil</AccountSectionTitle>
-          <AccountState>On prepare ton espace personnel EventFlow...</AccountState>
+          <AccountState>On prépare ton espace personnel EventFlow...</AccountState>
         </AccountStateCard>
       </AccountSection>
     )
@@ -374,7 +374,7 @@ export function AccountPage() {
               <AccountEyebrow>Mon profil</AccountEyebrow>
               <AccountTitle>{`${user.firstName} ${user.lastName}`}</AccountTitle>
               <AccountSubtitle>
-                Gere ton identite, ton avatar et tes preferences depuis un espace plus
+                G?re ton identité, ton’avatar et tes preferences depuis un espace plus
                 clair et plus personnel.
               </AccountSubtitle>
               <AccountBadgeRow>
@@ -395,14 +395,14 @@ export function AccountPage() {
             <AccountInfoCard>
               <AccountLabel>Outils staff</AccountLabel>
               <AccountValue>
-                {user.canAccessStaffTools ? 'Acces autorise' : 'Non disponible'}
+                {user.canAccessStaffTools ? 'Accès autorisé' : 'Non disponible'}
               </AccountValue>
             </AccountInfoCard>
 
             <AccountInfoCard>
               <AccountLabel>Espace organisateur</AccountLabel>
               <AccountValue>
-                {hasOrganizerAccess ? 'Disponible' : 'Demande non validee'}
+                {hasOrganizerAccess ? 'Disponible' : 'Demande non validée'}
               </AccountValue>
             </AccountInfoCard>
           </AccountGrid>
@@ -428,7 +428,7 @@ export function AccountPage() {
               </AccountSecondaryButton>
             ) : null}
             <AccountDangerButton type="button" onClick={handleLogout}>
-              Se deconnecter
+              Se déconnecter
             </AccountDangerButton>
           </AccountActions>
         </AccountOverviewCard>
@@ -437,7 +437,7 @@ export function AccountPage() {
           <div>
             <AccountSectionTitle>Modifier mes informations</AccountSectionTitle>
             <AccountSectionLead>
-              Mets a jour ton nom, ta photo et tes preferences sans sortir de ton espace
+              Mets à jour ton nom, ta photo et tes preferences sans sortir de ton espace
               perso.
             </AccountSectionLead>
           </div>
@@ -448,7 +448,7 @@ export function AccountPage() {
           <AccountForm onSubmit={handleProfileSubmit}>
             <AccountFormGrid>
               <AccountField>
-                <AccountFieldLabel>Prenom</AccountFieldLabel>
+                <AccountFieldLabel>Prénom</AccountFieldLabel>
                 <AccountInput
                   type="text"
                   value={profileForm.firstName}
@@ -487,13 +487,13 @@ export function AccountPage() {
               <AccountUploadMeta>
                 <AccountUploadTitle>Changer d&apos;email</AccountUploadTitle>
                 <AccountHelperText>
-                  Pour des raisons de securite, on enverra le lien de validation sur
+                  Pour des raisons de sécurité, on enverra le lien de validation sur
                   ton adresse actuelle avant d&apos;appliquer la modification.
                 </AccountHelperText>
               </AccountUploadMeta>
 
               <AccountField>
-                <AccountFieldLabel>Nouvel email</AccountFieldLabel>
+                <AccountFieldLabel>Nouvel’email</AccountFieldLabel>
                 <AccountInput
                   type="email"
                   value={emailChangeValue}
@@ -529,11 +529,11 @@ export function AccountPage() {
                 <AccountUploadMeta>
                   <AccountUploadTitle>Photo de profil</AccountUploadTitle>
                   <AccountHelperText>
-                    Importe une image locale JPG, PNG ou WebP. Elle remplacera ton avatar
+                    Importe une image locale JPG, PNG ou WebP. Elle remplacera ton’avatar
                     actuel sur ton profil et dans la navigation.
                   </AccountHelperText>
                   {selectedProfilePhotoName ? (
-                    <AccountHelperText>Image selectionnee : {selectedProfilePhotoName}</AccountHelperText>
+                    <AccountHelperText>Image sélectionnée : {selectedProfilePhotoName}</AccountHelperText>
                   ) : null}
                 </AccountUploadMeta>
               </AccountUploadRow>
@@ -541,7 +541,7 @@ export function AccountPage() {
               <AccountActions>
                 <AccountGhostButton
                   type="button"
-                  onClick={() => profilePhotoInputRef.current?.click()}
+                    onClick={() => profilePhotoInputRef.current?.click()}
                 >
                   Choisir une image
                 </AccountGhostButton>
@@ -577,7 +577,7 @@ export function AccountPage() {
 
             <AccountPrimaryButton type="submit" disabled={isSaving || isPreparingPhoto}>
               {isPreparingPhoto
-                ? "Preparation de l'image..."
+                ? "Préparation de l’image..."
                 : isSaving
                   ? 'Enregistrement...'
                   : 'Enregistrer mes modifications'}
@@ -589,7 +589,7 @@ export function AccountPage() {
             <AccountMutedValue>
               Ton role actuel est {roleLabel.toLowerCase()} et ton compte est
               {` ${accountStatusLabel.toLowerCase()}. `}
-              Les informations de verification et les futurs changements sensibles du
+              Les informations de vérification et les futurs changements sensibles du
               compte resteront centralises ici.
             </AccountMutedValue>
           </AccountInfoCard>

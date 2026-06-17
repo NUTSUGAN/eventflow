@@ -53,17 +53,17 @@ final class StaffCheckinService
         $event = $this->eventRepository->findOneForStaffScanById($eventId);
 
         if (!$event instanceof Event) {
-            throw new \DomainException('Evenement de scan introuvable.');
+            throw new \DomainException('l’évènement de scan introuvable.');
         }
 
         if (!$this->organizerStaffService->canAccessEvent($staffUser, $event)) {
-            throw new \DomainException('Tu n as pas acces a cet evenement pour le scan.');
+            throw new \DomainException('Tu n’as pas accès à cet évènement pour le scan.');
         }
 
         $normalizedToken = trim($scanPayload);
 
         if ('' === $normalizedToken) {
-            throw new \DomainException('Le QR scanne est vide.');
+            throw new \DomainException('Le QR scanné est vide.');
         }
 
         [$ticket, $matchedToken] = $this->findTicketFromScanPayload($normalizedToken);
@@ -71,7 +71,7 @@ final class StaffCheckinService
 
         if (
             !$ticket instanceof Ticket
-            || $ticket->getTicketType()?->getEvent()?->getId() !== $event->getId()
+            || $ticket->getTicketType()?->getEvent()?->getId() !== $event?->getId()
         ) {
             $checkin = $this->createCheckin(
                 event: $event,
@@ -82,7 +82,7 @@ final class StaffCheckinService
 
             return [
                 'result' => Checkin::RESULT_INVALID,
-                'message' => 'Billet invalide ou non associe a cet evenement.',
+                'message' => 'Billet invalide ou non associé à cet évènement.',
                 'checkin' => $this->serializeCheckin($checkin),
                 'ticket' => null,
             ];
@@ -99,7 +99,7 @@ final class StaffCheckinService
 
             return [
                 'result' => Checkin::RESULT_INVALID,
-                'message' => 'Ce billet n est pas exploitable pour un acces valide.',
+                'message' => 'Ce billet n’est pas exploitable pour un accès valide.',
                 'checkin' => $this->serializeCheckin($checkin),
                 'ticket' => $this->serializeTicket($ticket),
             ];
@@ -118,7 +118,7 @@ final class StaffCheckinService
 
             return [
                 'result' => Checkin::RESULT_ALREADY_USED,
-                'message' => 'Billet deja utilise.',
+                'message' => 'Billet déjà utilisé.',
                 'checkin' => $this->serializeCheckin($checkin),
                 'ticket' => $this->serializeTicket($ticket, $latestValidCheckin?->getScannedAt()),
             ];
@@ -136,7 +136,7 @@ final class StaffCheckinService
 
         return [
             'result' => Checkin::RESULT_VALID,
-            'message' => 'Billet valide. Acces autorise.',
+            'message' => 'Billet valide. Accès autorisé.',
             'checkin' => $this->serializeCheckin($checkin),
             'ticket' => $this->serializeTicket($ticket, $checkin->getScannedAt()),
         ];
@@ -230,13 +230,13 @@ final class StaffCheckinService
     private function serializeAccessibleEvent(Event $event): array
     {
         $organizer = $event->getOrganizer();
-        $location = $event->getLocation();
+        $location = $event?->getLocation();
 
         return [
-            'id' => $event->getId(),
-            'title' => $event->getTitle(),
+            'id' => $event?->getId(),
+            'title' => $event?->getTitle(),
             'status' => $event->getStatus(),
-            'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
+            'startsAt' => $event?->getStartDatetime()?->format(DATE_ATOM),
             'city' => $location?->getCity(),
             'venue' => $location?->getAddress() ?? $location?->getCity(),
             'organizer' => [

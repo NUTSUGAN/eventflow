@@ -24,7 +24,7 @@ final class PromotionPricingService
         $duration = strtolower(trim($duration));
 
         if (!in_array($duration, PromotionCampaign::DURATIONS, true)) {
-            throw new \InvalidArgumentException('Choisis une duree de promotion valide.');
+            throw new \InvalidArgumentException('Choisis une durée de promotion valide.');
         }
 
         $normalizedChannels = array_values(array_unique(array_map(
@@ -52,7 +52,7 @@ final class PromotionPricingService
             }
 
             if ([] !== $pricedChannels && $rate->getCurrency() !== $currency) {
-                throw new \LogicException('Les tarifs selectionnes utilisent plusieurs devises.');
+                throw new \LogicException('Les tarifs sélectionnés utilisent plusieurs devises.');
             }
 
             $currency = $rate->getCurrency();

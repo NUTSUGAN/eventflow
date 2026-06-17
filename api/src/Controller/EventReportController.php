@@ -34,7 +34,7 @@ final class EventReportController extends AbstractController
 
         if (!$reporter instanceof User) {
             return $this->json([
-                'message' => 'Connecte-toi pour signaler un evenement.',
+                'message' => 'Connecte-toi pour signaler un l’évènement.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -42,13 +42,13 @@ final class EventReportController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
         if ($event->getOrganizer()?->getId() === $reporter->getId()) {
             return $this->json([
-                'message' => 'Tu ne peux pas signaler ton propre evenement.',
+                'message' => 'Tu ne peux pas signaler ton propre l’évènement.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -78,7 +78,7 @@ final class EventReportController extends AbstractController
 
         if ($existingPendingReport instanceof EventReport) {
             return $this->json([
-                'message' => 'Ton signalement est deja en attente de traitement.',
+                'message' => 'Ton signalement est déjà en attente de traitement.',
             ], Response::HTTP_CONFLICT);
         }
 
@@ -98,15 +98,15 @@ final class EventReportController extends AbstractController
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to('admin@eventflow.local')
-                    ->subject("Nouveau signalement d'evenement EventFlow")
+                    ->subject("Nouveau signalement d’évènement EventFlow")
                     ->text($this->buildAdminNotificationBody($event, $reporter, $eventReport, $frontendAppUrl))
             );
         } catch (\Throwable) {
-            // Le signalement est garde en base meme si l'email admin ne part pas.
+            // Le signalement est gardé en base même si l'email admin ne part pas.
         }
 
         return $this->json([
-            'message' => 'Merci, ton signalement a bien ete transmis a l equipe EventFlow.',
+            'message' => 'Merci, ton signalement a bien été transmis à l’équipe EventFlow.',
         ], Response::HTTP_CREATED);
     }
 
@@ -116,22 +116,22 @@ final class EventReportController extends AbstractController
         EventReport $eventReport,
         string $frontendAppUrl,
     ): string {
-        $eventUrl = rtrim($frontendAppUrl, '/').'/events/'.$event->getId();
+        $eventUrl = rtrim($frontendAppUrl, '/').'/events/'.$event?->getId();
         $organizer = $event->getOrganizer()?->getDisplayName() ?? 'Organisateur inconnu';
 
         return implode("\n", [
             'Bonjour,',
             '',
-            'Un evenement public a ete signale sur EventFlow.',
+            'Un évènement public a été signalé sur EventFlow.',
             '',
-            'Evenement signale : '.($event->getTitle() ?? 'Evenement inconnu'),
-            'Organisateur concerne : '.$organizer,
-            'Motif : '.($eventReport->getReason() ?? 'Non renseigne'),
-            'Signale par : '.$reporter->getDisplayName().' <'.($reporter->getEmail() ?? 'email inconnu').'>',
-            'Cree le : '.($eventReport->getCreatedAt()?->format('d/m/Y H:i') ?? 'date inconnue'),
+            'Évènement signalé : '.($event?->getTitle() ?? 'évènement inconnu'),
+            'Organisateur concerné : '.$organizer,
+            'Motif : '.($eventReport->getReason() ?? 'Non renseigné'),
+            'Signalé par : '.$reporter->getDisplayName().' <'.($reporter->getEmail() ?? 'email inconnu').'>',
+            'Créé le : '.($eventReport->getCreatedAt()?->format('d/m/Y H:i') ?? 'date inconnue'),
             '',
-            'Details :',
-            $eventReport->getDetails() ?? 'Aucun detail supplementaire.',
+            'Détails :',
+            $eventReport->getDetails() ?? 'Aucun détail supplémentaire.',
             '',
             'Voir la fiche publique : '.$eventUrl,
         ]);

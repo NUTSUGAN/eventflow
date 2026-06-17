@@ -156,7 +156,7 @@ export function AdminOrdersPage() {
           <AdminDashboardEyebrow>Administration</AdminDashboardEyebrow>
           <AdminDashboardTitle>Commandes & paiements</AdminDashboardTitle>
           <AdminDashboardText>
-            Suivi des commandes, paiements Stripe et billets generes.
+            Suivi des commandes, paiements Stripe et billets générés.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>
@@ -178,7 +178,7 @@ export function AdminOrdersPage() {
           <div>
             <AdminDashboardPanelTitle>Commandes</AdminDashboardPanelTitle>
             <AdminDashboardText>
-              {filteredOrders.length} commande(s) affichee(s) sur {orders.length}
+              {filteredOrders.length} commande(s) affichée(s) sur {orders.length}
             </AdminDashboardText>
           </div>
         </AdminDashboardPanelHeader>
@@ -188,7 +188,7 @@ export function AdminOrdersPage() {
           <AdminDashboardInput
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Reference, client, paiement, evenement..."
+            placeholder="Reference, client, paiement, évènement..."
           />
         </AdminDashboardField>
 
@@ -200,7 +200,7 @@ export function AdminOrdersPage() {
 
         {!isLoading && filteredOrders.length === 0 ? (
           <AdminDashboardMessage $tone="neutral">
-            Aucune commande ne correspond a la recherche.
+            Aucune commande ne correspond à la recherche.
           </AdminDashboardMessage>
         ) : null}
 
@@ -218,15 +218,15 @@ export function AdminOrdersPage() {
                   {formatCurrency(order.totalAmount, order.currency)} - {' '}
                   {order.orderType === 'promotion'
                     ? 'commande Booster'
-                    : `${order.ticketsCount} billet(s) genere(s)`}
-                  {' '} - creee le {formatDate(order.createdAt)}
+                    : `${order.ticketsCount} billet(s) généré(s)`}
+                  {' '} - créée le {formatDate(order.createdAt)}
                 </AdminDashboardRowText>
                 <AdminDashboardRowText>
-                  Paiement: {order.payment?.provider ?? 'aucun'} / {order.payment?.status ?? 'non renseigne'}
+                  Paiement: {order.payment?.provider ?? 'aucun'} / {order.payment?.status ?? 'non renseigné'}
                   {order.payment?.providerPaymentId ? ` - ${order.payment.providerPaymentId}` : ''}
                 </AdminDashboardRowText>
                 <AdminDashboardRowText>
-                  Evenements: {order.promotion?.eventTitle ?? (order.items.map((item) => item.event.title).filter(Boolean).join(', ') || 'Non renseigne')}
+                  évènements: {order.promotion?.eventTitle ?? (order.items.map((item) => item.event.title).filter(Boolean).join(', ') || 'Non renseigné')}
                 </AdminDashboardRowText>
               </AdminDashboardRowMain>
               <AdminDashboardBadge $tone={getStatusTone(order.status)}>

@@ -116,7 +116,7 @@ final class TicketFulfillmentService
             $ticketListUrl = rtrim($frontendAppUrl, '/').'/mes-billets';
 
             $eventLine = is_string($orderSummary['eventTitle']) && '' !== trim($orderSummary['eventTitle'])
-                ? sprintf("Evenement : %s\n", trim((string) $orderSummary['eventTitle']))
+                ? sprintf("l’évènement : %s\n", trim((string) $orderSummary['eventTitle']))
                 : '';
 
             if ($orderSummary['eventStartsAt'] instanceof \DateTimeImmutable) {
@@ -130,18 +130,18 @@ final class TicketFulfillmentService
 
             $linesBlock = [] !== $orderSummary['lineSummaries']
                 ? implode("\n", $orderSummary['lineSummaries'])
-                : '- Billets confirmes';
+                : '- Billets confirmés';
 
             try {
                 $this->mailer->send(
                     (new Email())
                         ->from('no-reply@eventflow.local')
                         ->to($customerEmail)
-                        ->subject('Tes billets EventFlow sont prets')
+                        ->subject('Tes billets EventFlow sont prêts')
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".
-                                "Le paiement de ta commande %s a bien ete confirme.\n\n".
+                                "Le paiement de ta commande %s a bien été confirmé.\n\n".
                                 "%s".
                                 "Billets generes :\n%s\n\n".
                                 "Retrouve tes billets et leurs QR codes ici :\n%s\n\n".
@@ -170,7 +170,7 @@ final class TicketFulfillmentService
 
         $organizerName = trim((string) ($orderSummary['organizerName'] ?? ''));
         $eventLine = is_string($orderSummary['eventTitle']) && '' !== trim($orderSummary['eventTitle'])
-            ? sprintf("Evenement : %s\n", trim((string) $orderSummary['eventTitle']))
+            ? sprintf("l’évènement : %s\n", trim((string) $orderSummary['eventTitle']))
             : '';
 
         if ($orderSummary['eventStartsAt'] instanceof \DateTimeImmutable) {
@@ -184,24 +184,24 @@ final class TicketFulfillmentService
 
         $linesBlock = [] !== $orderSummary['lineSummaries']
             ? implode("\n", $orderSummary['lineSummaries'])
-            : '- Billets confirmes';
+            : '- Billets confirmés';
 
         try {
             $this->mailer->send(
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to($organizerEmail)
-                    ->subject('Nouvelle commande payee sur ton evenement EventFlow')
+                    ->subject('Nouvelle commande payée sur ton l’évènement EventFlow')
                     ->text(
                         sprintf(
                             "Bonjour %s,\n\n".
-                            "Une commande vient d etre payee sur ton evenement.\n\n".
+                            "Une commande vient d etre payée sur ton l’évènement.\n\n".
                             "Commande : %s\n".
                             "Client : %s\n".
                             "Email client : %s\n".
                             "%s".
                             "Billets vendus :\n%s\n\n".
-                            "Paiement confirme sur EventFlow.\n",
+                            "Paiement confirmé sur EventFlow.\n",
                             '' !== $organizerName ? $organizerName : 'Organisateur',
                             (string) $order->getReference(),
                             '' !== $customerName ? $customerName : 'Client EventFlow',

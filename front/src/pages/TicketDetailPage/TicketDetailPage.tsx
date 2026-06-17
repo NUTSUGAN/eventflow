@@ -32,7 +32,7 @@ import {
 
 function formatDateTime(value: string | null): string {
   if (!value) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -69,11 +69,11 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
         return
       }
 
-      reject(new Error('Impossible de preparer l image du billet.'))
+      reject(new Error('Impossible de préparer l’image du billet.'))
     }
 
     reader.onerror = () => {
-      reject(new Error('Impossible de preparer l image du billet.'))
+      reject(new Error('Impossible de préparer l’image du billet.'))
     }
 
     reader.readAsDataURL(blob)
@@ -169,8 +169,8 @@ export function TicketDetailPage() {
       return 'eventflow-ticket'
     }
 
-    const eventPart = sanitizeFilenamePart(ticket.event.title ?? 'eventflow')
-    const codePart = sanitizeFilenamePart(ticket.displayCode)
+    const eventPart = sanitizeFilenamePart(ticket?.event.title ?? 'eventflow')
+    const codePart = sanitizeFilenamePart(ticket?.displayCode)
 
     return `${eventPart || 'eventflow'}-${codePart || 'ticket'}`
   }, [ticket])
@@ -199,7 +199,7 @@ export function TicketDetailPage() {
         })
 
         if (!response.ok) {
-          throw new Error('Impossible de charger l image de l evenement.')
+          throw new Error('Impossible de charger l’image de l’évènement.')
         }
 
         const blob = await response.blob()
@@ -225,7 +225,7 @@ export function TicketDetailPage() {
 
   async function renderTicketImage(): Promise<{ dataUrl: string; width: number; height: number }> {
     if (!exportCardRef.current) {
-      throw new Error('Le billet a exporter est indisponible.')
+      throw new Error('Le billet à exporter est indisponible.')
     }
 
     await document.fonts.ready.catch(() => undefined)
@@ -325,7 +325,7 @@ export function TicketDetailPage() {
             type="button"
             onClick={() => navigate('/mes-billets')}
           >
-            Retour a mes billets
+            Retour à mes billets
           </MyTicketsPrimaryButton>
         </MyTicketsActions>
       </TicketDetailShell>
@@ -337,8 +337,8 @@ export function TicketDetailPage() {
       <TicketDetailHeader>
         <TicketDetailHero $imageUrl={ticket.event.coverImageUrl ?? undefined}>
           <TicketDetailHeroText>
-            <TicketDetailEyebrow>Billet confirme</TicketDetailEyebrow>
-            <TicketDetailTitle>{ticket.event.title ?? 'Evenement EventFlow'}</TicketDetailTitle>
+            <TicketDetailEyebrow>Billet confirmé</TicketDetailEyebrow>
+            <TicketDetailTitle>{ticket.event.title ?? 'évènement EventFlow'}</TicketDetailTitle>
             <TicketDetailSubtitle>
               {ticket.ticketType.name ?? 'Billet'} - {ticket.displayCode}
             </TicketDetailSubtitle>
@@ -348,7 +348,7 @@ export function TicketDetailPage() {
         <TicketDetailCard>
           <TicketDetailCardTitle>QR code du billet</TicketDetailCardTitle>
           <TicketDetailCodePanel>
-            <TicketDetailCodeBadge>Billet paye</TicketDetailCodeBadge>
+            <TicketDetailCodeBadge>Billet payé</TicketDetailCodeBadge>
             {ticket.qrToken ? (
               <TicketDetailQrWrap>
                 <QRCode
@@ -368,11 +368,10 @@ export function TicketDetailPage() {
               {formatDateTime(ticket.event.startsAt)}
             </MyTicketsCardText>
             <MyTicketsCardText>
-              {ticket.event.venue ?? 'Lieu a confirmer'}
+              {ticket.event.venue ?? 'Lieu à confirmer'}
             </MyTicketsCardText>
             <TicketDetailNote>
-              Telecharge ce billet en image ou en PDF pour l envoyer directement a
-              la personne qui doit entrer avec ce QR.
+              Télécharge ce billet en image ou en PDF pour l’envoyer directement à la personne qui doit entrer avec ce QR.
             </TicketDetailNote>
           </TicketDetailCodePanel>
         </TicketDetailCard>
@@ -385,27 +384,27 @@ export function TicketDetailPage() {
             onClick={handleDownloadImage}
             disabled={null !== downloadState}
           >
-            {downloadState === 'png' ? 'Preparation image...' : 'Partager en image'}
+            {downloadState === 'png' ? 'Préparation image...' : 'Partager en image'}
           </MyTicketsPrimaryButton>
           <MyTicketsPrimaryButton
             type="button"
             onClick={handleDownloadPdf}
             disabled={null !== downloadState}
           >
-            {downloadState === 'pdf' ? 'Preparation PDF...' : 'Telecharger en PDF'}
+            {downloadState === 'pdf' ? 'Préparation PDF...' : 'Télécharger en PDF'}
           </MyTicketsPrimaryButton>
           <MyTicketsSecondaryButton
             type="button"
             onClick={() => navigate('/mes-billets')}
           >
-            Retour a mes billets
+            Retour à mes billets
           </MyTicketsSecondaryButton>
           {ticket.event.id ? (
             <MyTicketsSecondaryButton
               type="button"
               onClick={() => navigate(`/events/${ticket.event.id}`)}
             >
-              Voir l&apos;evenement
+              Voir l&apos;évènement
             </MyTicketsSecondaryButton>
           ) : null}
         </MyTicketsActions>
@@ -483,11 +482,11 @@ export function TicketDetailPage() {
                 zIndex: 1,
               }}
             >
-              EventFlow - billet paye
+              EventFlow - billet payé
             </span>
             <div style={{ display: 'grid', gap: '6px', position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: '46px', fontWeight: 800, lineHeight: 1.05 }}>
-                {ticket.event.title ?? 'Evenement EventFlow'}
+                {ticket.event.title ?? 'évènement EventFlow'}
               </div>
               <div style={{ fontSize: '24px', opacity: 0.92 }}>
                 {ticket.ticketType.name ?? 'Billet'} - {ticket.displayCode}
@@ -513,7 +512,7 @@ export function TicketDetailPage() {
                 overflow: 'hidden',
               }}
             >
-              <div style={{ fontSize: '24px', fontWeight: 800 }}>Billet a presenter</div>
+              <div style={{ fontSize: '24px', fontWeight: 800 }}>Billet à présenter</div>
               <div
                 style={{
                   display: 'grid',
@@ -534,7 +533,7 @@ export function TicketDetailPage() {
                     Lieu
                   </span>
                   <span style={{ fontSize: '20px', fontWeight: 700 }}>
-                    {ticket.event.venue ?? 'Lieu a confirmer'}
+                    {ticket.event.venue ?? 'Lieu à confirmer'}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gap: '4px' }}>
@@ -542,7 +541,7 @@ export function TicketDetailPage() {
                     Commande
                   </span>
                   <span style={{ fontSize: '20px', fontWeight: 700 }}>
-                    {ticket.order.reference ?? 'Reference indisponible'}
+                    {ticket.order.reference ?? 'Référence indisponible'}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gap: '4px' }}>
@@ -564,8 +563,8 @@ export function TicketDetailPage() {
                   lineHeight: 1.6,
                 }}
               >
-                Ce billet peut etre envoye tel quel
-                a la personne qui doit se faire scanner.
+                Ce billet peut être envoyé tel quel
+                à la personne qui doit se faire scanner.
               </div>
             </div>
 

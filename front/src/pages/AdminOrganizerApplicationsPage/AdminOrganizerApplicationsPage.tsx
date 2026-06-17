@@ -52,7 +52,7 @@ function getStatusTone(
 function getStatusLabel(status: AdminOrganizerApplication['status']): string {
   switch (status) {
     case 'APPROVED':
-      return 'Approuvee'
+      return 'Approuvée'
     case 'REJECTED':
       return 'Refusee'
     default:
@@ -143,7 +143,7 @@ export function AdminOrganizerApplicationsPage() {
       )
       setStatusMessage(response.message)
     } catch {
-      setErrorMessage('Impossible d approuver cette demande pour le moment.')
+      setErrorMessage('Impossible d’approuver cette demande pour le moment.')
     } finally {
       setIsSubmittingId(null)
     }
@@ -167,7 +167,7 @@ export function AdminOrganizerApplicationsPage() {
       setStatusMessage(response.message)
     } catch {
       setErrorMessage(
-        'Impossible de refuser cette demande tant qu une note admin n a pas ete ajoutee.',
+        'Impossible de refuser cette demande tant qu’une note admin n’a pas été ajoutée.',
       )
     } finally {
       setIsSubmittingId(null)
@@ -248,17 +248,17 @@ export function AdminOrganizerApplicationsPage() {
   return (
     <AdminOrganizerApplicationsSection>
       <AdminOrganizerApplicationsHeader>
-        <AdminOrganizerApplicationsEyebrow>Validation admin</AdminOrganizerApplicationsEyebrow>
+        <AdminOrganizerApplicationsEyebrow>Validation’admin</AdminOrganizerApplicationsEyebrow>
         <AdminOrganizerApplicationsTitle>Demandes organisateur</AdminOrganizerApplicationsTitle>
         <AdminOrganizerApplicationsText>
-          Relis les justificatifs publics envoyes, ajoute un retour si besoin puis approuve ou refuse chaque demande. Une validation approuvee donne immediatement le role organisateur au compte.
+          Relis les justificatifs publics envoyés, ajoute un retour si besoin puis approuve ou refuse chaque demande. Une validation approuvée donne immédiatement le rôle organisateur au compte.
         </AdminOrganizerApplicationsText>
         <AdminOrganizerApplicationsActions>
           <AdminOrganizerApplicationsSecondaryButton
             type="button"
             onClick={() => navigate('/admin')}
           >
-            Revenir a la console admin
+            Revenir à la console admin
           </AdminOrganizerApplicationsSecondaryButton>
         </AdminOrganizerApplicationsActions>
         {statusMessage ? (
@@ -304,7 +304,7 @@ export function AdminOrganizerApplicationsPage() {
               $active={processedFilter === 'approved'}
               onClick={() => setProcessedFilter('approved')}
             >
-              Approuvees ({approvedCount})
+              Approuvées ({approvedCount})
             </AdminOrganizerApplicationsTab>
           </AdminOrganizerApplicationsTabs>
         ) : null}
@@ -321,7 +321,7 @@ export function AdminOrganizerApplicationsPage() {
         </AdminOrganizerApplicationsState>
       ) : currentUser?.role !== 'ROLE_ADMIN' ? (
         <AdminOrganizerApplicationsState>
-          Cette vue est reservee a l administration EventFlow.
+          Cette vue est réservée à l’administration EventFlow.
         </AdminOrganizerApplicationsState>
       ) : applications.length === 0 ? (
         <AdminOrganizerApplicationsState>
@@ -330,12 +330,12 @@ export function AdminOrganizerApplicationsPage() {
       ) : filteredApplications.length === 0 ? (
         <AdminOrganizerApplicationsState>
           {activeTab === 'pending'
-            ? 'Aucune demande en attente ne correspond a cette recherche.'
+            ? 'Aucune demande en’attente ne correspond à cette recherche.'
             : processedFilter === 'approved'
-              ? 'Aucune demande approuvee ne correspond a cette recherche.'
+              ? 'Aucune demande approuvée ne correspond à cette recherche.'
               : processedFilter === 'rejected'
-                ? 'Aucune demande refusee ne correspond a cette recherche.'
-                : 'Aucune demande traitee ne correspond a cette recherche.'}
+                ? 'Aucune demande refusée ne correspond à cette recherche.'
+                : 'Aucune demande traitée ne correspond à cette recherche.'}
         </AdminOrganizerApplicationsState>
       ) : (
         <>
@@ -385,7 +385,7 @@ export function AdminOrganizerApplicationsPage() {
                   <AdminOrganizerApplicationsLabel>Note admin</AdminOrganizerApplicationsLabel>
                   <AdminOrganizerApplicationsTextarea
                     value={reviewNotes[application.id] ?? ''}
-                    placeholder="Retour interne ou message de retour pour l organisateur..."
+                    placeholder="Retour interne ou message de retour pour l’organisateur..."
                     onChange={(event) =>
                       setReviewNotes((current) => ({
                         ...current,

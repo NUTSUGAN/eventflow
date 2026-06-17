@@ -8,7 +8,7 @@ export const EventLink = styled(Link)`
   color: inherit;
 `
 
-export const Card = styled.article<{ $variant?: CardVariant }>`
+export const Card = styled.article<{ $variant: CardVariant }>`
   display: flex;
   flex-direction: column;
   gap: ${({ $variant }) => ($variant === 'explorer' ? '0' : '8px')};
@@ -44,7 +44,7 @@ export const Card = styled.article<{ $variant?: CardVariant }>`
   }
 `
 
-export const CardCover = styled.div<{ $imageUrl?: string; $variant?: CardVariant }>`
+export const CardCover = styled.div<{ $imageUrl?: string; $variant: CardVariant }>`
   position: relative;
   z-index: 2;
   overflow: visible;
@@ -95,7 +95,7 @@ export const SponsoredBadge = styled.img`
   }
 `
 
-export const CardContent = styled.div<{ $variant?: CardVariant }>`
+export const CardContent = styled.div<{ $variant: CardVariant }>`
   position: relative;
   z-index: 1;
   padding: ${({ $variant }) => ($variant === 'explorer' ? '16px 16px 18px' : '0')};

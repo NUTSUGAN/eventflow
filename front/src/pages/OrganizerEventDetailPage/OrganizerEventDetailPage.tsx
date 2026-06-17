@@ -182,7 +182,7 @@ const organizerEventDetailTabs: Array<{
   label: string
 }> = [
   { id: 'overview', label: 'Apercu' },
-  { id: 'event', label: 'Evenement' },
+  { id: 'event', label: 'évènement' },
   { id: 'booster', label: 'Booster' },
   { id: 'scan', label: 'Scan' },
   { id: 'tickets', label: 'Billets' },
@@ -216,7 +216,7 @@ function addMinutesToDateTimeLocal(value: string, minutes: number): string {
 
 function formatOrganizerDate(value: string | null): string {
   if (!value) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -466,7 +466,7 @@ export function OrganizerEventDetailPage() {
   const ticketSectionMessage =
     ticketSuccessMessage ??
     (createdFromEventSetup
-      ? "Evenement cree avec succes. Tu peux maintenant ajouter les billets de cet evenement."
+      ? "évènement créé avec succès. Tu peux maintenant ajouter les billets de cet évènement."
       : null)
   const scanStats = event?.scanStats ?? null
   const scanStaffMembers = scanStats?.staffMembers ?? []
@@ -508,7 +508,7 @@ export function OrganizerEventDetailPage() {
 
     async function loadOrganizerEventDetail() {
       if (!eventId) {
-        setEventErrorMessage("Impossible de retrouver l'evenement organisateur demande.")
+        setEventErrorMessage("Impossible de retrouver l’évènement organisateur demande.")
         setIsLoading(false)
         return
       }
@@ -565,7 +565,7 @@ export function OrganizerEventDetailPage() {
           setEventErrorMessage(
             extractErrorMessage(
               error,
-              "Impossible de charger la fiche organisateur de l'evenement pour le moment.",
+              "Impossible de charger la fiche organisateur de l’évènement pour le moment.",
             ),
           )
         }
@@ -614,7 +614,7 @@ export function OrganizerEventDetailPage() {
       eventForm.locationCountry.trim() === ''
     ) {
       setEventErrorMessage(
-        'Renseigne le titre, la description, la categorie et toutes les informations de lieu avant de sauvegarder.',
+        'Renseigne le titre, la description, la catégorie et toutes les informations de lieu avant de sauvegarder.',
       )
       return
     }
@@ -623,7 +623,7 @@ export function OrganizerEventDetailPage() {
       !Number.isFinite(Number(eventForm.capacity)) ||
       Number(eventForm.capacity) <= 0
     ) {
-      setEventErrorMessage('La capacite doit etre un entier positif.')
+      setEventErrorMessage('La capacité doit être un entier positif.')
       return
     }
 
@@ -632,7 +632,7 @@ export function OrganizerEventDetailPage() {
     const now = new Date()
 
     if (Number.isNaN(startDatetime.getTime()) || Number.isNaN(endDatetime.getTime())) {
-      setEventErrorMessage('Renseigne des dates valides pour le debut et la fin.')
+      setEventErrorMessage('Renseigne des dates valides pour le début et la fin.')
       return
     }
 
@@ -645,18 +645,18 @@ export function OrganizerEventDetailPage() {
       existingStartDatetime.getTime() === startDatetime.getTime()
 
     if (startDatetime < now && !isKeepingExistingPastStartDatetime) {
-      setEventErrorMessage('La date de debut ne peut pas etre dans le passe.')
+      setEventErrorMessage('La date de début ne peut pas être dans le passé.')
       return
     }
 
     if (endDatetime <= startDatetime) {
-      setEventErrorMessage('La date de fin doit etre posterieure a la date de debut.')
+      setEventErrorMessage('La date de fin doit être postérieure à la date de début.')
       return
     }
 
     if (eventForm.eventVideo && endDatetime >= now) {
       setEventErrorMessage(
-        'La video souvenir peut etre ajoutee uniquement quand l evenement est termine.',
+        'La vidéo souvenir peut être ajoutée uniquement quand l’évènement est terminé.',
       )
       return
     }
@@ -708,7 +708,7 @@ export function OrganizerEventDetailPage() {
       setEventErrorMessage(
         extractErrorMessage(
           error,
-          "Impossible de mettre a jour la fiche evenement pour le moment.",
+          "Impossible de mettre à jour la fiche évènement pour le moment.",
         ),
       )
     } finally {
@@ -736,7 +736,7 @@ export function OrganizerEventDetailPage() {
       revealTicketSection()
     } catch (error) {
       setTicketErrorMessage(
-        extractErrorMessage(error, 'Impossible de creer le billet pour le moment.'),
+        extractErrorMessage(error, 'Impossible de créer le billet pour le moment.'),
       )
       revealTicketSection()
     } finally {
@@ -774,7 +774,7 @@ export function OrganizerEventDetailPage() {
       setTicketErrorMessage(
         extractErrorMessage(
           error,
-          'Impossible de mettre a jour le billet pour le moment.',
+          'Impossible de mettre à jour le billet pour le moment.',
         ),
       )
       revealTicketSection()
@@ -826,7 +826,7 @@ export function OrganizerEventDetailPage() {
       guestTicketForm.recipientEmail.trim() === '' ||
       guestTicketForm.ticketTypeId.trim() === ''
     ) {
-      setGuestTicketErrorMessage('Renseigne au minimum l email et le billet a envoyer.')
+      setGuestTicketErrorMessage('Renseigne au minimum l’email et le billet à envoyer.')
       return
     }
 
@@ -855,12 +855,12 @@ export function OrganizerEventDetailPage() {
       )
       setGuestTicketForm(initialGuestTicketForm)
       setGuestTicketSuccessMessage(
-        response.message ?? 'Invitation creee et envoyee par email.',
+        response.message ?? 'Invitation créée et envoyée par email.',
       )
       revealTicketSection()
     } catch (error) {
       setGuestTicketErrorMessage(
-        extractErrorMessage(error, 'Impossible de creer l invitation pour le moment.'),
+        extractErrorMessage(error, 'Impossible de créer l’invitation pour le moment.'),
       )
       revealTicketSection()
     } finally {
@@ -875,7 +875,7 @@ export function OrganizerEventDetailPage() {
 
     try {
       await navigator.clipboard.writeText(url)
-      setGuestTicketSuccessMessage('Lien du billet invite copie.')
+      setGuestTicketSuccessMessage('Lien du billet invité copié.')
     } catch {
       setGuestTicketErrorMessage('Impossible de copier le lien automatiquement.')
     }
@@ -886,7 +886,7 @@ export function OrganizerEventDetailPage() {
       <OrganizerEventDetailSection>
         <OrganizerEventDetailShell>
           <OrganizerEventDetailState>
-            Chargement de la fiche organisateur de l evenement...
+            Chargement de la fiche organisateur de l’évènement...
           </OrganizerEventDetailState>
         </OrganizerEventDetailShell>
       </OrganizerEventDetailSection>
@@ -901,9 +901,21 @@ export function OrganizerEventDetailPage() {
             type="button"
             onClick={() => navigate('/organizer/events')}
           >
-            Revenir a mes evenements
+            Revenir à mes évènements
           </OrganizerEventDetailBackButton>
           <OrganizerEventDetailError>{eventErrorMessage}</OrganizerEventDetailError>
+        </OrganizerEventDetailShell>
+      </OrganizerEventDetailSection>
+    )
+  }
+
+  if (!event) {
+    return (
+      <OrganizerEventDetailSection>
+        <OrganizerEventDetailShell>
+          <OrganizerEventDetailState>
+            La fiche organisateur de l’évènement n’est pas disponible.
+          </OrganizerEventDetailState>
         </OrganizerEventDetailShell>
       </OrganizerEventDetailSection>
     )
@@ -916,41 +928,41 @@ export function OrganizerEventDetailPage() {
           type="button"
           onClick={() => navigate('/organizer/events')}
         >
-          Revenir a mes evenements
+          Revenir à mes évènements
         </OrganizerEventDetailBackButton>
 
         <OrganizerEventDetailHero>
           <OrganizerEventDetailCover
-            $imageUrl={resolveMediaUrl(event?.coverPhoto ?? event?.thumbnailPhoto ?? null)}
+            $imageUrl={resolveMediaUrl(event.coverPhoto ?? event.thumbnailPhoto ?? null)}
           />
           <OrganizerEventDetailHeroContent>
             <OrganizerEventDetailEyebrow>Espace organisateur</OrganizerEventDetailEyebrow>
-            <OrganizerEventDetailTitle>{event?.title ?? 'Fiche evenement'}</OrganizerEventDetailTitle>
+            <OrganizerEventDetailTitle>{event.title ?? 'Fiche évènement'}</OrganizerEventDetailTitle>
             <OrganizerEventDetailText>
               {currentUser
-                ? `${currentUser.firstName}, pilote cette fiche avec ses ventes, ses scans, sa billetterie et ses reglages depuis les onglets.`
-                : "Retrouve ici la fiche organisateur de ton evenement et sa billetterie."}
+                ? `${currentUser.firstName}, pilote cette fiche avec ses ventes, ses scans, sa billetterie et ses réglages depuis les onglets.`
+                : "Retrouve ici la fiche organisateur de ton évènement et sa billetterie."}
             </OrganizerEventDetailText>
-            <OrganizerEventDetailStatusBadge $published={event?.status === 'published'}>
-              {formatStatusLabel(event?.status ?? 'draft')}
+            <OrganizerEventDetailStatusBadge $published={event.status === 'published'}>
+              {formatStatusLabel(event.status ?? 'draft')}
             </OrganizerEventDetailStatusBadge>
 
             <OrganizerEventDetailInfoPanel>
               <OrganizerEventDetailInfoTitle>Resume de la fiche</OrganizerEventDetailInfoTitle>
               <OrganizerEventDetailInfoText>
-                {event?.category.name ?? 'Categorie'} - {event?.location.city ?? 'Ville'}
+                {event.category.name ?? 'Catégorie'} - {event.location.city ?? 'Ville'}
               </OrganizerEventDetailInfoText>
               <OrganizerEventDetailInfoText>
-                Debut: {formatOrganizerDate(event?.startDatetime ?? null)}
+                Début: {formatOrganizerDate(event.startDatetime ?? null)}
               </OrganizerEventDetailInfoText>
               <OrganizerEventDetailInfoText>
-                Capacite maximale: {event?.capacity ?? 0} place(s)
+                Capacité maximale: {event.capacity ?? 0} place(s)
               </OrganizerEventDetailInfoText>
             </OrganizerEventDetailInfoPanel>
           </OrganizerEventDetailHeroContent>
         </OrganizerEventDetailHero>
 
-        <OrganizerEventDetailTabs aria-label="Sections de la fiche evenement">
+        <OrganizerEventDetailTabs aria-label="Sections de la fiche évènement">
           {organizerEventDetailTabs.map((tab) => (
             <OrganizerEventDetailTabButton
               key={tab.id}
@@ -967,9 +979,9 @@ export function OrganizerEventDetailPage() {
           <OrganizerEventDetailSplitSection>
             <OrganizerEventDetailSplitHeader>
               <OrganizerEventDetailSplitEyebrow>Apercu</OrganizerEventDetailSplitEyebrow>
-              <OrganizerEventDetailSplitTitle>Performance de l evenement</OrganizerEventDetailSplitTitle>
+              <OrganizerEventDetailSplitTitle>Performance de l’évènement</OrganizerEventDetailSplitTitle>
               <OrganizerEventDetailSplitText>
-                Retrouve les chiffres cles de cette fiche avant de passer aux reglages, au scan ou aux billets.
+                Retrouve les chiffres clés de cette fiche avant de passer aux réglages, au scan ou aux billets.
               </OrganizerEventDetailSplitText>
             </OrganizerEventDetailSplitHeader>
 
@@ -980,7 +992,7 @@ export function OrganizerEventDetailPage() {
                   {formatCurrencyAmount(eventSales.revenueTotal)}
                 </OrganizerEventDetailOverviewStatValue>
                 <OrganizerEventDetailOverviewStatHint>
-                  Paiements confirmes uniquement
+                  Paiements confirmés uniquement
                 </OrganizerEventDetailOverviewStatHint>
               </OrganizerEventDetailOverviewStat>
 
@@ -990,7 +1002,7 @@ export function OrganizerEventDetailPage() {
                   {eventSales.paidOrders}
                 </OrganizerEventDetailOverviewStatValue>
                 <OrganizerEventDetailOverviewStatHint>
-                  Commandes payees sur cet evenement
+                  Commandes payées sur cet évènement
                 </OrganizerEventDetailOverviewStatHint>
               </OrganizerEventDetailOverviewStat>
 
@@ -1047,10 +1059,10 @@ export function OrganizerEventDetailPage() {
         {activeTab === 'event' ? (
         <OrganizerEventDetailSplitSection>
           <OrganizerEventDetailSplitHeader>
-            <OrganizerEventDetailSplitEyebrow>Evenement</OrganizerEventDetailSplitEyebrow>
-            <OrganizerEventDetailSplitTitle>Fiche evenement</OrganizerEventDetailSplitTitle>
+            <OrganizerEventDetailSplitEyebrow>évènement</OrganizerEventDetailSplitEyebrow>
+            <OrganizerEventDetailSplitTitle>Fiche évènement</OrganizerEventDetailSplitTitle>
             <OrganizerEventDetailSplitText>
-              Mets a jour ici la fiche publique complete de ton evenement : contenu, lieu, dates, medias et statut.
+              Mets à jour ici la fiche publique complété de ton évènement : contenu, lieu, dates, medias et statut.
             </OrganizerEventDetailSplitText>
           </OrganizerEventDetailSplitHeader>
 
@@ -1079,7 +1091,7 @@ export function OrganizerEventDetailPage() {
               </OrganizerEventDetailField>
 
               <OrganizerEventDetailField>
-                <OrganizerEventDetailLabel>Capacite</OrganizerEventDetailLabel>
+                <OrganizerEventDetailLabel>Capacité</OrganizerEventDetailLabel>
                 <OrganizerEventDetailInput
                   type="number"
                   min="1"
@@ -1094,7 +1106,7 @@ export function OrganizerEventDetailPage() {
                   required
                 />
                 <OrganizerEventDetailHint>
-                  La capacite ne peut pas descendre sous le stock deja alloue aux billets.
+                  La capacité ne peut pas descendre sous le stock déjà alloue aux billets.
                 </OrganizerEventDetailHint>
               </OrganizerEventDetailField>
             </OrganizerEventDetailGrid>
@@ -1114,7 +1126,7 @@ export function OrganizerEventDetailPage() {
             </OrganizerEventDetailField>
 
             <OrganizerEventDetailField>
-              <OrganizerEventDetailLabel>Categorie</OrganizerEventDetailLabel>
+              <OrganizerEventDetailLabel>Catégorie</OrganizerEventDetailLabel>
               <OrganizerEventDetailSelect
                 value={eventForm.categoryId}
                 onChange={(changeEvent) =>
@@ -1125,7 +1137,7 @@ export function OrganizerEventDetailPage() {
                 }
                 required
               >
-                <option value="">Choisir une categorie</option>
+                <option value="">Choisir une catégorie</option>
                 {options.categories.map((category) => (
                   <option key={category.id} value={String(category.id)}>
                     {category.name}
@@ -1136,7 +1148,7 @@ export function OrganizerEventDetailPage() {
                 <OrganizerEventDetailHint>{selectedCategory.description}</OrganizerEventDetailHint>
               ) : (
                 <OrganizerEventDetailHint>
-                  Choisis la categorie qui correspond le mieux au tri public de cet evenement.
+                  Choisis la catégorie qui correspond le mieux au tri public de cet évènement.
                 </OrganizerEventDetailHint>
               )}
             </OrganizerEventDetailField>
@@ -1152,7 +1164,7 @@ export function OrganizerEventDetailPage() {
                       locationAddress: changeEvent.target.value,
                     }))
                   }
-                  placeholder="10 Rue de l Example"
+                  placeholder="10 Rue de l’Exemple"
                   required
                 />
               </OrganizerEventDetailField>
@@ -1221,7 +1233,7 @@ export function OrganizerEventDetailPage() {
                   placeholder="48.8566000"
                 />
                 <OrganizerEventDetailHint>
-                  Facultatif. Utile si tu veux positionner precisement le lieu.
+                  Facultatif. Utile si tu veux positionner précisément le lieu.
                 </OrganizerEventDetailHint>
               </OrganizerEventDetailField>
 
@@ -1240,14 +1252,14 @@ export function OrganizerEventDetailPage() {
                   placeholder="2.3522000"
                 />
                 <OrganizerEventDetailHint>
-                  Facultatif. Laisse vide si tu n as pas encore les coordonnees.
+                  Facultatif. Laisse vide si tu n’as pas encore les coordonnées.
                 </OrganizerEventDetailHint>
               </OrganizerEventDetailField>
             </OrganizerEventDetailGrid>
 
             <OrganizerEventDetailGrid>
               <OrganizerEventDetailField>
-                <OrganizerEventDetailLabel>Debut</OrganizerEventDetailLabel>
+                <OrganizerEventDetailLabel>Début</OrganizerEventDetailLabel>
                 <OrganizerEventDetailInput
                   type="datetime-local"
                   min={editableMinimumStartDatetime}
@@ -1280,7 +1292,7 @@ export function OrganizerEventDetailPage() {
                   required
                 />
                 <OrganizerEventDetailHint>
-                  Si ton evenement est deja passe, tu peux garder sa date actuelle pour modifier le reste de la fiche.
+                  Si ton évènement est déjà passé, tu peux garder sa date actuelle pour modifier le reste de la fiche.
                 </OrganizerEventDetailHint>
               </OrganizerEventDetailField>
 
@@ -1299,7 +1311,7 @@ export function OrganizerEventDetailPage() {
                   required
                 />
                 <OrganizerEventDetailHint>
-                  La fin doit toujours rester apres le debut.
+                  La fin doit toujours rester après le début.
                 </OrganizerEventDetailHint>
               </OrganizerEventDetailField>
             </OrganizerEventDetailGrid>
@@ -1308,7 +1320,7 @@ export function OrganizerEventDetailPage() {
               <OrganizerEventDetailMediaCard>
                 <OrganizerEventDetailMediaLabel>Miniature actuelle</OrganizerEventDetailMediaLabel>
                 <OrganizerEventDetailMediaPreview
-                  $imageUrl={resolveMediaUrl(event?.thumbnailPhoto ?? null)}
+                  $imageUrl={resolveMediaUrl(event.thumbnailPhoto ?? null)}
                 />
                 <OrganizerEventDetailField>
                   <OrganizerEventDetailLabel>Remplacer la miniature</OrganizerEventDetailLabel>
@@ -1331,7 +1343,7 @@ export function OrganizerEventDetailPage() {
               <OrganizerEventDetailMediaCard>
                 <OrganizerEventDetailMediaLabel>Cover actuelle</OrganizerEventDetailMediaLabel>
                 <OrganizerEventDetailMediaPreview
-                  $imageUrl={resolveMediaUrl(event?.coverPhoto ?? null)}
+                  $imageUrl={resolveMediaUrl(event.coverPhoto ?? null)}
                 />
                 <OrganizerEventDetailField>
                   <OrganizerEventDetailLabel>Remplacer la cover</OrganizerEventDetailLabel>
@@ -1353,8 +1365,8 @@ export function OrganizerEventDetailPage() {
 
               {eventIsFinished ? (
                 <OrganizerEventDetailMediaCard>
-                  <OrganizerEventDetailMediaLabel>Video souvenir</OrganizerEventDetailMediaLabel>
-                  {event?.eventVideo ? (
+                  <OrganizerEventDetailMediaLabel>Vidéo souvenir</OrganizerEventDetailMediaLabel>
+                  {event.eventVideo ? (
                     <OrganizerEventDetailVideoPreview
                       controls
                       preload="metadata"
@@ -1362,14 +1374,14 @@ export function OrganizerEventDetailPage() {
                     />
                   ) : (
                     <OrganizerEventDetailState>
-                      Aucune video souvenir n est encore liee a cet evenement.
+                      Aucune vidéo souvenir n’est encore liée à cet évènement.
                     </OrganizerEventDetailState>
                   )}
                   <OrganizerEventDetailField>
-                    <OrganizerEventDetailLabel>Ajouter ou remplacer la video</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailLabel>Ajouter ou remplacer la vidéo</OrganizerEventDetailLabel>
                     <OrganizerEventDetailInput
                       type="file"
-                      accept="video/*"
+                      accept="vidéo/*"
                       onChange={(changeEvent) =>
                         setEventForm((current) => ({
                           ...current,
@@ -1379,14 +1391,14 @@ export function OrganizerEventDetailPage() {
                     />
                   </OrganizerEventDetailField>
                   <OrganizerEventDetailHint>
-                    Visible par les clients depuis la corbeille publique des evenements passes.
+                    Visible par les clients depuis la corbeille publique des évènements passés.
                   </OrganizerEventDetailHint>
                 </OrganizerEventDetailMediaCard>
               ) : (
                 <OrganizerEventDetailMediaCard>
-                  <OrganizerEventDetailMediaLabel>Video souvenir</OrganizerEventDetailMediaLabel>
+                  <OrganizerEventDetailMediaLabel>Vidéo souvenir</OrganizerEventDetailMediaLabel>
                   <OrganizerEventDetailState>
-                    Tu pourras ajouter une video locale quand l evenement sera termine.
+                    Tu pourras ajouter une vidéo locale quand l’évènement sera terminé.
                   </OrganizerEventDetailState>
                 </OrganizerEventDetailMediaCard>
               )}
@@ -1413,9 +1425,9 @@ export function OrganizerEventDetailPage() {
 
             <OrganizerEventDetailActions>
               <OrganizerEventDetailPrimaryButton type="submit" disabled={isSavingEvent}>
-                {isSavingEvent ? 'Mise a jour en cours...' : 'Mettre a jour la fiche'}
+                {isSavingEvent ? 'Mise à jour en cours...' : 'Mettre à jour la fiche'}
               </OrganizerEventDetailPrimaryButton>
-              {event?.status === 'published' ? (
+              {event.status === 'published' ? (
                 <OrganizerEventDetailSecondaryButton
                   type="button"
                   onClick={() => navigate(`/events/${event.id}`)}
@@ -1440,8 +1452,8 @@ export function OrganizerEventDetailPage() {
             <OrganizerEventDetailSplitEyebrow>Scan</OrganizerEventDetailSplitEyebrow>
             <OrganizerEventDetailSplitTitle>Activite du staff</OrganizerEventDetailSplitTitle>
             <OrganizerEventDetailSplitText>
-              Suis le nombre de scans realises pour cet evenement, avec le detail
-              par membre du staff ou organisateur ayant utilise le poste de scan.
+              Suis le nombre de scans realises pour cet évènement, avec le detail
+              par membre du staff ou organisateur ayant utilisé le poste de scan.
             </OrganizerEventDetailSplitText>
           </OrganizerEventDetailSplitHeader>
 
@@ -1459,7 +1471,7 @@ export function OrganizerEventDetailPage() {
               </OrganizerEventDetailScanStatValue>
             </OrganizerEventDetailScanStat>
             <OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStatLabel>Deja utilises</OrganizerEventDetailScanStatLabel>
+              <OrganizerEventDetailScanStatLabel>Déjà utilisés</OrganizerEventDetailScanStatLabel>
               <OrganizerEventDetailScanStatValue>
                 {scanStats?.alreadyUsedScans ?? 0}
               </OrganizerEventDetailScanStatValue>
@@ -1506,7 +1518,7 @@ export function OrganizerEventDetailPage() {
                       </OrganizerEventDetailTicketStatValue>
                     </OrganizerEventDetailTicketStat>
                     <OrganizerEventDetailTicketStat>
-                      <OrganizerEventDetailTicketStatLabel>Deja utilises</OrganizerEventDetailTicketStatLabel>
+                      <OrganizerEventDetailTicketStatLabel>Déjà utilisés</OrganizerEventDetailTicketStatLabel>
                       <OrganizerEventDetailTicketStatValue>
                         {staffSummary.alreadyUsedScans}
                       </OrganizerEventDetailTicketStatValue>
@@ -1523,7 +1535,7 @@ export function OrganizerEventDetailPage() {
             </OrganizerEventDetailScanStaffList>
           ) : (
             <OrganizerEventDetailState>
-              Aucun scan n a encore ete enregistre pour cet evenement.
+              Aucun scan n’a encore été enregistré pour cet évènement.
             </OrganizerEventDetailState>
           )}
         </OrganizerEventDetailSplitSection>
@@ -1533,9 +1545,9 @@ export function OrganizerEventDetailPage() {
         <OrganizerEventDetailSplitSection ref={ticketSectionRef}>
           <OrganizerEventDetailSplitHeader>
             <OrganizerEventDetailSplitEyebrow>Billets</OrganizerEventDetailSplitEyebrow>
-            <OrganizerEventDetailSplitTitle>Billets de cet evenement</OrganizerEventDetailSplitTitle>
+            <OrganizerEventDetailSplitTitle>Billets de cet évènement</OrganizerEventDetailSplitTitle>
             <OrganizerEventDetailSplitText>
-              Gere ici la billetterie liee a cet evenement, avec son stock, ses dates de vente et sa visibilite.
+              G?re ici la billetterie liée à cet évènement, avec son stock, ses dates de vente et sa visibilite.
             </OrganizerEventDetailSplitText>
           </OrganizerEventDetailSplitHeader>
 
@@ -1551,20 +1563,20 @@ export function OrganizerEventDetailPage() {
             <div>
               <OrganizerEventDetailTicketTitle>Gestion des billets</OrganizerEventDetailTicketTitle>
               <OrganizerEventDetailTicketText>
-                Chaque billet est lie a cet evenement. Son stock total s aligne sur la capacite de la fiche et ses dates de vente restent bornees par le calendrier de l evenement.
+                Chaque billet est lié à cet évènement. Son stock total s’aligne sur la capacité de la fiche et ses dates de vente restent bornées par le calendrier de l’évènement.
               </OrganizerEventDetailTicketText>
             </div>
           </OrganizerEventDetailTicketHeader>
 
           <OrganizerEventDetailTicketGrid>
             <OrganizerEventDetailTicketCreateCard>
-              <OrganizerEventDetailInfoTitle>Creer un billet</OrganizerEventDetailInfoTitle>
+              <OrganizerEventDetailInfoTitle>Créer un billet</OrganizerEventDetailInfoTitle>
               <OrganizerEventDetailInfoText>
-                Definis un type de billet, son prix, son stock et sa fenetre de vente.
+                Definis un type de billet, son prix, son stock et sa fenêtre de vente.
               </OrganizerEventDetailInfoText>
               <OrganizerEventDetailHint>
-                Il reste actuellement {remainingTicketCapacity} place(s) a attribuer
-                sur {eventCapacity} pour cet evenement.
+                Il reste actuellement {remainingTicketCapacity} place(s) à attribuer
+                sur {eventCapacity} pour cet évènement.
               </OrganizerEventDetailHint>
 
               <OrganizerEventDetailForm onSubmit={handleTicketCreate}>
@@ -1593,7 +1605,7 @@ export function OrganizerEventDetailPage() {
                         description: changeEvent.target.value,
                       }))
                     }
-                    placeholder="Acces general, placement libre..."
+                    placeholder="Accès général, placement libre..."
                   />
                 </OrganizerEventDetailField>
 
@@ -1633,16 +1645,16 @@ export function OrganizerEventDetailPage() {
                       required
                     />
                     <OrganizerEventDetailHint>
-                      Tu peux encore attribuer jusqu a {remainingTicketCapacity} place(s)
-                      a un nouveau billet, dans la limite des {eventCapacity} places de
-                      l evenement.
+                      Tu peux encore attribuer jusqu’à {remainingTicketCapacity} place(s)
+                      a un nouveau billet, dans la limit des {eventCapacity} places de
+                      l’évènement.
                     </OrganizerEventDetailHint>
                   </OrganizerEventDetailField>
                 </OrganizerEventDetailGrid>
 
                 <OrganizerEventDetailGrid>
                   <OrganizerEventDetailField>
-                    <OrganizerEventDetailLabel>Debut de vente</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailLabel>Début de vente</OrganizerEventDetailLabel>
                     <OrganizerEventDetailInput
                       type="datetime-local"
                       min={minimumTicketSalesStart}
@@ -1691,7 +1703,7 @@ export function OrganizerEventDetailPage() {
                       required
                     />
                     <OrganizerEventDetailHint>
-                      La vente doit se terminer avant le debut de l evenement.
+                      La vente doit se terminér avant le début de l’évènement.
                     </OrganizerEventDetailHint>
                   </OrganizerEventDetailField>
                 </OrganizerEventDetailGrid>
@@ -1735,7 +1747,7 @@ export function OrganizerEventDetailPage() {
                     type="submit"
                     disabled={isSavingTicket}
                   >
-                    {isSavingTicket ? 'Creation en cours...' : 'Creer le billet'}
+                    {isSavingTicket ? 'Création en cours...' : 'Créer le billet'}
                   </OrganizerEventDetailPrimaryButton>
                 </OrganizerEventDetailActions>
               </OrganizerEventDetailForm>
@@ -1784,7 +1796,7 @@ export function OrganizerEventDetailPage() {
                       Vente: {formatOrganizerDate(ticketType.salesStartAt)} {'->'} {formatOrganizerDate(ticketType.salesEndAt)}
                     </OrganizerEventDetailTicketCardText>
                     <OrganizerEventDetailTicketCardText>
-                      Max par commande: {ticketType.maxPerOrder ?? 'Non limite'}
+                      Max par commande: {ticketType.maxPerOrder ?? 'Non limité'}
                     </OrganizerEventDetailTicketCardText>
 
                     {editingTicketId === ticketType.id ? (
@@ -1855,15 +1867,15 @@ export function OrganizerEventDetailPage() {
                               required
                             />
                             <OrganizerEventDetailHint>
-                              Pour ce billet, tu peux monter jusqu a{' '}
+                              Pour ce billet, tu peux monter jusqu’à{' '}
                               {editableRemainingCapacityForCurrentTicket} place(s)
-                              sans depasser la capacite globale de l evenement.
+                              sans dépasser la capacité globale de l’évènement.
                             </OrganizerEventDetailHint>
                           </OrganizerEventDetailField>
                         </OrganizerEventDetailGrid>
                         <OrganizerEventDetailGrid>
                           <OrganizerEventDetailField>
-                            <OrganizerEventDetailLabel>Debut de vente</OrganizerEventDetailLabel>
+                            <OrganizerEventDetailLabel>Début de vente</OrganizerEventDetailLabel>
                             <OrganizerEventDetailInput
                               type="datetime-local"
                               value={editingTicketForm.salesStartAt}
@@ -1927,7 +1939,7 @@ export function OrganizerEventDetailPage() {
                             type="submit"
                             disabled={isSavingTicket}
                           >
-                            {isSavingTicket ? 'Mise a jour...' : 'Enregistrer le billet'}
+                            {isSavingTicket ? 'Mise à jour...' : 'Enregistrer le billet'}
                           </OrganizerEventDetailPrimaryButton>
                           <OrganizerEventDetailSecondaryButton
                             type="button"
@@ -1966,7 +1978,7 @@ export function OrganizerEventDetailPage() {
                 ))
               ) : (
                 <OrganizerEventDetailState>
-                  Aucun billet n est encore rattache a cet evenement. Cree le premier type de billet a gauche pour lancer la billetterie.
+                  Aucun billet n’est encore rattaché à cet évènement. Crée le premier type de billet à gauche pour lancer la billetterie.
                 </OrganizerEventDetailState>
               )}
             </OrganizerEventDetailTicketList>
@@ -1979,8 +1991,8 @@ export function OrganizerEventDetailPage() {
                   Invitations nominatives
                 </OrganizerEventDetailTicketTitle>
                 <OrganizerEventDetailTicketText>
-                  Cree un billet gratuit pour un invite, envoie-le par email et
-                  suis ensuite s il est passe au scan.
+                  Crée un billet gratuit pour un invité, envoie-le par email et
+                  suis ensuite s’il est passé au scan.
                 </OrganizerEventDetailTicketText>
               </div>
               <OrganizerEventDetailGuestBadge $checkedIn={false}>
@@ -1997,7 +2009,7 @@ export function OrganizerEventDetailPage() {
 
             <OrganizerEventDetailGuestGrid>
               <OrganizerEventDetailTicketCreateCard>
-                <OrganizerEventDetailInfoTitle>Envoyer un billet invite</OrganizerEventDetailInfoTitle>
+                <OrganizerEventDetailInfoTitle>Envoyer un billet invité</OrganizerEventDetailInfoTitle>
                 <OrganizerEventDetailInfoText>
                   Le billet consomme une place disponible du type choisi et reste
                   scannable comme un billet classique.
@@ -2005,7 +2017,7 @@ export function OrganizerEventDetailPage() {
 
                 <OrganizerEventDetailForm onSubmit={handleGuestTicketCreate}>
                   <OrganizerEventDetailField>
-                    <OrganizerEventDetailLabel>Nom de l invite</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailLabel>Nom de l’invité</OrganizerEventDetailLabel>
                     <OrganizerEventDetailInput
                       value={guestTicketForm.recipientName}
                       onChange={(changeEvent) =>
@@ -2019,7 +2031,7 @@ export function OrganizerEventDetailPage() {
                   </OrganizerEventDetailField>
 
                   <OrganizerEventDetailField>
-                    <OrganizerEventDetailLabel>Email de l invite</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailLabel>Email de l’invité</OrganizerEventDetailLabel>
                     <OrganizerEventDetailInput
                       type="email"
                       value={guestTicketForm.recipientEmail}
@@ -2029,13 +2041,13 @@ export function OrganizerEventDetailPage() {
                           recipientEmail: changeEvent.target.value,
                         }))
                       }
-                      placeholder="invite@example.com"
+                      placeholder="invité@example.com"
                       required
                     />
                   </OrganizerEventDetailField>
 
                   <OrganizerEventDetailField>
-                    <OrganizerEventDetailLabel>Billet a envoyer</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailLabel>Billet à envoyer</OrganizerEventDetailLabel>
                     <OrganizerEventDetailSelect
                       value={guestTicketForm.ticketTypeId}
                       onChange={(changeEvent) =>
@@ -2056,7 +2068,7 @@ export function OrganizerEventDetailPage() {
                     <OrganizerEventDetailHint>
                       {availableInvitationTicketTypes.length > 0
                         ? `${totalAvailableTickets} place(s) encore disponible(s) sur les billets actifs.`
-                        : 'Aucun billet actif avec du stock disponible pour creer une invitation.'}
+                        : 'Aucun billet actif avec du stock disponible pour créer une invitation.'}
                     </OrganizerEventDetailHint>
                   </OrganizerEventDetailField>
 
@@ -2070,7 +2082,7 @@ export function OrganizerEventDetailPage() {
                     >
                       {isSendingGuestTicket
                         ? 'Envoi en cours...'
-                        : 'Creer et envoyer'}
+                        : 'Créer et envoyer'}
                     </OrganizerEventDetailPrimaryButton>
                   </OrganizerEventDetailActions>
                 </OrganizerEventDetailForm>
@@ -2082,7 +2094,7 @@ export function OrganizerEventDetailPage() {
                     <OrganizerEventDetailGuestCard key={guestTicket.id}>
                       <OrganizerEventDetailGuestMeta>
                         <OrganizerEventDetailGuestName>
-                          {guestTicket.recipientName ?? 'Invite EventFlow'}
+                          {guestTicket.recipientName ?? 'Invité EventFlow'}
                         </OrganizerEventDetailGuestName>
                         <OrganizerEventDetailGuestText>
                           {guestTicket.recipientEmail ?? 'Email indisponible'}
@@ -2098,7 +2110,7 @@ export function OrganizerEventDetailPage() {
                           Passage scan:{' '}
                           {guestTicket.usedAt
                             ? formatOrganizerDate(guestTicket.usedAt)
-                            : 'pas encore scanne'}
+                            : 'pas encore scanné'}
                         </OrganizerEventDetailGuestText>
                       </OrganizerEventDetailGuestMeta>
 
@@ -2106,7 +2118,7 @@ export function OrganizerEventDetailPage() {
                         <OrganizerEventDetailGuestBadge
                           $checkedIn={guestTicket.hasCheckedIn}
                         >
-                          {guestTicket.hasCheckedIn ? 'Venu' : 'Non scanne'}
+                          {guestTicket.hasCheckedIn ? 'Venu' : 'Non scanné'}
                         </OrganizerEventDetailGuestBadge>
                         <OrganizerEventDetailLinkButton
                           type="button"
@@ -2119,7 +2131,7 @@ export function OrganizerEventDetailPage() {
                   ))
                 ) : (
                   <OrganizerEventDetailState>
-                    Aucun billet invite pour le moment. Cree une invitation pour
+                    Aucun billet invité pour le moment. Crée une invitation pour
                     envoyer un QR par email et suivre son passage au scan.
                   </OrganizerEventDetailState>
                 )}

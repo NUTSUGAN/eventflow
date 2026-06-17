@@ -49,7 +49,7 @@ const emptyDashboardEvents: OrganizerDashboardEventSummary[] = []
 
 function formatDashboardDate(date: string | null): string {
   if (!date) {
-    return 'Date a confirmer'
+    return 'Date à confirmer'
   }
 
   return new Intl.DateTimeFormat('fr-FR', {
@@ -237,7 +237,7 @@ export function OrganizerDashboardPage() {
       setStatusMessage(response.message)
     } catch (error) {
       setErrorMessage(
-        readApiMessage(error, "Impossible de mettre a jour le statut de l'evenement."),
+        readApiMessage(error, "Impossible de mettre à jour le statut de l’évènement."),
       )
     } finally {
       setUpdatingEventId(null)
@@ -252,8 +252,8 @@ export function OrganizerDashboardPage() {
           <OrganizerDashboardTitle>Tableau de bord organisateur</OrganizerDashboardTitle>
           <OrganizerDashboardText>
             {user
-              ? `${user.firstName}, suis tes evenements, tes ventes, tes billets et les controles d acces depuis un seul espace.`
-              : 'Suis tes evenements, tes ventes, tes billets et les controles d acces depuis un seul espace.'}
+              ? `${user.firstName}, suis tes événements, tes ventes, tes billets et les contrôles d’accès depuis un seul espace.`
+              : 'Suis tes évènements, tes ventes, tes billets et les controles d’accès depuis un seul espace.'}
           </OrganizerDashboardText>
         </OrganizerDashboardHeaderText>
         <OrganizerDashboardActions>
@@ -261,13 +261,13 @@ export function OrganizerDashboardPage() {
             type="button"
             onClick={() => navigate('/organizer/events/new')}
           >
-            Creer un evenement
+            Créer un évènement
           </OrganizerDashboardPrimaryButton>
           <OrganizerDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/organizer/events')}
           >
-            Mes evenements
+            Mes évènements
           </OrganizerDashboardSecondaryButton>
           <OrganizerDashboardSecondaryButton
             type="button"
@@ -288,7 +288,7 @@ export function OrganizerDashboardPage() {
               type="button"
               onClick={() => navigate('/organizer/staff')}
             >
-              Gerer mon staff
+              Gérer mon staff
             </OrganizerDashboardSecondaryButton>
           ) : null}
           {user?.role === 'ROLE_ADMIN' ? (
@@ -323,10 +323,10 @@ export function OrganizerDashboardPage() {
               dashboard?.stats.revenue.currency ?? 'EUR',
             )}
           </OrganizerDashboardMetricValue>
-          <OrganizerDashboardMetricHint>Commandes payees uniquement</OrganizerDashboardMetricHint>
+          <OrganizerDashboardMetricHint>Commandes payées uniquement</OrganizerDashboardMetricHint>
         </OrganizerDashboardMetric>
         <OrganizerDashboardMetric>
-          <OrganizerDashboardMetricLabel>Abonnes</OrganizerDashboardMetricLabel>
+          <OrganizerDashboardMetricLabel>Abonnés</OrganizerDashboardMetricLabel>
           <OrganizerDashboardMetricValue>
             {dashboard?.stats.subscribers.total ?? 0}
           </OrganizerDashboardMetricValue>
@@ -337,7 +337,7 @@ export function OrganizerDashboardPage() {
           <OrganizerDashboardMetricValue>
             {dashboard?.stats.tickets.sold ?? 0}
           </OrganizerDashboardMetricValue>
-          <OrganizerDashboardMetricHint>Tous evenements confondus</OrganizerDashboardMetricHint>
+          <OrganizerDashboardMetricHint>Tous évènements confondus</OrganizerDashboardMetricHint>
         </OrganizerDashboardMetric>
         <OrganizerDashboardMetric>
           <OrganizerDashboardMetricLabel>Scans realises</OrganizerDashboardMetricLabel>
@@ -352,7 +352,7 @@ export function OrganizerDashboardPage() {
 
       <OrganizerDashboardGrid>
         <OrganizerDashboardMetric>
-          <OrganizerDashboardMetricLabel>Evenements publics</OrganizerDashboardMetricLabel>
+          <OrganizerDashboardMetricLabel>évènements publics</OrganizerDashboardMetricLabel>
           <OrganizerDashboardMetricValue>{publishedEvents.length}</OrganizerDashboardMetricValue>
           <OrganizerDashboardMetricHint>Actuellement visibles</OrganizerDashboardMetricHint>
         </OrganizerDashboardMetric>
@@ -378,10 +378,10 @@ export function OrganizerDashboardPage() {
       <OrganizerDashboardPanel>
         <OrganizerDashboardPanelHeader>
           <div>
-            <OrganizerDashboardPanelTitle>Ventes par evenement</OrganizerDashboardPanelTitle>
+            <OrganizerDashboardPanelTitle>Ventes par évènement</OrganizerDashboardPanelTitle>
             <OrganizerDashboardText>
-              Compare rapidement le chiffre d affaires, les commandes, les billets
-              vendus et les scans par fiche evenement.
+              Compare rapidement le chiffre d’affaires, les commandes, les billets
+              vendus et les scans par fiche évènement.
             </OrganizerDashboardText>
           </div>
         </OrganizerDashboardPanelHeader>
@@ -391,9 +391,9 @@ export function OrganizerDashboardPage() {
       <OrganizerDashboardPanel>
         <OrganizerDashboardPanelHeader>
           <div>
-            <OrganizerDashboardPanelTitle>Mes evenements</OrganizerDashboardPanelTitle>
+            <OrganizerDashboardPanelTitle>Mes évènements</OrganizerDashboardPanelTitle>
             <OrganizerDashboardText>
-              Change un statut, ouvre une fiche, puis complete les billets et le
+              Change un statut, ouvre une fiche, puis complété les billets et le
               suivi operationnel.
             </OrganizerDashboardText>
           </div>
@@ -401,7 +401,7 @@ export function OrganizerDashboardPage() {
             type="button"
             onClick={() => navigate('/organizer/events')}
           >
-            Ouvrir la gestion complete
+            Ouvrir la gestion complété
           </OrganizerDashboardSecondaryButton>
         </OrganizerDashboardPanelHeader>
         {renderEventList(latestEvents)}
@@ -413,7 +413,7 @@ export function OrganizerDashboardPage() {
     if (renderedEvents.length === 0) {
       return (
         <OrganizerDashboardMessage $tone="neutral">
-          Aucun evenement avec vente pour le moment.
+          Aucun évènement avec vente pour le moment.
         </OrganizerDashboardMessage>
       )
     }
@@ -425,7 +425,7 @@ export function OrganizerDashboardPage() {
             <OrganizerDashboardRowMain>
               <OrganizerDashboardRowTitle>{event.title}</OrganizerDashboardRowTitle>
               <OrganizerDashboardRowText>
-                {formatDashboardDate(event.startDatetime)} - {event.location.city ?? 'Ville a confirmer'}
+                {formatDashboardDate(event.startDatetime)} - {event.location.city ?? 'Ville à confirmer'}
               </OrganizerDashboardRowText>
             </OrganizerDashboardRowMain>
             <OrganizerDashboardRowStats>
@@ -472,7 +472,7 @@ export function OrganizerDashboardPage() {
     if (renderedEvents.length === 0) {
       return (
         <OrganizerDashboardMessage $tone="neutral">
-          Tu n as pas encore d evenement. Cree le premier pour commencer a
+          Tu n’as pas encore d’évènement. Crée le premier pour commencer a
           vendre des billets.
         </OrganizerDashboardMessage>
       )
@@ -488,7 +488,7 @@ export function OrganizerDashboardPage() {
               </OrganizerDashboardBadge>
               <OrganizerDashboardRowTitle>{event.title}</OrganizerDashboardRowTitle>
               <OrganizerDashboardRowText>
-                {event.category.name ?? 'Categorie'} - {event.location.city ?? 'Ville a confirmer'}
+                {event.category.name ?? 'Catégorie'} - {event.location.city ?? 'Ville à confirmer'}
               </OrganizerDashboardRowText>
               <OrganizerDashboardRowText>
                 {formatDashboardDate(event.startDatetime)}

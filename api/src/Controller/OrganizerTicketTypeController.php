@@ -39,7 +39,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
         }
 
@@ -47,13 +47,13 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], 404);
         }
 
         if (!$this->canManageEvent($user, $event)) {
             return $this->json([
-                'message' => 'Vous ne pouvez gerer que les billets de vos propres evenements.',
+                'message' => 'Vous ne pouvez gérer que les billets de vos propres évènements.',
             ], 403);
         }
 
@@ -76,19 +76,19 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!is_numeric($price) || (float) $price < 0) {
             return $this->json([
-                'message' => 'Le prix doit etre un nombre positif ou nul.',
+                'message' => 'Le prix doit être un nombre positif ou nul.',
             ], 400);
         }
 
         if (!is_numeric($stock) || (int) $stock < 0) {
             return $this->json([
-                'message' => 'Le stock doit etre un entier positif ou nul.',
+                'message' => 'Le stock doit être un entier positif ou nul.',
             ], 400);
         }
 
         if ($maxPerOrder !== null && (!is_numeric($maxPerOrder) || (int) $maxPerOrder <= 0)) {
             return $this->json([
-                'message' => 'maxPerOrder doit etre un entier strictement positif.',
+                'message' => 'maxPerOrder doit être un entier strictement positif.',
             ], 400);
         }
 
@@ -103,19 +103,19 @@ class OrganizerTicketTypeController extends AbstractController
 
         if ($salesStartAt >= $salesEndAt) {
             return $this->json([
-                'message' => 'La date de debut de vente doit etre avant la date de fin de vente.',
+                'message' => 'La date de début de vente doit être avant la date de fin de vente.',
             ], 400);
         }
 
         if ($salesStartAt >= $event->getStartDatetime()) {
             return $this->json([
-                'message' => 'Le debut de vente doit intervenir avant le debut de l evenement.',
+                'message' => 'Le début de vente doit intervenir avant le début de l’l’évènement.',
             ], 400);
         }
 
         if ($salesEndAt > $event->getStartDatetime()) {
             return $this->json([
-                'message' => 'La fin de vente ne peut pas depasser le debut de l evenement.',
+                'message' => 'La fin de vente ne peut pas depasser le début de l’l’évènement.',
             ], 400);
         }
 
@@ -125,7 +125,7 @@ class OrganizerTicketTypeController extends AbstractController
         if ($nextEventStock > (int) $event->getCapacity()) {
             return $this->json([
                 'message' => sprintf(
-                    'Le stock total des billets (%d) depasserait la capacite de l evenement (%d).',
+                    'Le stock total des billets (%d) depasserait la capacité de l’l’évènement (%d).',
                     $nextEventStock,
                     (int) $event->getCapacity()
                 ),
@@ -156,7 +156,7 @@ class OrganizerTicketTypeController extends AbstractController
         );
 
         return $this->json([
-            'message' => 'Billet cree avec succes.',
+            'message' => 'Billet crée avec succès.',
             'ticketType' => $this->serializeTicketType($ticketType, $reservedQuantity),
         ], 201);
     }
@@ -178,7 +178,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
         }
 
@@ -186,13 +186,13 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'Evenement introuvable.',
+                'message' => 'l’évènement introuvable.',
             ], 404);
         }
 
         if (!$this->canManageEvent($user, $event)) {
             return $this->json([
-                'message' => 'Vous ne pouvez consulter que les billets de vos propres evenements.',
+                'message' => 'Vous ne pouvez consulter que les billets de vos propres évènements.',
             ], 403);
         }
 
@@ -230,7 +230,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
         }
 
@@ -244,7 +244,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$this->canManageTicketType($user, $ticketType)) {
             return $this->json([
-                'message' => 'Vous ne pouvez modifier que les billets de vos propres evenements.',
+                'message' => 'Vous ne pouvez modifier que les billets de vos propres évènements.',
             ], 403);
         }
 
@@ -255,7 +255,7 @@ class OrganizerTicketTypeController extends AbstractController
 
             if ($name === '') {
                 return $this->json([
-                    'message' => 'Le nom ne peut pas etre vide.',
+                    'message' => 'Le nom ne peut pas être vide.',
                 ], 400);
             }
 
@@ -272,7 +272,7 @@ class OrganizerTicketTypeController extends AbstractController
 
             if (!is_numeric($price) || (float) $price < 0) {
                 return $this->json([
-                    'message' => 'Le prix doit etre un nombre positif ou nul.',
+                    'message' => 'Le prix doit être un nombre positif ou nul.',
                 ], 400);
             }
 
@@ -284,7 +284,7 @@ class OrganizerTicketTypeController extends AbstractController
 
             if (!is_numeric($stock) || (int) $stock < 0) {
                 return $this->json([
-                    'message' => 'Le stock doit etre un entier positif ou nul.',
+                    'message' => 'Le stock doit être un entier positif ou nul.',
                 ], 400);
             }
 
@@ -296,7 +296,7 @@ class OrganizerTicketTypeController extends AbstractController
 
             if ($maxPerOrder !== null && (!is_numeric($maxPerOrder) || (int) $maxPerOrder <= 0)) {
                 return $this->json([
-                    'message' => 'maxPerOrder doit etre un entier strictement positif.',
+                    'message' => 'maxPerOrder doit être un entier strictement positif.',
                 ], 400);
             }
 
@@ -336,7 +336,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if ($salesStartAt >= $salesEndAt) {
             return $this->json([
-                'message' => 'La date de debut de vente doit etre avant la date de fin de vente.',
+                'message' => 'La date de début de vente doit être avant la date de fin de vente.',
             ], 400);
         }
 
@@ -345,13 +345,13 @@ class OrganizerTicketTypeController extends AbstractController
         if ($event instanceof Event) {
             if ($salesStartAt >= $event->getStartDatetime()) {
                 return $this->json([
-                    'message' => 'Le debut de vente doit intervenir avant le debut de l evenement.',
+                    'message' => 'Le début de vente doit intervenir avant le début de l’l’évènement.',
                 ], 400);
             }
 
             if ($salesEndAt > $event->getStartDatetime()) {
                 return $this->json([
-                    'message' => 'La fin de vente ne peut pas depasser le debut de l evenement.',
+                    'message' => 'La fin de vente ne peut pas depasser le début de l’l’évènement.',
                 ], 400);
             }
 
@@ -364,7 +364,7 @@ class OrganizerTicketTypeController extends AbstractController
             if ($nextEventStock > (int) $event->getCapacity()) {
                 return $this->json([
                     'message' => sprintf(
-                        'Le stock total des billets (%d) depasserait la capacite de l evenement (%d).',
+                        'Le stock total des billets (%d) depasserait la capacité de l’l’évènement (%d).',
                         $nextEventStock,
                         (int) $event->getCapacity()
                     ),
@@ -380,7 +380,7 @@ class OrganizerTicketTypeController extends AbstractController
         );
 
         return $this->json([
-            'message' => 'Billet mis a jour avec succes.',
+            'message' => 'Billet mis à jour avec succès.',
             'ticketType' => $this->serializeTicketType($ticketType, $reservedQuantity),
         ]);
     }
@@ -401,7 +401,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$this->isOrganizerOrAdmin($user)) {
             return $this->json([
-                'message' => 'Acces reserve aux organisateurs ou administrateurs.',
+                'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
         }
 
@@ -415,7 +415,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$this->canManageTicketType($user, $ticketType)) {
             return $this->json([
-                'message' => 'Vous ne pouvez supprimer que les billets de vos propres evenements.',
+                'message' => 'Vous ne pouvez supprimer que les billets de vos propres évènements.',
             ], 403);
         }
 
@@ -423,7 +423,7 @@ class OrganizerTicketTypeController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Billet supprime avec succes.',
+            'message' => 'Billet supprime avec succès.',
         ]);
     }
 

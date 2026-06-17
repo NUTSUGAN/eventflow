@@ -41,7 +41,7 @@ export function GuestTicketPage() {
 
   useEffect(() => {
     if (!token) {
-      setErrorMessage('Billet invite introuvable.')
+      setErrorMessage('Billet invité introuvable.')
       setIsLoading(false)
       return
     }
@@ -60,7 +60,7 @@ export function GuestTicketPage() {
         }
       } catch {
         if (isMounted) {
-          setErrorMessage('Impossible de charger ce billet invite.')
+          setErrorMessage('Impossible de charger ce billet invité.')
         }
       } finally {
         if (isMounted) {
@@ -79,7 +79,7 @@ export function GuestTicketPage() {
   if (isLoading) {
     return (
       <TicketDetailShell>
-        <TicketDetailState>Chargement du billet invite...</TicketDetailState>
+        <TicketDetailState>Chargement du billet invité...</TicketDetailState>
       </TicketDetailShell>
     )
   }
@@ -87,7 +87,7 @@ export function GuestTicketPage() {
   if (!guestTicket || !guestTicket.qrToken) {
     return (
       <TicketDetailShell>
-        <TicketDetailState>{errorMessage ?? 'Billet invite indisponible.'}</TicketDetailState>
+        <TicketDetailState>{errorMessage ?? 'Billet invité indisponible.'}</TicketDetailState>
       </TicketDetailShell>
     )
   }
@@ -99,7 +99,7 @@ export function GuestTicketPage() {
           <TicketDetailHeroText>
             <TicketDetailEyebrow>Invitation EventFlow</TicketDetailEyebrow>
             <TicketDetailTitle>
-              {guestTicket.event.title ?? 'Evenement EventFlow'}
+              {guestTicket.event.title ?? 'évènement EventFlow'}
             </TicketDetailTitle>
             <TicketDetailSubtitle>
               {guestTicket.ticketType.name ?? 'Invitation'} -{' '}
@@ -109,10 +109,10 @@ export function GuestTicketPage() {
         </TicketDetailHero>
 
         <TicketDetailCard>
-          <TicketDetailCardTitle>QR code a presenter au scan</TicketDetailCardTitle>
+          <TicketDetailCardTitle>QR code à présenter au scan</TicketDetailCardTitle>
           <TicketDetailCodePanel>
             <TicketDetailCodeBadge>
-              {guestTicket.hasCheckedIn ? 'Deja scanne' : 'Invitation'}
+              {guestTicket.hasCheckedIn ? 'Déjà scanné' : 'Invitation'}
             </TicketDetailCodeBadge>
             <TicketDetailQrWrap>
               <QRCode
@@ -128,13 +128,13 @@ export function GuestTicketPage() {
               Code billet : {guestTicket.displayCode}
             </TicketDetailCodeValue>
             <MyTicketsCardText>
-              Invite : {guestTicket.recipientName ?? guestTicket.recipientEmail}
+              Invité : {guestTicket.recipientName ?? guestTicket.recipientEmail}
             </MyTicketsCardText>
             <MyTicketsCardText>
               {formatDateTime(guestTicket.event.startsAt)}
             </MyTicketsCardText>
             <MyTicketsCardText>
-              {guestTicket.event.venue ?? 'Lieu a confirmer'}
+              {guestTicket.event.venue ?? 'Lieu à confirmer'}
             </MyTicketsCardText>
           </TicketDetailCodePanel>
         </TicketDetailCard>

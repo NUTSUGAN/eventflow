@@ -405,7 +405,7 @@ class PromotionCampaign
             && null !== $channel->getChannelCode()
             && $this->hasChannel($channel->getChannelCode())
         ) {
-            throw new \InvalidArgumentException('Ce canal est deja present dans la campagne.');
+            throw new \InvalidArgumentException('Ce canal est déjà present dans la campagne.');
         }
 
         if (!$this->channels->contains($channel)) {

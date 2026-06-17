@@ -22,7 +22,7 @@ final class PromotionCampaignService
             PromotionCampaign::DURATION_7_DAYS => $startsAt->modify('+7 days'),
             PromotionCampaign::DURATION_14_DAYS => $startsAt->modify('+14 days'),
             PromotionCampaign::DURATION_30_DAYS => $startsAt->modify('+30 days'),
-            default => throw new \InvalidArgumentException('Duree de promotion invalide.'),
+            default => throw new \InvalidArgumentException('Durée de promotion invalide.'),
         };
     }
 
@@ -52,7 +52,7 @@ final class PromotionCampaignService
         }
 
         if (!$this->isLaunchPackAvailable($startsAt, $endsAt, $campaign->getId())) {
-            throw new \LogicException('Les 3 emplacements Pack Lancement sont deja reserves sur cette periode.');
+            throw new \LogicException('Les 3 emplacements Pack Lancement sont déjà réservés sur cette période.');
         }
     }
 
@@ -63,14 +63,14 @@ final class PromotionCampaignService
         }
 
         if (PromotionCampaign::STATUS_APPROVED !== $campaign->getStatus()) {
-            throw new \LogicException('Seule une campagne approuvee peut etre activee apres paiement.');
+            throw new \LogicException('Seule une campagne approuvée peut être activee apres paiement.');
         }
 
         $now = new \DateTimeImmutable();
         $duration = $campaign->getDuration();
 
         if (!is_string($duration)) {
-            throw new \LogicException('La duree de la campagne est absente.');
+            throw new \LogicException('La durée de la campagne est absente.');
         }
 
         $campaign

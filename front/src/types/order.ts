@@ -26,8 +26,8 @@ export type PreparedOrder = {
   event: {
     id: number | null
     title: string | null
-    startsAt?: string | null
-    endsAt?: string | null
+    startsAt: string | null
+    endsAt: string | null
     city?: string | null
     venue?: string | null
   }

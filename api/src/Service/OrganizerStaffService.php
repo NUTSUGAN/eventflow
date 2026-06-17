@@ -41,7 +41,7 @@ final class OrganizerStaffService
     public function addMemberByEmail(User $organizer, string $email): OrganizerStaffMember
     {
         if (!$organizer->canManageStaff()) {
-            throw new \DomainException('Seuls les organisateurs peuvent gerer un staff.');
+            throw new \DomainException('Seuls les organisateurs peuvent gérer un staff.');
         }
 
         $normalizedEmail = mb_strtolower(trim($email));
@@ -53,7 +53,7 @@ final class OrganizerStaffService
         $staffUser = $this->userRepository->findOneByEmailInsensitive($normalizedEmail);
 
         if (!$staffUser instanceof User) {
-            throw new \DomainException('Aucun utilisateur EventFlow ne correspond a cet email.');
+            throw new \DomainException('Aucun utilisateur EventFlow ne correspond à cet email.');
         }
 
         if ($staffUser->getId() === $organizer->getId()) {
@@ -76,11 +76,11 @@ final class OrganizerStaffService
         );
 
         if ($existingMembership instanceof OrganizerStaffMember && $existingMembership->isActive()) {
-            throw new \DomainException('Cet utilisateur fait deja partie de ton staff.');
+            throw new \DomainException('Cet utilisateur fait déjà partie de ton staff.');
         }
 
         if ($this->countMembers($organizer) >= self::MAX_STAFF_MEMBERS) {
-            throw new \DomainException('Tu as deja atteint la limite de 10 membres de staff.');
+            throw new \DomainException('Tu as déjà atteint la limite de 10 membres de staff.');
         }
 
         $now = new \DateTimeImmutable();
@@ -114,7 +114,7 @@ final class OrganizerStaffService
     public function setMemberOutOfService(User $organizer, int $membershipId): OrganizerStaffMember
     {
         if (!$organizer->canManageStaff()) {
-            throw new \DomainException('Seuls les organisateurs peuvent gerer un staff.');
+            throw new \DomainException('Seuls les organisateurs peuvent gérer un staff.');
         }
 
         $membership = $this->organizerStaffMemberRepository->findOneForOrganizerById(
@@ -127,7 +127,7 @@ final class OrganizerStaffService
         }
 
         if ($membership->isOutOfService()) {
-            throw new \DomainException('Ce membre est deja hors service.');
+            throw new \DomainException('Ce membre est déjà hors service.');
         }
 
         $membership
@@ -240,18 +240,18 @@ final class OrganizerStaffService
                         ->to($staffEmail)
                         ->subject($wasReactivated
                             ? 'Tu es de nouveau actif dans un staff EventFlow'
-                            : 'Tu fais maintenant partie d un staff EventFlow')
+                            : 'Tu fais maintenant partie d’un staff EventFlow')
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".
                                 "%s %s.\n\n".
                                 "Tu peux des maintenant ouvrir la page de scan ici :\n%s\n\n".
-                                "Tu y retrouveras les evenements auxquels tu peux donner acces.\n",
+                                "Tu y retrouveras les évènements auxquels tu peux donner accès.\n",
                                 $staffName,
                                 $organizerName,
                                 $wasReactivated
-                                    ? 'ta remis en service dans son staff EventFlow'
-                                    : 't a ajoute a son staff EventFlow',
+                                    ? 't’a remis en service dans son staff EventFlow'
+                                    : 't a ajoute à son staff EventFlow',
                                 $scanUrl,
                             )
                         )
@@ -273,12 +273,12 @@ final class OrganizerStaffService
                         ->to($organizerEmail)
                         ->subject($wasReactivated
                             ? 'Membre remis en service dans ton staff EventFlow'
-                            : 'Nouveau membre ajoute a ton staff EventFlow')
+                            : 'Nouveau membre ajouté à ton staff EventFlow')
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".
                                 "Tu as %s %s (%s) dans ton staff EventFlow.\n\n".
-                                "Tu peux suivre ton equipe ici :\n%s\n",
+                                "Tu peux suivre ton équipe ici :\n%s\n",
                                 $organizerName,
                                 $wasReactivated ? 'remis en service' : 'ajoute',
                                 $staffName,

@@ -55,7 +55,7 @@ type AuthMode =
   | 'register'
   | 'forgot-password'
   | 'reset-password'
-  | 'google-complete'
+  | 'google-complété'
 
 const initialLoginForm: LoginPayload = {
   email: '',
@@ -80,9 +80,9 @@ const initialForgotPasswordForm: ForgotPasswordPayload = {
 function getIntentLabel(intent: AuthIntent): string | null {
   switch (intent) {
     case 'organizer':
-      return 'Acces organisateur'
+      return 'Accès organisateur'
     case 'publish':
-      return 'Publication evenement'
+      return 'Publication évènement'
     default:
       return null
   }
@@ -91,15 +91,15 @@ function getIntentLabel(intent: AuthIntent): string | null {
 function getGoogleStatusMessage(googleStatus: string): string | null {
   switch (googleStatus) {
     case 'configuration_error':
-      return 'La connexion Google n est pas encore configuree sur cet environnement.'
+      return 'La connexion Google n’est pas encore configurée sur cet environnement.'
     case 'invalid_state':
-      return 'La verification de securite Google a echoue. Reessaie depuis EventFlow.'
+      return 'La vérification de sécurité Google a échoué. Réessaie depuis EventFlow.'
     case 'missing_code':
-      return 'Google n a pas renvoye de code de connexion exploitable.'
+      return 'Google n’a pas renvoyé de code de connexion exploitable.'
     case 'request_failed':
       return 'Impossible de finaliser la connexion Google pour le moment.'
     case 'missing_profile':
-      return 'Google n a pas fourni les informations minimales du compte.'
+      return 'Google n’a pas fourni les informations minimales du compte.'
     default:
       return null
   }
@@ -114,7 +114,7 @@ function resolveAuthMode(value: string | null): AuthMode {
     value === 'register' ||
     value === 'forgot-password' ||
     value === 'reset-password' ||
-    value === 'google-complete'
+    value === 'google-complété'
   ) {
     return value
   }
@@ -164,11 +164,11 @@ function extractApiError(error: unknown, fallbackMessage: string): string {
   }
 
   if (responseStatus === 403) {
-    return 'Acces refuse pour cette action.'
+    return 'Accès refusé pour cette action.'
   }
 
   if (responseStatus !== null && responseStatus >= 500) {
-    return 'Le serveur EventFlow a rencontre une erreur temporaire. Reessaie dans un instant.'
+    return 'Le serveur EventFlow a rencontré une erreur temporaire. Réessaie dans un instant.'
   }
 
   if (error instanceof Error && error.message.trim() !== '') {
@@ -187,7 +187,7 @@ function extractApiError(error: unknown, fallbackMessage: string): string {
 }
 
 const passwordRequirementsMessage =
-  'Utilise au moins 8 caracteres, une minuscule, une majuscule, un chiffre et un caractere special.'
+  'Utilise au moins 8 caracteres, une minuscule, une majuscule, un chiffre et un caractere spécial.'
 
 function isPasswordStrong(password: string): boolean {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(
@@ -274,7 +274,7 @@ export function AuthPage() {
     let isMounted = true
 
     async function completeGoogleLogin() {
-      setStatusMessage('Connexion Google reussie. Redirection en cours...')
+      setStatusMessage('Connexion Google réussie. Redirection en cours...')
       setErrorMessage(null)
 
       try {
@@ -287,7 +287,7 @@ export function AuthPage() {
         if (isMounted) {
           setStatusMessage(null)
           setErrorMessage(
-            'La connexion Google a reussi, mais la session EventFlow n a pas pu etre verifiee.',
+            'La connexion Google a réussi, mais la session EventFlow n’a pas pu être vérifiée.',
           )
         }
       }
@@ -301,7 +301,7 @@ export function AuthPage() {
   }, [googleStatus, intent, navigate])
 
   useEffect(() => {
-    if (mode !== 'google-complete') {
+    if (mode !== 'google-complété') {
       return
     }
 
@@ -323,7 +323,7 @@ export function AuthPage() {
           setErrorMessage(
             extractApiError(
               error,
-              'Impossible de recuperer la finalisation Google pour le moment.',
+              'Impossible de récupérer la finalisation Google pour le moment.',
             ),
           )
         }
@@ -341,7 +341,7 @@ export function AuthPage() {
     }
   }, [mode])
 
-  function switchMode(nextMode: Exclude<AuthMode, 'google-complete'>) {
+  function switchMode(nextMode: Exclude<AuthMode, 'google-complété'>) {
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('mode', nextMode)
     nextParams.delete('google')
@@ -362,7 +362,7 @@ export function AuthPage() {
     try {
       await loginUser(loginForm)
       await getCurrentUser()
-      setStatusMessage('Connexion reussie.')
+      setStatusMessage('Connexion réussie.')
       navigate(resolvePostAuthPath(intent), { replace: true })
     } catch (error) {
       setErrorMessage(
@@ -393,11 +393,11 @@ export function AuthPage() {
         rememberMe: false,
       })
       await getCurrentUser()
-      setStatusMessage('Compte cree avec succes.')
+      setStatusMessage('Compte créé avec succès.')
       navigate(resolvePostAuthPath(intent), { replace: true })
     } catch (error) {
       setErrorMessage(
-        extractApiError(error, 'Impossible de creer le compte pour le moment.'),
+        extractApiError(error, 'Impossible de créer le compte pour le moment.'),
       )
     } finally {
       setIsSubmitting(false)
@@ -417,7 +417,7 @@ export function AuthPage() {
       setErrorMessage(
         extractApiError(
           error,
-          'Impossible de preparer la reinitialisation du mot de passe pour le moment.',
+          'Impossible de préparer la réinitialisation du mot de passe pour le moment.',
         ),
       )
     } finally {
@@ -450,7 +450,7 @@ export function AuthPage() {
       setErrorMessage(
         extractApiError(
           error,
-          'Impossible de reinitialiser le mot de passe pour le moment.',
+          'Impossible de réinitialiser le mot de passe pour le moment.',
         ),
       )
     } finally {
@@ -466,7 +466,7 @@ export function AuthPage() {
 
     try {
       await finalizeGoogleAuth(googleConsent)
-      setStatusMessage('Compte Google finalise avec succes.')
+      setStatusMessage('Compte Google finalisé avec succès.')
       navigate(resolvePostAuthPath(intent), { replace: true })
     } catch (error) {
       setErrorMessage(
@@ -489,26 +489,26 @@ export function AuthPage() {
       <AuthHero>
         {intentLabel ? <AuthIntentBadge>{intentLabel}</AuthIntentBadge> : null}
         <AuthTitle>
-          {mode === 'google-complete'
+          {mode === 'google-complété'
             ? 'Finalise ton compte Google'
             : mode === 'forgot-password'
-              ? 'Mot de passe oublie'
+              ? 'Mot de passe oublié'
               : mode === 'reset-password'
-                ? 'Choisis un nouveau mot de passe'
+                ? 'Choisis un nouveau mot de passé'
             : mode === 'register'
-              ? 'Cree ton compte EventFlow'
-              : 'Connecte-toi a EventFlow'}
+              ? 'Crée ton compte EventFlow'
+              : 'Connecte-toi à EventFlow'}
         </AuthTitle>
         <AuthSubtitle>
           {intent === 'organizer'
-            ? 'Connecte-toi ou cree ton compte pour preparer ta demande d acces organisateur.'
+            ? 'Connecte-toi ou crée ton compte pour préparer ta demande d’accès organisateur.'
             : intent === 'publish'
-              ? 'Connecte-toi ou cree ton compte pour preparer la publication de ton evenement.'
+              ? 'Connecte-toi ou crée ton compte pour préparer la publication de ton évènement.'
               : 'Retrouve tes recherches, tes suivis organisateur et la suite du parcours EventFlow.'}
         </AuthSubtitle>
         <AuthDescription>
-          L inscription classique demande un consentement obligatoire aux
-          conditions et a la politique de confidentialite. La newsletter EventFlow
+          L’inscription classique demande un consentement obligatoire aux
+          conditions et à la politique de confidentialité. La newsletter EventFlow
           reste toujours optionnelle.
         </AuthDescription>
       </AuthHero>
@@ -559,7 +559,7 @@ export function AuthPage() {
 
               <AuthField>
                 <AuthFieldLabel htmlFor="auth-login-password">
-                  Mot de passe
+                  Mot de passeé
                 </AuthFieldLabel>
                 <AuthTextInput
                   id="auth-login-password"
@@ -591,7 +591,7 @@ export function AuthPage() {
                   Se souvenir de moi pendant 14 jours sur cet appareil.
                 </AuthCheckboxLabel>
                 <AuthHelperText>
-                  Sans cette option, la session reste liee au navigateur courant et se termine plus vite.
+                  Sans cette option, la session reste liée au navigateur courant et se terminé plus vite.
                 </AuthHelperText>
               </AuthField>
             </AuthFieldset>
@@ -612,7 +612,7 @@ export function AuthPage() {
               type="button"
               onClick={() => switchMode('forgot-password')}
             >
-              Mot de passe oublie ?
+              Mot de passe oublié ?
             </AuthSupportButton>
           </AuthPanel>
         ) : null}
@@ -623,7 +623,7 @@ export function AuthPage() {
               <AuthFieldRow>
                 <AuthField>
                   <AuthFieldLabel htmlFor="auth-register-first-name">
-                    Prenom
+                    Prénom
                   </AuthFieldLabel>
                   <AuthTextInput
                     id="auth-register-first-name"
@@ -676,7 +676,7 @@ export function AuthPage() {
 
               <AuthField>
                 <AuthFieldLabel htmlFor="auth-register-password">
-                  Mot de passe
+                  Mot de passeé
                 </AuthFieldLabel>
                 <AuthTextInput
                   id="auth-register-password"
@@ -707,7 +707,7 @@ export function AuthPage() {
                     }
                     required
                   />
-                  J accepte les conditions d utilisation EventFlow.
+                  J’accepte les conditions d’utilisation EventFlow.
                 </AuthCheckboxLabel>
               </AuthField>
 
@@ -725,7 +725,7 @@ export function AuthPage() {
                     }
                     required
                   />
-                  J accepte la politique de confidentialite EventFlow.
+                  J’accepte la politique de confidentialité EventFlow.
                 </AuthCheckboxLabel>
               </AuthField>
 
@@ -753,7 +753,7 @@ export function AuthPage() {
 
             <AuthActionsRow>
               <AuthPrimaryButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Creation...' : 'Creer mon compte'}
+                {isSubmitting ? 'Création...' : 'Créer mon compte'}
               </AuthPrimaryButton>
               <AuthGoogleButton
                 type="button"
@@ -781,7 +781,7 @@ export function AuthPage() {
                   required
                 />
                 <AuthHelperText>
-                  On te preparera un lien de reinitialisation si un compte existe
+                  On te préparera un lien de réinitialisation si un compte existe
                   pour cet email.
                 </AuthHelperText>
               </AuthField>
@@ -789,14 +789,14 @@ export function AuthPage() {
 
             <AuthActionsRow>
               <AuthPrimaryButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Preparation...' : 'Recevoir un lien'}
+                {isSubmitting ? 'Préparation...' : 'Recevoir un lien'}
               </AuthPrimaryButton>
               <AuthSecondaryButton
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => switchMode('login')}
               >
-                Retour a la connexion
+                Retour à la connexion
               </AuthSecondaryButton>
             </AuthActionsRow>
           </AuthPanel>
@@ -825,22 +825,22 @@ export function AuthPage() {
                 type="submit"
                 disabled={isSubmitting || resetToken === ''}
               >
-                {isSubmitting ? 'Reinitialisation...' : 'Mettre a jour le mot de passe'}
+                {isSubmitting ? 'Réinitialisation...' : 'Mettre à jour le mot de passe'}
               </AuthPrimaryButton>
               <AuthSecondaryButton
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => switchMode('login')}
               >
-                Retour a la connexion
+                Retour à la connexion
               </AuthSecondaryButton>
             </AuthActionsRow>
           </AuthPanel>
         ) : null}
 
-        {mode === 'google-complete' ? (
+        {mode === 'google-complété' ? (
           isPendingGoogleLoading ? (
-            <AuthStateBox>Preparation de ton compte Google...</AuthStateBox>
+            <AuthStateBox>Préparation de ton compte Google...</AuthStateBox>
           ) : pendingGoogleAccount ? (
             <AuthPanel as="form" onSubmit={handleGoogleFinalizeSubmit}>
               <PendingAccountCard>
@@ -850,8 +850,8 @@ export function AuthPage() {
                 <PendingAccountText>{pendingGoogleAccount.email}</PendingAccountText>
                 <PendingAccountText>
                   {pendingGoogleAccount.existingUser
-                    ? 'Un compte EventFlow existe deja pour cet email. Il sera relie a Google apres ton consentement.'
-                    : 'Ton compte EventFlow sera cree juste apres ce dernier accord.'}
+                    ? 'Un compte EventFlow existe déjà pour cet email. Il sera relié à Google après ton consentement.'
+                    : 'Ton compte EventFlow sera créé juste après ce dernier accord.'}
                 </PendingAccountText>
               </PendingAccountCard>
 
@@ -870,7 +870,7 @@ export function AuthPage() {
                       }
                       required
                     />
-                    J accepte les conditions d utilisation EventFlow.
+                    J’accepte les conditions d’utilisation EventFlow.
                   </AuthCheckboxLabel>
                 </AuthField>
 
@@ -888,7 +888,7 @@ export function AuthPage() {
                       }
                       required
                     />
-                    J accepte la politique de confidentialite EventFlow.
+                    J’accepte la politique de confidentialité EventFlow.
                   </AuthCheckboxLabel>
                 </AuthField>
 
@@ -920,7 +920,7 @@ export function AuthPage() {
                   disabled={isSubmitting}
                   onClick={() => switchMode('login')}
                 >
-                  Revenir a la connexion
+                  Revenir à la connexion
                 </AuthSecondaryButton>
               </AuthActionsRow>
             </AuthPanel>

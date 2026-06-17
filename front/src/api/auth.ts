@@ -215,7 +215,7 @@ export async function confirmEmailChange(
 
 export function buildGoogleAuthUrl(
   mode: 'login' | 'register',
-  intent?: string,
+  intent: string,
 ): string {
   const authUrl = new URL('/api/auth/google/redirect', getBackendPublicUrl())
   authUrl.searchParams.set('mode', mode)

@@ -126,7 +126,7 @@ export function OrganizerStaffPage() {
 
     if (normalizedEmail === '') {
       setStatusTone('danger')
-      setStatusMessage("Renseigne l'email du membre a ajouter.")
+      setStatusMessage("Renseigne l’email du membre à ajouter.")
       return
     }
 
@@ -159,7 +159,7 @@ export function OrganizerStaffPage() {
     } catch (error) {
       setStatusTone('danger')
       setStatusMessage(
-        readApiMessage(error, "Impossible d'ajouter ce membre au staff pour le moment."),
+        readApiMessage(error, "Impossible d’ajouter ce membre au staff pour le moment."),
       )
     } finally {
       setIsSubmitting(false)
@@ -198,9 +198,9 @@ export function OrganizerStaffPage() {
         <OrganizerStaffEyebrow>Staff organisateur</OrganizerStaffEyebrow>
         <OrganizerStaffTitle>Mon staff EventFlow</OrganizerStaffTitle>
         <OrganizerStaffText>
-          Ajoute jusqu a 10 personnes pour gerer les scans a l entree. Chaque ajout
-          envoie un email a la personne concernee et une confirmation a
-          l organisateur.
+          Ajoute jusqu’à 10 personnes pour gérer les scans à l’entrée. Chaque ajout
+          envoie un email à la personne concernée et une confirmation’a
+          l’organisateur.
         </OrganizerStaffText>
 
         <OrganizerStaffGrid>
@@ -210,13 +210,13 @@ export function OrganizerStaffPage() {
               {activeStaffCount} / {staffLimit} membres actifs
             </OrganizerStaffCounter>
             <OrganizerStaffInlineText>
-              L utilisateur doit deja avoir un compte EventFlow. Une fois ajoute,
-              il verra automatiquement l outil de scan dans son espace.
+              L’utilisateur doit déjà avoir un compte EventFlow. Une fois ajouté,
+              il verra automatiquement l’outil de scan dans son espace.
             </OrganizerStaffInlineText>
             <OrganizerStaffInlineText>
-              Si tu retires quelqu un, il passe hors service. Son historique reste
+              Si tu retires quelqu’un, il passe hors service. Son historique reste
               visible, il ne compte plus dans les 10 actifs, et tu peux ajouter
-              une autre personne a sa place.
+              une autre personne à sa place.
             </OrganizerStaffInlineText>
             <OrganizerStaffForm onSubmit={handleSubmit}>
               <OrganizerStaffInput
@@ -249,15 +249,15 @@ export function OrganizerStaffPage() {
           </OrganizerStaffPanel>
 
           <OrganizerStaffPanel>
-            <OrganizerStaffPanelTitle>Ce que l equipe obtient</OrganizerStaffPanelTitle>
+            <OrganizerStaffPanelTitle>Ce que l’équipe obtient</OrganizerStaffPanelTitle>
             <OrganizerStaffInlineText>
-              Chaque membre peut ouvrir la page staff de scan, choisir un evenement
+              Chaque membre peut ouvrir la page staff de scan, choisir un évènement
               accessible, puis valider les billets en ligne avec le futur scanner
               Tera branche en mode clavier.
             </OrganizerStaffInlineText>
             <OrganizerStaffInlineText>
-              Pour cette premiere version, tout passe par le web et par l API
-              centrale, ce qui garde les validations de billets coherentes en temps
+              Pour cette première version, tout passé par le web et par l’API
+              centrale, ce qui garde les validations de billets cohérentes en temps
               reel.
             </OrganizerStaffInlineText>
           </OrganizerStaffPanel>
@@ -288,7 +288,7 @@ export function OrganizerStaffPage() {
                 </OrganizerStaffMemberMeta>
                 <OrganizerStaffMemberMeta>
                   {member.isActive
-                    ? 'Pret pour le scan.'
+                    ? 'Prêt pour le scan.'
                     : `Passe hors service le ${formatDateLabel(member.statusChangedAt)}`}
                 </OrganizerStaffMemberMeta>
                 {member.isActive ? (
@@ -309,8 +309,8 @@ export function OrganizerStaffPage() {
           </OrganizerStaffList>
         ) : (
           <OrganizerStaffInlineText>
-            Aucun membre pour le moment. Ajoute ton premier renfort pour preparer
-            les controles d acces.
+            Aucun membre pour le moment. Ajoute ton premier renfort pour préparer
+            les controles d’accès.
           </OrganizerStaffInlineText>
         )}
       </OrganizerStaffPanel>

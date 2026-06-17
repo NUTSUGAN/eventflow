@@ -25,24 +25,24 @@ import {
 
 const statusLabels: Record<string, string> = {
   pending: 'En attente de validation',
-  approved: 'A payer',
-  active: 'Paiement confirme',
-  expired: 'Terminee',
+  approved: 'À payer',
+  active: 'Paiement confirmé',
+  expired: 'Terminée',
   rejected: 'Refusee',
   cancelled: 'Annulee',
 }
 
 const channelLabels: Record<string, string> = {
   LAUNCH_PACK: 'Pack Lancement',
-  SOCIAL_INFLUENCER: 'Reseaux / influenceurs',
+  SOCIAL_INFLUENCER: 'Réseaux / influenceurs',
   NEWSLETTER: 'Newsletter',
 }
 
 const deliveryLabels: Record<string, string> = {
   pending: 'En attente',
-  scheduled: 'Planifie',
+  scheduled: 'Planifié',
   active: 'En diffusion',
-  delivered: 'Livre',
+  delivered: 'Livré',
   cancelled: 'Annule',
 }
 
@@ -60,7 +60,7 @@ function formatDate(value: string | null): string {
 }
 
 function linkedBrief(value: string | null) {
-  const text = value ?? 'L equipe EventFlow ajoutera ici les informations de diffusion.'
+  const text = value ?? 'L’équipe EventFlow ajoutera ici les informations de diffusion.'
   const parts = text.split(/(https?:\/\/[^\s]+|www\.[^\s]+)/gi)
 
   return parts.map((part, index) => {
@@ -115,19 +115,19 @@ export function OrganizerPromotionDetailPage() {
     <PromotionPage>
       <PromotionActions>
         <PromotionButton type="button" onClick={() => navigate('/organizer/promotions')}>
-          Retour aux campagnes
+          Retour cux campagnes
         </PromotionButton>
       </PromotionActions>
 
       <PromotionPageHeader>
         <div>
           <PromotionPageTitle>Suivi de ma campagne</PromotionPageTitle>
-          <PromotionPageText>Consulte les informations de diffusion ajoutees par l equipe EventFlow.</PromotionPageText>
+          <PromotionPageText>Consulte les informations de diffusion’ajoutées par l’équipe EventFlow.</PromotionPageText>
         </div>
       </PromotionPageHeader>
 
       {searchParams.get('payment') === 'success' ? (
-        <PromotionMessage>Paiement confirme. Ta campagne est maintenant prise en charge par EventFlow.</PromotionMessage>
+        <PromotionMessage>Paiement confirmé. Ta campagne est maintenant prise en charge par EventFlow.</PromotionMessage>
       ) : null}
       {error ? <PromotionMessage $error>{error}</PromotionMessage> : null}
       {!campaign && !error ? <PromotionMessage>Chargement du suivi...</PromotionMessage> : null}
@@ -161,7 +161,7 @@ export function OrganizerPromotionDetailPage() {
                 <PromotionMeta>Planification : {formatDate(channel.scheduledAt)}</PromotionMeta>
                 <PromotionMeta>Livraison : {formatDate(channel.deliveredAt)}</PromotionMeta>
                 {channel.channelCode === 'LAUNCH_PACK' ? (
-                  <PromotionMeta>{channel.isFeatured ? 'Mise en avant publique activee.' : 'Mise en avant publique pas encore activee.'}</PromotionMeta>
+                  <PromotionMeta>{channel.isFeatured ? 'Mise en avant publique activée.' : 'Mise en avant publique pas encore activée.'}</PromotionMeta>
                 ) : null}
               </PromotionChannel>
             ))}

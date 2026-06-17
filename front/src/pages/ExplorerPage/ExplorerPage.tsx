@@ -56,13 +56,13 @@ const emptyPublicEventsResponse: PublicEventsResponse = {
 
 function formatResultsCount(visibleCount: number, totalCount: number): string {
   if (totalCount <= 0) {
-    return 'Aucun evenement trouve'
+    return 'Aucun évènement trouve'
   }
 
   const visibleLabel =
-    visibleCount > 1 ? `${visibleCount} evenements affiches` : `${visibleCount} evenement affiche`
+    visibleCount > 1 ? `${visibleCount} événements affichés` : `${visibleCount} événement affiché`
   const totalLabel =
-    totalCount > 1 ? `${totalCount} evenements au total` : `${totalCount} evenement au total`
+    totalCount > 1 ? `${totalCount} événements au total` : `${totalCount} événement au total`
 
   return `${visibleLabel} sur ${totalLabel}`
 }
@@ -204,7 +204,7 @@ export function ExplorerPage() {
           setEvents([])
           setPagination(emptyPublicEventsResponse)
           setErrorMessage(
-            "Impossible de charger les evenements de l'explorer pour le moment.",
+            "Impossible de charger les évènements de l'explorer pour le moment.",
           )
         }
       } finally {
@@ -285,9 +285,9 @@ export function ExplorerPage() {
     <ExplorerSection>
       <ExplorerHeader>
         <ExplorerEyebrow>Explorer</ExplorerEyebrow>
-        <ExplorerTitle>Decouvre les evenements publies</ExplorerTitle>
+        <ExplorerTitle>Decouvre les évènements publiés</ExplorerTitle>
         <ExplorerLead>
-          Filtre par type, ville et date pour retrouver rapidement l&apos;evenement
+          Filtre par type, ville et date pour retrouver rapidement l&apos;évènement
           qui t&apos;interesse.
         </ExplorerLead>
         {searchQuery ? <SearchBadge>Recherche active : {searchQuery}</SearchBadge> : null}
@@ -295,7 +295,7 @@ export function ExplorerPage() {
 
       <FilterToolbar>
         <FilterGroup>
-          <FilterLabel>Type d&apos;evenement</FilterLabel>
+          <FilterLabel>Type d&apos;évènement</FilterLabel>
           <FilterSelect
             id="explorer-type"
             value={typeFilter}
@@ -342,7 +342,7 @@ export function ExplorerPage() {
       <FilterMetaRow>
         <FilterSummary>
           {isLoading
-            ? 'Chargement des resultats...'
+            ? 'Chargement des résultats...'
             : formatResultsCount(events.length, pagination.total)}
         </FilterSummary>
 
@@ -366,7 +366,7 @@ export function ExplorerPage() {
       </FilterMetaRow>
 
       {isLoading ? (
-        <ExplorerStateText>Chargement des evenements de l&apos;explorer...</ExplorerStateText>
+        <ExplorerStateText>Chargement des évènements de l&apos;explorer...</ExplorerStateText>
       ) : errorMessage ? (
         <ExplorerErrorText>{errorMessage}</ExplorerErrorText>
       ) : events.length > 0 ? (
@@ -378,8 +378,8 @@ export function ExplorerPage() {
       ) : (
         <ExplorerStateText>
           {followingFilter
-            ? "Aucun evenement a venir ne correspond aux organisateurs que tu suis pour le moment."
-            : 'Aucun evenement publie ne correspond a ces filtres pour le moment.'}
+            ? "Aucun évènement à venir ne correspond aux organisateurs que tu suis pour le moment."
+            : 'Aucun évènement publié ne correspond à ces filtres pour le moment.'}
         </ExplorerStateText>
       )}
 
@@ -406,7 +406,7 @@ export function ExplorerPage() {
                   type="button"
                   $active={token === currentPage}
                   onClick={() => updatePage(token)}
-                  aria-label={`Aller a la page ${token}`}
+                  aria-label={`Aller à la page ${token}`}
                 >
                   {token}
                 </PaginationButton>
@@ -435,7 +435,7 @@ export function ExplorerPage() {
               fill="currentColor"
             />
           </ExplorerArchiveIcon>
-          Voir la corbeille publique des evenements passes
+          Voir la corbeille publique des évènements passés
         </ExplorerArchiveButton>
       </ExplorerArchiveDock>
 

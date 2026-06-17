@@ -45,7 +45,7 @@ final class OrderPreparationController extends AbstractController
             $data = $request->toArray();
         } catch (\Throwable) {
             return $this->json([
-                'message' => 'Le corps de la requete doit etre un JSON valide.',
+                'message' => 'Le corps de la requête doit être un JSON valide.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -62,7 +62,7 @@ final class OrderPreparationController extends AbstractController
         foreach ($items as $item) {
             if (!is_array($item)) {
                 return $this->json([
-                    'message' => 'Chaque ligne de commande doit etre un objet valide.',
+                    'message' => 'Chaque ligne de commande doit être un objet valide.',
                 ], Response::HTTP_BAD_REQUEST);
             }
 
@@ -71,13 +71,13 @@ final class OrderPreparationController extends AbstractController
 
             if (!is_numeric($ticketTypeId) || (int) $ticketTypeId <= 0) {
                 return $this->json([
-                    'message' => 'ticketTypeId doit etre un entier positif.',
+                    'message' => 'ticketTypeId doit être un entier positif.',
                 ], Response::HTTP_BAD_REQUEST);
             }
 
             if (!is_numeric($quantity) || (int) $quantity <= 0) {
                 return $this->json([
-                    'message' => 'quantity doit etre un entier positif.',
+                    'message' => 'quantity doit être un entier positif.',
                 ], Response::HTTP_BAD_REQUEST);
             }
 
@@ -102,7 +102,7 @@ final class OrderPreparationController extends AbstractController
 
             if (null === $ticketEvent || 'published' !== strtolower((string) $ticketEvent->getStatus())) {
                 return $this->json([
-                    'message' => 'Ce billet nest pas disponible a la reservation.',
+                    'message' => 'Ce billet n’est pas disponible à la réservation.',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
@@ -120,7 +120,7 @@ final class OrderPreparationController extends AbstractController
 
             if ($ticketType->getSalesEndAt() < $now) {
                 return $this->json([
-                    'message' => sprintf('La vente du billet "%s" est terminee.', $ticketType->getName()),
+                    'message' => sprintf('La vente du billet "%s" est terminée.', $ticketType->getName()),
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
@@ -134,9 +134,9 @@ final class OrderPreparationController extends AbstractController
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            if (null !== $event && $event->getId() !== $ticketEvent->getId()) {
+            if (null !== $event && $event?->getId() !== $ticketEvent->getId()) {
                 return $this->json([
-                    'message' => 'Une commande ne peut preparer que des billets du meme evenement.',
+                    'message' => 'Une commande ne peut preparer que des billets du meme l’évènement.',
                 ], Response::HTTP_BAD_REQUEST);
             }
 
@@ -199,7 +199,7 @@ final class OrderPreparationController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Commande preparee avec succes.',
+            'message' => 'Commande preparee avec succès.',
             'order' => $this->serializeOrder($order, $stripePaymentService),
         ], Response::HTTP_CREATED);
     }
@@ -278,7 +278,7 @@ final class OrderPreparationController extends AbstractController
 
         if (Order::STATUS_PAID === $order->getStatus()) {
             return $this->json([
-                'message' => 'Cette commande est deja payee.',
+                'message' => 'Cette commande est déjà payée.',
                 'order' => $this->serializeOrder($order, $stripePaymentService),
             ], Response::HTTP_CONFLICT);
         }
@@ -301,7 +301,7 @@ final class OrderPreparationController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Session Stripe creee avec succes.',
+            'message' => 'Session Stripe creee avec succès.',
             'checkoutUrl' => $session->url,
             'sessionId' => $session->id,
         ]);
@@ -331,14 +331,14 @@ final class OrderPreparationController extends AbstractController
         $message = trim($exception->getMessage());
 
         if (str_contains(strtolower($message), 'set an account or business name')) {
-            return "Le compte Stripe de test n'est pas encore completement configure. Ajoute d'abord le nom du compte ou de l'entreprise dans le dashboard Stripe, puis reessaie.";
+            return "Le compte Stripe de test n’est pas encore complètement configuré. Ajoute d'abord le nom du compte ou de l'entreprise dans le dashboard Stripe, puis réessaie.";
         }
 
         if ('' !== $message) {
-            return sprintf('Stripe a refuse la creation de la session : %s', $message);
+            return sprintf('Stripe a refusé la création de la session : %s', $message);
         }
 
-        return 'Impossible de creer la session Stripe pour le moment.';
+        return 'Impossible de créer la session Stripe pour le moment.';
     }
 
     /**
