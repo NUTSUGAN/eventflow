@@ -11,16 +11,16 @@ import type {
   PublicEventsResponse,
 } from '../types/event'
 
-type PublicEventFilters = {
-  search?: string
-  type?: string
-  city?: string
-  date?: string
-  following?: boolean
-  scope?: 'upcoming' | 'archive'
-  limit?: number
-  page?: number
-}
+type PublicEventFilters = Partial<{
+  search: string
+  type: string
+  city: string
+  date: string
+  following: boolean
+  scope: 'upcoming' | 'archive'
+  limit: number
+  page: number
+}>
 
 export async function getPublicEvents(
   filters: PublicEventFilters = {},

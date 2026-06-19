@@ -347,7 +347,7 @@ export function OrderCheckoutPage() {
             </OrderPreparationHint>
           ) : order.canStartCheckout ? (
             <OrderPreparationHint>
-              Le paiement est g?re sur la page Stripe hebergee, puis on revient ici pour la confirmation.
+              Le paiement est géré sur la page Stripe hebergee, puis on revient ici pour la confirmation.
             </OrderPreparationHint>
           ) : (
             <OrderPreparationState>

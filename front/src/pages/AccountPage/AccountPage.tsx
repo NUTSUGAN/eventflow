@@ -374,7 +374,7 @@ export function AccountPage() {
               <AccountEyebrow>Mon profil</AccountEyebrow>
               <AccountTitle>{`${user.firstName} ${user.lastName}`}</AccountTitle>
               <AccountSubtitle>
-                G?re ton identité, ton’avatar et tes preferences depuis un espace plus
+                Gère ton identité, ton avatar et tes préférences depuis un espace plus
                 clair et plus personnel.
               </AccountSubtitle>
               <AccountBadgeRow>
@@ -493,7 +493,7 @@ export function AccountPage() {
               </AccountUploadMeta>
 
               <AccountField>
-                <AccountFieldLabel>Nouvel’email</AccountFieldLabel>
+                <AccountFieldLabel>Nouvel email</AccountFieldLabel>
                 <AccountInput
                   type="email"
                   value={emailChangeValue}
@@ -529,7 +529,7 @@ export function AccountPage() {
                 <AccountUploadMeta>
                   <AccountUploadTitle>Photo de profil</AccountUploadTitle>
                   <AccountHelperText>
-                    Importe une image locale JPG, PNG ou WebP. Elle remplacera ton’avatar
+                    Importe une image locale JPG, PNG ou WebP. Elle remplacera ton avatar
                     actuel sur ton profil et dans la navigation.
                   </AccountHelperText>
                   {selectedProfilePhotoName ? (
@@ -572,7 +572,7 @@ export function AccountPage() {
                   }))
                 }
               />
-              Recevoir la newsletter EventFlow, les promotions et les nouveautes.
+              Recevoir la newsletter EventFlow, les promotions et les nouveautés.
             </AccountCheckboxRow>
 
             <AccountPrimaryButton type="submit" disabled={isSaving || isPreparingPhoto}>
@@ -587,10 +587,10 @@ export function AccountPage() {
           <AccountInfoCard>
             <AccountLabel>Compte EventFlow</AccountLabel>
             <AccountMutedValue>
-              Ton role actuel est {roleLabel.toLowerCase()} et ton compte est
+              Ton rôle actuel est {roleLabel.toLowerCase()} et ton compte est
               {` ${accountStatusLabel.toLowerCase()}. `}
               Les informations de vérification et les futurs changements sensibles du
-              compte resteront centralises ici.
+              compte resteront centralisées ici.
             </AccountMutedValue>
           </AccountInfoCard>
         </AccountFormCard>

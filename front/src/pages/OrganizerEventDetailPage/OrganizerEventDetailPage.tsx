@@ -1547,7 +1547,7 @@ export function OrganizerEventDetailPage() {
             <OrganizerEventDetailSplitEyebrow>Billets</OrganizerEventDetailSplitEyebrow>
             <OrganizerEventDetailSplitTitle>Billets de cet évènement</OrganizerEventDetailSplitTitle>
             <OrganizerEventDetailSplitText>
-              G?re ici la billetterie liée à cet évènement, avec son stock, ses dates de vente et sa visibilite.
+              Gère ici la billetterie liée à cet évènement, avec son stock, ses dates de vente et sa visibilite.
             </OrganizerEventDetailSplitText>
           </OrganizerEventDetailSplitHeader>
 

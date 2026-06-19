@@ -34,17 +34,17 @@ export function EventsListPage() {
 
       try {
         const data = await getPublicEvents({
-          limit: 18,
+          limit: 12,
           search: searchQuery || undefined,
         })
 
         if (isMounted) {
-          setEvents(data.items)
+          setEvents(data.items.slice(0, 3))
         }
       } catch {
         if (isMounted) {
           setErrorMessage(
-            "Impossible de charger les évènements pour le moment.",
+            "Impossible de charger les evenements pour le moment.",
           )
         }
       } finally {
@@ -65,18 +65,18 @@ export function EventsListPage() {
     <PageSection>
       <PageHeader>
         <PageTitle>
-          {searchQuery ? 'Résultats de recherche' : 'Évènements à venir'}
+          {searchQuery ? 'Resultats de recherche' : 'Evenements a venir'}
         </PageTitle>
         {searchQuery ? (
           <PageIntro>
-            évènements trouves pour <strong>{searchQuery}</strong>.
+            Evenements trouves pour <strong>{searchQuery}</strong>.
           </PageIntro>
         ) : null}
       </PageHeader>
 
       {isLoading ? (
         <LoadingStateText>
-          Chargement des évènements depuis la base de données...
+          Chargement des evenements depuis la base de donnees...
         </LoadingStateText>
       ) : errorMessage ? (
         <ErrorStateText>{errorMessage}</ErrorStateText>
@@ -89,14 +89,16 @@ export function EventsListPage() {
           </CardsGrid>
 
           <ActionRow>
-            <MoreEventsButton type="button" onClick={() => navigate('/explorer')}>PLUS D&apos;ÉVÈNEMENTS</MoreEventsButton>
+            <MoreEventsButton type="button" onClick={() => navigate('/explorer')}>
+              PLUS D&apos;EVENEMENTS
+            </MoreEventsButton>
           </ActionRow>
         </>
       ) : (
         <EmptyStateText>
           {searchQuery
-            ? "Aucun évènement ne correspond à cette recherche pour le moment."
-            : "Aucun évènement publié n’est disponible pour le moment."}
+            ? "Aucun evenement ne correspond a cette recherche pour le moment."
+            : "Aucun evenement publie n'est disponible pour le moment."}
         </EmptyStateText>
       )}
 
