@@ -275,6 +275,12 @@ export function OrganizerDashboardPage() {
           >
             Mes campagnes Booster
           </OrganizerDashboardSecondaryButton>
+          <OrganizerDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/organizer/withdrawals')}
+          >
+            Retraits
+          </OrganizerDashboardSecondaryButton>
           {user?.canAccessStaffTools ? (
             <OrganizerDashboardSecondaryButton
               type="button"

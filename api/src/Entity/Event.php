@@ -59,6 +59,9 @@ class Event
     #[ORM\Column(name: 'created_at')]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\Column(name: 'withdrawal_fee_percent', type: Types::DECIMAL, precision: 5, scale: 2, options: ['default' => '0.00'])]
+    private string $withdrawalFeePercent = '0.00';
+
     /**
      * @var Collection<int, TicketType>
      */
@@ -234,6 +237,18 @@ class Event
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getWithdrawalFeePercent(): string
+    {
+        return $this->withdrawalFeePercent;
+    }
+
+    public function setWithdrawalFeePercent(string $withdrawalFeePercent): static
+    {
+        $this->withdrawalFeePercent = number_format(max(0, (float) $withdrawalFeePercent), 2, '.', '');
 
         return $this;
     }

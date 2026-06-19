@@ -362,12 +362,12 @@ export function AdminDashboardPage() {
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>
-          <AdminDashboardSecondaryButton
+          <AdminDashboardPrimaryButton
             type="button"
             onClick={() => navigate('/admin/organizer-applications')}
           >
             Demandes organisateur
-          </AdminDashboardSecondaryButton>
+          </AdminDashboardPrimaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/users')}
@@ -386,17 +386,23 @@ export function AdminDashboardPage() {
           >
             Billets & scans
           </AdminDashboardSecondaryButton>
-          <AdminDashboardPrimaryButton
-            type="button"
-            onClick={() => navigate('/organizer/events/new')}
-          >
-            Créer un évènement
-          </AdminDashboardPrimaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/promotions')}
           >
             Campagnes Booster
+          </AdminDashboardSecondaryButton>
+          <AdminDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/admin/withdrawals')}
+          >
+            Retraits
+          </AdminDashboardSecondaryButton>
+          <AdminDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/organizer/events/new')}
+          >
+            Créer un évènement
           </AdminDashboardSecondaryButton>
         </AdminDashboardActions>
       </AdminDashboardHeader>

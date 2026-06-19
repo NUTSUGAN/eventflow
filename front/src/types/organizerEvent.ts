@@ -54,6 +54,7 @@ export type OrganizerEventSummary = {
   eventVideo: string | null
   status: string
   createdAt: string | null
+  withdrawalFeePercent: string | null
   ticketTypesCount: number
   category: {
     id: number | null

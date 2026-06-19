@@ -13,6 +13,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\CheckinRepository;
 use App\Repository\AbonnementOrganisateurRepository;
 use App\Repository\EventRepository;
+use App\Repository\WithdrawalSettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -207,7 +208,8 @@ final class OrganizerEventController extends AbstractController
     public function create(
         Request $request,
         CategoryRepository $categoryRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        WithdrawalSettingRepository $withdrawalSettingRepository,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -355,6 +357,9 @@ final class OrganizerEventController extends AbstractController
         $event->setCoverPhoto($coverPath);
         $event->setStatus($status);
         $event->setCreatedAt(new \DateTimeImmutable());
+        $event->setWithdrawalFeePercent(
+            $withdrawalSettingRepository->getCurrent($entityManager)->getDefaultFeePercent()
+        );
 
         $entityManager->persist($location);
         $entityManager->persist($event);
@@ -924,6 +929,7 @@ final class OrganizerEventController extends AbstractController
             'eventVideo' => $event->getEventVideo(),
             'status' => $event->getStatus(),
             'createdAt' => $this->formatDateTimeForFrontend($event->getCreatedAt()),
+            'withdrawalFeePercent' => $event->getWithdrawalFeePercent(),
             'ticketTypesCount' => $event->getTicketTypes()->count(),
             'category' => [
                 'id' => $event->getCategory()?->getId(),
