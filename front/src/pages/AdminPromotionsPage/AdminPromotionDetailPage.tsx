@@ -204,7 +204,7 @@ export function AdminPromotionDetailPage() {
                       <option value="scheduled">Planifié</option>
                       <option value="active">En diffusion</option>
                       <option value="delivered">Livré</option>
-                      <option value="cancelled">Annule</option>
+                      <option value="cancelled">Annulé</option>
                     </AdminPromotionSelect>
                   </AdminPromotionField>
                   {channel.channelCode === 'LAUNCH_PACK' ? (

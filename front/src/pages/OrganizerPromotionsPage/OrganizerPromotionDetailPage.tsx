@@ -28,8 +28,8 @@ const statusLabels: Record<string, string> = {
   approved: 'À payer',
   active: 'Paiement confirmé',
   expired: 'Terminée',
-  rejected: 'Refusee',
-  cancelled: 'Annulee',
+  rejected: 'Refusée',
+  cancelled: 'Annulée',
 }
 
 const channelLabels: Record<string, string> = {
@@ -43,7 +43,7 @@ const deliveryLabels: Record<string, string> = {
   scheduled: 'Planifié',
   active: 'En diffusion',
   delivered: 'Livré',
-  cancelled: 'Annule',
+  cancelled: 'Annulé',
 }
 
 function apiMessage(error: unknown): string {
@@ -55,7 +55,7 @@ function apiMessage(error: unknown): string {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return 'A definir'
+  if (!value) return 'À définir'
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 

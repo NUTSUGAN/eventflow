@@ -305,4 +305,15 @@ export const OrganizerDashboardMessage = styled.div<{ $tone: 'neutral' | 'succes
         : $tone === 'danger'
           ? '#ffd5ca'
           : 'rgba(255, 239, 229, 0.84)'};
+
+  button {
+    margin-left: 8px;
+    border: 0;
+    border-radius: 999px;
+    padding: 7px 12px;
+    background: rgba(235, 148, 81, 0.18);
+    color: #fff4ea;
+    font-weight: 900;
+    cursor: pointer;
+  }
 `

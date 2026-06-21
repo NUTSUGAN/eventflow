@@ -13,6 +13,7 @@ import { AdminPromotionsPage } from './pages/AdminPromotionsPage/AdminPromotions
 import { AdminPromotionDetailPage } from './pages/AdminPromotionsPage/AdminPromotionDetailPage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
+import { AdminWithdrawalDetailPage } from './pages/AdminWithdrawalsPage/AdminWithdrawalDetailPage'
 import { AdminWithdrawalsPage } from './pages/AdminWithdrawalsPage/AdminWithdrawalsPage'
 import { AuthPage } from './pages/AuthPage/AuthPage'
 import { EventDetailPage } from './pages/EventDetailPage/EventDetailPage'
@@ -26,6 +27,7 @@ import { OrderCheckoutPage } from './pages/OrderCheckoutPage/OrderCheckoutPage'
 import { MyTicketsPage } from './pages/MyTicketsPage/MyTicketsPage'
 import { MyOrdersPage } from './pages/MyOrdersPage/MyOrdersPage'
 import { OrganizerAccessPage } from './pages/OrganizerAccessPage/OrganizerAccessPage'
+import { OrganizerBankPage } from './pages/OrganizerBankPage/OrganizerBankPage'
 import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage/OrganizerDashboardPage'
 import { OrganizerEventCreatePage } from './pages/OrganizerEventCreatePage/OrganizerEventCreatePage'
 import { OrganizerEventDetailPage } from './pages/OrganizerEventDetailPage/OrganizerEventDetailPage'
@@ -66,6 +68,7 @@ function App() {
           <Route path="/admin/tickets" element={<AdminTicketsPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/withdrawals" element={<AdminWithdrawalsPage />} />
+          <Route path="/admin/withdrawals/:withdrawalId" element={<AdminWithdrawalDetailPage />} />
           <Route
             path="/admin/organizer-applications"
             element={<AdminOrganizerApplicationsPage />}
@@ -92,6 +95,7 @@ function App() {
             path="/organizer/dashboard"
             element={<OrganizerDashboardPage />}
           />
+          <Route path="/organizer/bank" element={<OrganizerBankPage />} />
           <Route path="/organizer/staff" element={<OrganizerStaffPage />} />
           <Route path="/organizer/promotions" element={<OrganizerPromotionsPage />} />
           <Route path="/organizer/promotions/:promotionId" element={<OrganizerPromotionDetailPage />} />

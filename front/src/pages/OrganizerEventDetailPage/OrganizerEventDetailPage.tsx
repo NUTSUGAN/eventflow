@@ -1035,7 +1035,7 @@ export function OrganizerEventDetailPage() {
                 </OrganizerEventDetailScanStatValue>
               </OrganizerEventDetailScanStat>
               <OrganizerEventDetailScanStat>
-                <OrganizerEventDetailScanStatLabel>Scans valides</OrganizerEventDetailScanStatLabel>
+                <OrganizerEventDetailScanStatLabel>Scans validés</OrganizerEventDetailScanStatLabel>
                 <OrganizerEventDetailScanStatValue>
                   {eventScans.valid}
                 </OrganizerEventDetailScanStatValue>

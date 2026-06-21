@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\WithdrawalRequest;
 use App\Repository\EventRepository;
+use App\Repository\OrganizerPayoutAccountRepository;
 use App\Repository\WithdrawalRequestRepository;
 use App\Service\WithdrawalService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +22,7 @@ final class OrganizerWithdrawalController extends AbstractController
     public function index(
         EventRepository $eventRepository,
         WithdrawalRequestRepository $withdrawalRepository,
+        OrganizerPayoutAccountRepository $payoutAccountRepository,
         WithdrawalService $withdrawalService,
     ): JsonResponse {
         $user = $this->getUser();
@@ -35,6 +37,7 @@ final class OrganizerWithdrawalController extends AbstractController
 
         $events = $eventRepository->findBy(['organizer' => $user], ['createdAt' => 'DESC']);
         $existingWithdrawals = $withdrawalRepository->findForOrganizer($user);
+        $hasActivePayoutAccount = null !== $payoutAccountRepository->findActiveForOrganizer($user);
         $withdrawalsByEventId = [];
 
         foreach ($existingWithdrawals as $withdrawal) {
@@ -72,11 +75,14 @@ final class OrganizerWithdrawalController extends AbstractController
                 'withdrawal' => $withdrawal instanceof WithdrawalRequest
                     ? $withdrawalService->serialize($withdrawal)
                     : null,
-                'canRequest' => !$hasBlockingWithdrawal && (float) $amounts['grossAmount'] > 0,
+                'canRequest' => $hasActivePayoutAccount && !$hasBlockingWithdrawal && (float) $amounts['grossAmount'] > 0,
             ];
         }
 
-        return $this->json(['items' => $items]);
+        return $this->json([
+            'hasActivePayoutAccount' => $hasActivePayoutAccount,
+            'items' => $items,
+        ]);
     }
 
     #[Route('/{id<\d+>}', name: 'api_organizer_withdrawal_show', methods: ['GET'])]

@@ -19,6 +19,25 @@ export type WithdrawalOrganizerSummary = {
   email: string | null
 }
 
+export type WithdrawalPayoutType = 'bank' | 'mobile_money'
+
+export type WithdrawalPayoutSnapshot = {
+  type: WithdrawalPayoutType
+  label: string | null
+  bank: {
+    holderName: string | null
+    iban: string | null
+    bic: string | null
+    bankName: string | null
+  }
+  mobileMoney: {
+    name: string | null
+    phone: string | null
+    provider: string | null
+    country: string | null
+  }
+}
+
 export type WithdrawalAmounts = {
   grossAmount: string
   feePercent: string
@@ -39,6 +58,7 @@ export type WithdrawalSummary = {
   currency: string
   adminNote: string | null
   paymentReference: string | null
+  payout: WithdrawalPayoutSnapshot | null
   requestedAt: string | null
   reviewedAt: string | null
   paidAt: string | null
@@ -55,6 +75,7 @@ export type OrganizerWithdrawalCandidate = {
 }
 
 export type OrganizerWithdrawalsResponse = {
+  hasActivePayoutAccount: boolean
   items: OrganizerWithdrawalCandidate[]
 }
 
@@ -75,6 +96,10 @@ export type AdminWithdrawalSettings = {
 export type AdminWithdrawalsResponse = {
   settings: AdminWithdrawalSettings
   items: WithdrawalSummary[]
+}
+
+export type AdminWithdrawalResponse = {
+  withdrawal: WithdrawalSummary
 }
 
 export type AdminWithdrawalUpdatePayload = {

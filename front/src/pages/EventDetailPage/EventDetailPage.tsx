@@ -224,7 +224,7 @@ const eventStatusOptions = [
   { value: 'draft', label: 'Brouillon' },
   { value: 'pending', label: 'En attente' },
   { value: 'published', label: 'Public' },
-  { value: 'cancelled', label: 'Annule' },
+  { value: 'cancelled', label: 'Annulé' },
   { value: 'complétéd', label: 'Termine' },
 ]
 

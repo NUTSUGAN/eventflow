@@ -44,7 +44,7 @@ export function EventsListPage() {
       } catch {
         if (isMounted) {
           setErrorMessage(
-            "Impossible de charger les evenements pour le moment.",
+            "Impossible de charger les événements pour le moment.",
           )
         }
       } finally {
@@ -65,18 +65,18 @@ export function EventsListPage() {
     <PageSection>
       <PageHeader>
         <PageTitle>
-          {searchQuery ? 'Resultats de recherche' : 'Evenements a venir'}
+          {searchQuery ? 'Résultats de recherche' : 'Événements à venir'}
         </PageTitle>
         {searchQuery ? (
           <PageIntro>
-            Evenements trouves pour <strong>{searchQuery}</strong>.
+            Événements trouvés pour <strong>{searchQuery}</strong>.
           </PageIntro>
         ) : null}
       </PageHeader>
 
       {isLoading ? (
         <LoadingStateText>
-          Chargement des evenements depuis la base de donnees...
+          Chargement des événements depuis la base de données...
         </LoadingStateText>
       ) : errorMessage ? (
         <ErrorStateText>{errorMessage}</ErrorStateText>
@@ -90,15 +90,15 @@ export function EventsListPage() {
 
           <ActionRow>
             <MoreEventsButton type="button" onClick={() => navigate('/explorer')}>
-              PLUS D&apos;EVENEMENTS
+              PLUS D&apos;ÉVÉNEMENTS
             </MoreEventsButton>
           </ActionRow>
         </>
       ) : (
         <EmptyStateText>
           {searchQuery
-            ? "Aucun evenement ne correspond a cette recherche pour le moment."
-            : "Aucun evenement publie n'est disponible pour le moment."}
+            ? "Aucun événement ne correspond à cette recherche pour le moment."
+            : "Aucun événement publié n'est disponible pour le moment."}
         </EmptyStateText>
       )}
 

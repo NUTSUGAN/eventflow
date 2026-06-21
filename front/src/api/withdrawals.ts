@@ -1,5 +1,6 @@
 import { apiClient } from './client'
 import type {
+  AdminWithdrawalResponse,
   AdminWithdrawalSettingsResponse,
   AdminWithdrawalsResponse,
   AdminWithdrawalUpdatePayload,
@@ -47,6 +48,17 @@ export async function getAdminWithdrawals(
   const response = await apiClient.get<AdminWithdrawalsResponse>(
     '/api/admin/withdrawals',
     { params: { status, _: Date.now() } },
+  )
+
+  return response.data
+}
+
+export async function getAdminWithdrawal(
+  withdrawalId: number,
+): Promise<AdminWithdrawalResponse> {
+  const response = await apiClient.get<AdminWithdrawalResponse>(
+    `/api/admin/withdrawals/${withdrawalId}`,
+    { params: { _: Date.now() } },
   )
 
   return response.data

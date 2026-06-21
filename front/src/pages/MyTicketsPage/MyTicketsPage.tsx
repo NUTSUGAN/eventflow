@@ -99,11 +99,11 @@ function formatOrderStatusLabel(status: string): string {
     case 'pending_payment':
       return 'En attente de paiement'
     case 'expired':
-      return 'Paiement a relancer'
+      return 'Paiement à relancer'
     case 'cancelled':
-      return 'Annulee'
+      return 'Annulée'
     case 'paid':
-      return 'Payee'
+      return 'Payée'
     default:
       return status
   }
@@ -269,7 +269,7 @@ export function MyTicketsPage() {
           $active={activeTab === 'upcoming'}
           onClick={() => setActiveTab('upcoming')}
         >
-          A venir
+          À venir
         </MyTicketsTabButton>
         <MyTicketsTabButton
           type="button"
@@ -345,7 +345,7 @@ export function MyTicketsPage() {
               <MyTicketsInfoTitle>Préparations de commande</MyTicketsInfoTitle>
               <MyTicketsInfoText>
                 Retirer une préparation ici la masque seulement dans ce navigateur.
-                La commande reste disponible cote plateforme si elle doit être auditee.
+                La commande reste disponible côté plateforme si elle doit être auditee.
               </MyTicketsInfoText>
             </MyTicketsInfoCard>
           </>
@@ -397,7 +397,7 @@ export function MyTicketsPage() {
                     </MyTicketsSummaryValue>
                   </MyTicketsSummaryItem>
                   <MyTicketsSummaryItem>
-                    <MyTicketsSummaryLabel>Preparee le</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryLabel>Préparée le</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
                       {formatDateTime(order.createdAt)}
                     </MyTicketsSummaryValue>
@@ -462,8 +462,8 @@ export function MyTicketsPage() {
           <MyTicketsInfoCard>
             <MyTicketsInfoTitle>Conditions de revente</MyTicketsInfoTitle>
             <MyTicketsInfoText>
-              La revente de billets n&apos;est pas encore geree depuis cet espace.
-              Chaque billet visible ici correspond'uniquement à une commande Stripe payée.
+              La revente de billets n&apos;est pas encore gérée depuis cet espace.
+              Chaque billet visible ici correspond uniquement à une commande Stripe payée.
             </MyTicketsInfoText>
           </MyTicketsInfoCard>
         </>
@@ -516,7 +516,7 @@ export function MyTicketsPage() {
                     </MyTicketsSummaryValue>
                   </MyTicketsSummaryItem>
                   <MyTicketsSummaryItem>
-                    <MyTicketsSummaryLabel>Emission</MyTicketsSummaryLabel>
+                    <MyTicketsSummaryLabel>Émission</MyTicketsSummaryLabel>
                     <MyTicketsSummaryValue>
                       {formatDateTime(ticket.issuedAt)}
                     </MyTicketsSummaryValue>

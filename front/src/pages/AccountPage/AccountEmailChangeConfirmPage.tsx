@@ -97,7 +97,7 @@ export function AccountEmailChangeConfirmPage() {
             Se connecter
           </AccountPrimaryButton>
           <AccountSecondaryButton type="button" onClick={() => navigate('/account')}>
-            Retour cu profil
+            Retour au profil
           </AccountSecondaryButton>
         </AccountActions>
       </AccountStateCard>

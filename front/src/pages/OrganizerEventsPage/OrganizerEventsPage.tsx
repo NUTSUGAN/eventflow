@@ -227,7 +227,7 @@ export function OrganizerEventsPage() {
               type="button"
               onClick={() => navigate('/organizer/dashboard')}
             >
-              Revenir cu dashboard
+              Revenir au dashboard
             </OrganizerEventsPageSecondaryButton>
             <OrganizerEventsPageSecondaryButton
               type="button"

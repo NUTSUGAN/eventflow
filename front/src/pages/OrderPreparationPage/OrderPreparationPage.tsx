@@ -56,9 +56,9 @@ function formatOrderStatusLabel(status: string): string {
     case 'pending_payment':
       return 'En attente de paiement'
     case 'paid':
-      return 'Payee'
+      return 'Payée'
     case 'cancelled':
-      return 'Annulee'
+      return 'Annulée'
     case 'expired':
       return 'Expirée'
     default:
@@ -389,7 +389,7 @@ export function OrderPreparationPage() {
                 <OrderPreparationCardTitle>Commande créée</OrderPreparationCardTitle>
                 <OrderPreparationList>
                   <OrderPreparationListRow>
-                    <OrderPreparationLabel>Reference</OrderPreparationLabel>
+                    <OrderPreparationLabel>Référence</OrderPreparationLabel>
                     <OrderPreparationValue>{preparedOrder.reference}</OrderPreparationValue>
                   </OrderPreparationListRow>
                   <OrderPreparationListRow>

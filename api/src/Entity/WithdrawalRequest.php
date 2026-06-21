@@ -66,6 +66,36 @@ class WithdrawalRequest
     #[ORM\Column(name: 'payment_reference', length: 120, nullable: true)]
     private ?string $paymentReference = null;
 
+    #[ORM\Column(name: 'payout_type', length: 30, nullable: true)]
+    private ?string $payoutType = null;
+
+    #[ORM\Column(name: 'payout_label', length: 120, nullable: true)]
+    private ?string $payoutLabel = null;
+
+    #[ORM\Column(name: 'bank_holder_name', length: 160, nullable: true)]
+    private ?string $bankHolderName = null;
+
+    #[ORM\Column(name: 'bank_iban', length: 80, nullable: true)]
+    private ?string $bankIban = null;
+
+    #[ORM\Column(name: 'bank_bic', length: 40, nullable: true)]
+    private ?string $bankBic = null;
+
+    #[ORM\Column(name: 'bank_name', length: 120, nullable: true)]
+    private ?string $bankName = null;
+
+    #[ORM\Column(name: 'mobile_money_name', length: 160, nullable: true)]
+    private ?string $mobileMoneyName = null;
+
+    #[ORM\Column(name: 'mobile_money_phone', length: 40, nullable: true)]
+    private ?string $mobileMoneyPhone = null;
+
+    #[ORM\Column(name: 'mobile_money_provider', length: 80, nullable: true)]
+    private ?string $mobileMoneyProvider = null;
+
+    #[ORM\Column(name: 'mobile_money_country', length: 80, nullable: true)]
+    private ?string $mobileMoneyCountry = null;
+
     #[ORM\Column(name: 'requested_at')]
     private \DateTimeImmutable $requestedAt;
 
@@ -122,6 +152,26 @@ class WithdrawalRequest
     public function setAdminNote(?string $adminNote): static { $adminNote = null !== $adminNote ? trim($adminNote) : null; $this->adminNote = '' !== $adminNote ? $adminNote : null; return $this; }
     public function getPaymentReference(): ?string { return $this->paymentReference; }
     public function setPaymentReference(?string $paymentReference): static { $paymentReference = null !== $paymentReference ? trim($paymentReference) : null; $this->paymentReference = '' !== $paymentReference ? $paymentReference : null; return $this; }
+    public function getPayoutType(): ?string { return $this->payoutType; }
+    public function setPayoutType(?string $payoutType): static { $payoutType = null !== $payoutType ? trim($payoutType) : null; $this->payoutType = '' !== $payoutType ? $payoutType : null; return $this; }
+    public function getPayoutLabel(): ?string { return $this->payoutLabel; }
+    public function setPayoutLabel(?string $payoutLabel): static { $payoutLabel = null !== $payoutLabel ? trim($payoutLabel) : null; $this->payoutLabel = '' !== $payoutLabel ? $payoutLabel : null; return $this; }
+    public function getBankHolderName(): ?string { return $this->bankHolderName; }
+    public function setBankHolderName(?string $bankHolderName): static { $bankHolderName = null !== $bankHolderName ? trim($bankHolderName) : null; $this->bankHolderName = '' !== $bankHolderName ? $bankHolderName : null; return $this; }
+    public function getBankIban(): ?string { return $this->bankIban; }
+    public function setBankIban(?string $bankIban): static { $bankIban = null !== $bankIban ? trim($bankIban) : null; $this->bankIban = '' !== $bankIban ? $bankIban : null; return $this; }
+    public function getBankBic(): ?string { return $this->bankBic; }
+    public function setBankBic(?string $bankBic): static { $bankBic = null !== $bankBic ? trim($bankBic) : null; $this->bankBic = '' !== $bankBic ? $bankBic : null; return $this; }
+    public function getBankName(): ?string { return $this->bankName; }
+    public function setBankName(?string $bankName): static { $bankName = null !== $bankName ? trim($bankName) : null; $this->bankName = '' !== $bankName ? $bankName : null; return $this; }
+    public function getMobileMoneyName(): ?string { return $this->mobileMoneyName; }
+    public function setMobileMoneyName(?string $mobileMoneyName): static { $mobileMoneyName = null !== $mobileMoneyName ? trim($mobileMoneyName) : null; $this->mobileMoneyName = '' !== $mobileMoneyName ? $mobileMoneyName : null; return $this; }
+    public function getMobileMoneyPhone(): ?string { return $this->mobileMoneyPhone; }
+    public function setMobileMoneyPhone(?string $mobileMoneyPhone): static { $mobileMoneyPhone = null !== $mobileMoneyPhone ? trim($mobileMoneyPhone) : null; $this->mobileMoneyPhone = '' !== $mobileMoneyPhone ? $mobileMoneyPhone : null; return $this; }
+    public function getMobileMoneyProvider(): ?string { return $this->mobileMoneyProvider; }
+    public function setMobileMoneyProvider(?string $mobileMoneyProvider): static { $mobileMoneyProvider = null !== $mobileMoneyProvider ? trim($mobileMoneyProvider) : null; $this->mobileMoneyProvider = '' !== $mobileMoneyProvider ? $mobileMoneyProvider : null; return $this; }
+    public function getMobileMoneyCountry(): ?string { return $this->mobileMoneyCountry; }
+    public function setMobileMoneyCountry(?string $mobileMoneyCountry): static { $mobileMoneyCountry = null !== $mobileMoneyCountry ? trim($mobileMoneyCountry) : null; $this->mobileMoneyCountry = '' !== $mobileMoneyCountry ? $mobileMoneyCountry : null; return $this; }
     public function getRequestedAt(): \DateTimeImmutable { return $this->requestedAt; }
     public function getReviewedAt(): ?\DateTimeImmutable { return $this->reviewedAt; }
     public function setReviewedAt(?\DateTimeImmutable $reviewedAt): static { $this->reviewedAt = $reviewedAt; return $this; }
@@ -129,4 +179,20 @@ class WithdrawalRequest
     public function setPaidAt(?\DateTimeImmutable $paidAt): static { $this->paidAt = $paidAt; return $this; }
     public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
     public function touch(): static { $this->updatedAt = new \DateTimeImmutable(); return $this; }
+
+    public function copyPayoutAccount(OrganizerPayoutAccount $payoutAccount): static
+    {
+        return $this
+            ->setPayoutType($payoutAccount->getType())
+            ->setPayoutLabel($payoutAccount->getLabel())
+            ->setBankHolderName($payoutAccount->getHolderName())
+            ->setBankIban($payoutAccount->getIban())
+            ->setBankBic($payoutAccount->getBic())
+            ->setBankName($payoutAccount->getBankName())
+            ->setMobileMoneyName($payoutAccount->getMobileMoneyName())
+            ->setMobileMoneyPhone($payoutAccount->getMobileMoneyPhone())
+            ->setMobileMoneyProvider($payoutAccount->getMobileMoneyProvider())
+            ->setMobileMoneyCountry($payoutAccount->getMobileMoneyCountry())
+        ;
+    }
 }

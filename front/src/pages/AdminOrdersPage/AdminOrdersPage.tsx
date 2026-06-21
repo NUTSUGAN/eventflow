@@ -188,7 +188,7 @@ export function AdminOrdersPage() {
           <AdminDashboardInput
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Reference, client, paiement, évènement..."
+            placeholder="Référence, client, paiement, événement..."
           />
         </AdminDashboardField>
 

@@ -54,7 +54,7 @@ function getStatusLabel(status: AdminOrganizerApplication['status']): string {
     case 'APPROVED':
       return 'Approuvée'
     case 'REJECTED':
-      return 'Refusee'
+      return 'Refusée'
     default:
       return 'En attente'
   }
@@ -280,7 +280,7 @@ export function AdminOrganizerApplicationsPage() {
             $active={activeTab === 'processed'}
             onClick={() => setActiveTab('processed')}
           >
-            Traitees ({processedCount})
+            Traitées ({processedCount})
           </AdminOrganizerApplicationsTab>
         </AdminOrganizerApplicationsTabs>
         {activeTab === 'processed' ? (
@@ -297,7 +297,7 @@ export function AdminOrganizerApplicationsPage() {
               $active={processedFilter === 'rejected'}
               onClick={() => setProcessedFilter('rejected')}
             >
-              Refusees ({rejectedCount})
+              Refusées ({rejectedCount})
             </AdminOrganizerApplicationsTab>
             <AdminOrganizerApplicationsTab
               type="button"
@@ -366,7 +366,7 @@ export function AdminOrganizerApplicationsPage() {
 
                 <AdminOrganizerApplicationsGrid>
                   <AdminOrganizerApplicationsInfoCard>
-                    <AdminOrganizerApplicationsLabel>Presentation</AdminOrganizerApplicationsLabel>
+                    <AdminOrganizerApplicationsLabel>Présentation</AdminOrganizerApplicationsLabel>
                     <AdminOrganizerApplicationsValue>
                       {application.motivation}
                     </AdminOrganizerApplicationsValue>
@@ -408,7 +408,7 @@ export function AdminOrganizerApplicationsPage() {
                     disabled={isSubmittingId === application.id}
                     onClick={() => handleReject(application)}
                   >
-                    {application.status === 'APPROVED' ? 'Annuler le role' : 'Refuser'}
+                    {application.status === 'APPROVED' ? 'Annuler le rôle' : 'Refuser'}
                   </AdminOrganizerApplicationsSecondaryButton>
                 </AdminOrganizerApplicationsActions>
               </AdminOrganizerApplicationsCard>

@@ -43,7 +43,7 @@ final class AdminWithdrawalController extends AbstractController
                 'updatedAt' => $setting->getUpdatedAt()->format(DATE_ATOM),
             ],
             'items' => array_map(
-                $withdrawalService->serialize(...),
+                static fn (WithdrawalRequest $withdrawal): array => $withdrawalService->serialize($withdrawal, true),
                 $withdrawalRepository->findForAdmin($status),
             ),
         ]);
@@ -71,6 +71,16 @@ final class AdminWithdrawalController extends AbstractController
                 'defaultFeePercent' => $setting->getDefaultFeePercent(),
                 'updatedAt' => $setting->getUpdatedAt()->format(DATE_ATOM),
             ],
+        ]);
+    }
+
+    #[Route('/{id<\d+>}', name: 'api_admin_withdrawal_show', methods: ['GET'])]
+    public function show(
+        WithdrawalRequest $withdrawal,
+        WithdrawalService $withdrawalService,
+    ): JsonResponse {
+        return $this->json([
+            'withdrawal' => $withdrawalService->serialize($withdrawal, true),
         ]);
     }
 
@@ -130,7 +140,7 @@ final class AdminWithdrawalController extends AbstractController
 
         return $this->json([
             'message' => 'Retrait mis à jour.',
-            'withdrawal' => $withdrawalService->serialize($withdrawal),
+            'withdrawal' => $withdrawalService->serialize($withdrawal, true),
         ]);
     }
 

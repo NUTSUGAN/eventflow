@@ -100,6 +100,7 @@ function readApiMessage(error: unknown, fallback: string): string {
 export function OrganizerWithdrawalsPage() {
   const navigate = useNavigate()
   const [items, setItems] = useState<OrganizerWithdrawalCandidate[]>([])
+  const [hasActivePayoutAccount, setHasActivePayoutAccount] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [requestingEventId, setRequestingEventId] = useState<number | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
@@ -127,6 +128,7 @@ export function OrganizerWithdrawalsPage() {
         }
 
         setItems(response.items)
+        setHasActivePayoutAccount(response.hasActivePayoutAccount)
       } catch (error) {
         if (!isMounted) {
           return
@@ -170,6 +172,7 @@ export function OrganizerWithdrawalsPage() {
       const refreshed = await getOrganizerWithdrawals()
 
       setItems(refreshed.items)
+      setHasActivePayoutAccount(refreshed.hasActivePayoutAccount)
       setStatusMessage(response.message)
     } catch (error) {
       setErrorMessage(
@@ -216,6 +219,14 @@ export function OrganizerWithdrawalsPage() {
       {isLoading ? (
         <OrganizerDashboardMessage $tone="neutral">
           Chargement des retraits...
+        </OrganizerDashboardMessage>
+      ) : null}
+      {!isLoading && !hasActivePayoutAccount ? (
+        <OrganizerDashboardMessage $tone="neutral">
+          Ajoute ton moyen de retrait avant de demander un paiement.{' '}
+          <button type="button" onClick={() => navigate('/organizer/bank')}>
+            Configurer
+          </button>
         </OrganizerDashboardMessage>
       ) : null}
 
@@ -323,6 +334,13 @@ export function OrganizerWithdrawalsPage() {
                           ? 'Nouvelle demande'
                           : 'Demander un retrait'}
                     </OrganizerDashboardPrimaryButton>
+                  ) : !withdrawal && !hasActivePayoutAccount ? (
+                    <OrganizerDashboardSecondaryButton
+                      type="button"
+                      onClick={() => navigate('/organizer/bank')}
+                    >
+                      Configurer banque
+                    </OrganizerDashboardSecondaryButton>
                   ) : !withdrawal ? (
                     <OrganizerDashboardSecondaryButton type="button" disabled>
                       Indisponible

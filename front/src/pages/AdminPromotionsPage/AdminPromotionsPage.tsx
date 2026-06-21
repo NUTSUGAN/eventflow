@@ -42,7 +42,7 @@ const filters: Array<{ value?: PromotionStatus; label: string }> = [
   { value: 'pending', label: 'En attente' },
   { value: 'approved', label: 'À payer' },
   { value: 'active', label: 'Payées / en suivi' },
-  { value: 'rejected', label: 'Refusees' },
+  { value: 'rejected', label: 'Refusées' },
   { value: 'expired', label: 'Terminées' },
 ]
 

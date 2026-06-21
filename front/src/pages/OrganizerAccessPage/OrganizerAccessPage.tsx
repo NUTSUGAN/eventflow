@@ -392,7 +392,7 @@ export function OrganizerAccessPage() {
               </OrganizerAccessField>
 
               <OrganizerAccessField>
-                <OrganizerAccessFieldLabel>Presentation de l’activité</OrganizerAccessFieldLabel>
+                <OrganizerAccessFieldLabel>Présentation de l’activité</OrganizerAccessFieldLabel>
                 <OrganizerAccessTextarea
                   value={form.motivation}
                   placeholder="Decris ton activité, le type d’évènements organises et ce que tu veux publiér sur EventFlow."

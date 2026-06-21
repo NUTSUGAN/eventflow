@@ -85,6 +85,16 @@ function readApiMessage(error: unknown, fallback: string): string {
   return fallback
 }
 
+function payoutTitle(withdrawal: WithdrawalSummary): string {
+  if (!withdrawal.payout) {
+    return 'Aucun moyen copié'
+  }
+
+  return withdrawal.payout.label ?? (
+    withdrawal.payout.type === 'bank' ? 'Compte bancaire' : 'Mobile Money'
+  )
+}
+
 export function OrganizerWithdrawalDetailPage() {
   const navigate = useNavigate()
   const { withdrawalId } = useParams()
@@ -260,6 +270,69 @@ export function OrganizerWithdrawalDetailPage() {
           <OrganizerDashboardPanel>
             <OrganizerDashboardPanelHeader>
               <div>
+                <OrganizerDashboardPanelTitle>Moyen de retrait utilisé</OrganizerDashboardPanelTitle>
+                <OrganizerDashboardText>
+                  Coordonnées copiées au moment de la demande.
+                </OrganizerDashboardText>
+              </div>
+            </OrganizerDashboardPanelHeader>
+
+            {withdrawal.payout ? (
+              <WithdrawalPayoutGrid>
+                <WithdrawalInfo>
+                  <span>Type</span>
+                  <strong>{payoutTitle(withdrawal)}</strong>
+                </WithdrawalInfo>
+                {withdrawal.payout.type === 'bank' ? (
+                  <>
+                    <WithdrawalInfo>
+                      <span>Titulaire</span>
+                      <strong>{withdrawal.payout.bank.holderName ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                    <WithdrawalInfo>
+                      <span>IBAN</span>
+                      <strong>{withdrawal.payout.bank.iban ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                    <WithdrawalInfo>
+                      <span>BIC</span>
+                      <strong>{withdrawal.payout.bank.bic ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                    <WithdrawalInfo>
+                      <span>Banque</span>
+                      <strong>{withdrawal.payout.bank.bankName ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                  </>
+                ) : (
+                  <>
+                    <WithdrawalInfo>
+                      <span>Titulaire</span>
+                      <strong>{withdrawal.payout.mobileMoney.name ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                    <WithdrawalInfo>
+                      <span>Numero</span>
+                      <strong>{withdrawal.payout.mobileMoney.phone ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                    <WithdrawalInfo>
+                      <span>Operateur</span>
+                      <strong>{withdrawal.payout.mobileMoney.provider ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                    <WithdrawalInfo>
+                      <span>Pays</span>
+                      <strong>{withdrawal.payout.mobileMoney.country ?? 'À définir'}</strong>
+                    </WithdrawalInfo>
+                  </>
+                )}
+              </WithdrawalPayoutGrid>
+            ) : (
+              <OrganizerDashboardMessage $tone="neutral">
+                Cette ancienne demande ne contient pas encore de moyen de retrait copié.
+              </OrganizerDashboardMessage>
+            )}
+          </OrganizerDashboardPanel>
+
+          <OrganizerDashboardPanel>
+            <OrganizerDashboardPanelHeader>
+              <div>
                 <OrganizerDashboardPanelTitle>Traitement</OrganizerDashboardPanelTitle>
                 <OrganizerDashboardText>
                   Suis les étapes principales de la demande jusqu’au paiement.
@@ -351,6 +424,18 @@ const WithdrawalInfoGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const WithdrawalPayoutGrid = styled(WithdrawalInfoGrid)`
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;

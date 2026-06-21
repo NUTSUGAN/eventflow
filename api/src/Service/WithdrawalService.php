@@ -3,10 +3,12 @@
 namespace App\Service;
 
 use App\Entity\Event;
+use App\Entity\OrganizerPayoutAccount;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\User;
 use App\Entity\WithdrawalRequest;
+use App\Repository\OrganizerPayoutAccountRepository;
 use App\Repository\WithdrawalRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -15,6 +17,7 @@ final class WithdrawalService
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly WithdrawalRequestRepository $withdrawalRequestRepository,
+        private readonly OrganizerPayoutAccountRepository $payoutAccountRepository,
     ) {
     }
 
@@ -78,6 +81,12 @@ final class WithdrawalService
             throw new \DomainException('Une demande de retrait existe déjà pour cet évènement.');
         }
 
+        $payoutAccount = $this->payoutAccountRepository->findActiveForOrganizer($organizer);
+
+        if (!$payoutAccount instanceof OrganizerPayoutAccount) {
+            throw new \DomainException('Ajoute ton moyen de retrait avant de demander un retrait.');
+        }
+
         $amounts = $this->calculateEventAmounts($event);
 
         if ((float) $amounts['grossAmount'] <= 0) {
@@ -92,6 +101,7 @@ final class WithdrawalService
             ->setFeeAmount($amounts['feeAmount'])
             ->setNetAmount($amounts['netAmount'])
             ->setCurrency($amounts['currency'])
+            ->copyPayoutAccount($payoutAccount)
         ;
 
         $this->entityManager->persist($withdrawal);
@@ -119,7 +129,7 @@ final class WithdrawalService
         ;
     }
 
-    public function serialize(WithdrawalRequest $withdrawal): array
+    public function serialize(WithdrawalRequest $withdrawal, bool $includeSensitivePayout = false): array
     {
         $event = $withdrawal->getEvent();
         $organizer = $withdrawal->getOrganizer();
@@ -134,6 +144,7 @@ final class WithdrawalService
             'currency' => $withdrawal->getCurrency(),
             'adminNote' => $withdrawal->getAdminNote(),
             'paymentReference' => $withdrawal->getPaymentReference(),
+            'payout' => $this->serializePayoutSnapshot($withdrawal, $includeSensitivePayout),
             'requestedAt' => $withdrawal->getRequestedAt()->format(DATE_ATOM),
             'reviewedAt' => $withdrawal->getReviewedAt()?->format(DATE_ATOM),
             'paidAt' => $withdrawal->getPaidAt()?->format(DATE_ATOM),
@@ -151,5 +162,55 @@ final class WithdrawalService
                 'email' => $organizer?->getEmail(),
             ],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function serializePayoutSnapshot(
+        WithdrawalRequest $withdrawal,
+        bool $includeSensitivePayout
+    ): ?array {
+        $type = $withdrawal->getPayoutType();
+
+        if (null === $type) {
+            return null;
+        }
+
+        return [
+            'type' => $type,
+            'label' => $withdrawal->getPayoutLabel(),
+            'bank' => [
+                'holderName' => $withdrawal->getBankHolderName(),
+                'iban' => $this->maskUnlessAllowed($withdrawal->getBankIban(), $includeSensitivePayout),
+                'bic' => $withdrawal->getBankBic(),
+                'bankName' => $withdrawal->getBankName(),
+            ],
+            'mobileMoney' => [
+                'name' => $withdrawal->getMobileMoneyName(),
+                'phone' => $this->maskUnlessAllowed($withdrawal->getMobileMoneyPhone(), $includeSensitivePayout),
+                'provider' => $withdrawal->getMobileMoneyProvider(),
+                'country' => $withdrawal->getMobileMoneyCountry(),
+            ],
+        ];
+    }
+
+    private function maskUnlessAllowed(?string $value, bool $includeSensitivePayout): ?string
+    {
+        if ($includeSensitivePayout || null === $value) {
+            return $value;
+        }
+
+        $compact = preg_replace('/\s+/', '', $value) ?? $value;
+        $length = strlen($compact);
+
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        $tail = substr($compact, -4);
+        $head = $length > 12 ? substr($compact, 0, 4).' ' : '';
+
+        return $head.'**** **** '.$tail;
     }
 }

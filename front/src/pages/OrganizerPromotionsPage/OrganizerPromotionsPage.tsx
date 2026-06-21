@@ -27,8 +27,8 @@ const statusLabels: Record<string, string> = {
   approved: 'À payer',
   active: 'Paiement confirmé',
   expired: 'Terminée',
-  rejected: 'Refusee',
-  cancelled: 'Annulee',
+  rejected: 'Refusée',
+  cancelled: 'Annulée',
 }
 
 const channelLabels: Record<string, string> = {

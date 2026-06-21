@@ -89,7 +89,7 @@ function getEventStatusLabel(status: string | null): string {
     case 'published':
       return 'Public'
     case 'cancelled':
-      return 'Annule'
+      return 'Annulé'
     default:
       return 'Brouillon'
   }
@@ -684,7 +684,7 @@ export function AdminDashboardPage() {
             <AdminDashboardMetricValue>{draftEvents.length}</AdminDashboardMetricValue>
           </AdminDashboardMetric>
           <AdminDashboardMetric>
-            <AdminDashboardMetricLabel>Scans realises</AdminDashboardMetricLabel>
+            <AdminDashboardMetricLabel>Scans réalisés</AdminDashboardMetricLabel>
             <AdminDashboardMetricValue>{stats?.scans.total ?? 0}</AdminDashboardMetricValue>
           </AdminDashboardMetric>
         </>

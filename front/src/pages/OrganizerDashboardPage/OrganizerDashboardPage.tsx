@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
+import { getOrganizerPayoutAccount } from '../../api/organizerPayoutAccount'
 import {
   getOrganizerDashboard,
   updateOrganizerEventStatus,
@@ -72,7 +73,7 @@ function formatStatusLabel(status: string | null): string {
     case 'published':
       return 'Public'
     case 'cancelled':
-      return 'Annule'
+      return 'Annulé'
     default:
       return 'Brouillon'
   }
@@ -113,6 +114,7 @@ export function OrganizerDashboardPage() {
   const [nowTimestamp] = useState(() => Date.now())
   const [user, setUser] = useState<AuthUser | null>(null)
   const [dashboard, setDashboard] = useState<OrganizerDashboardResponse | null>(null)
+  const [hasActivePayoutAccount, setHasActivePayoutAccount] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [updatingEventId, setUpdatingEventId] = useState<number | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
@@ -147,6 +149,14 @@ export function OrganizerDashboardPage() {
         }
 
         const organizerDashboard = await getOrganizerDashboard()
+        let nextHasActivePayoutAccount: boolean | null = null
+
+        try {
+          const payoutAccountResponse = await getOrganizerPayoutAccount()
+          nextHasActivePayoutAccount = Boolean(payoutAccountResponse.active)
+        } catch {
+          nextHasActivePayoutAccount = null
+        }
 
         if (!isMounted) {
           return
@@ -154,6 +164,7 @@ export function OrganizerDashboardPage() {
 
         setUser(currentUser)
         setDashboard(organizerDashboard)
+        setHasActivePayoutAccount(nextHasActivePayoutAccount)
       } catch (error) {
         if (!isMounted) {
           return
@@ -281,6 +292,12 @@ export function OrganizerDashboardPage() {
           >
             Retraits
           </OrganizerDashboardSecondaryButton>
+          <OrganizerDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/organizer/bank')}
+          >
+            Banque
+          </OrganizerDashboardSecondaryButton>
           {user?.canAccessStaffTools ? (
             <OrganizerDashboardSecondaryButton
               type="button"
@@ -297,14 +314,6 @@ export function OrganizerDashboardPage() {
               Gérer mon staff
             </OrganizerDashboardSecondaryButton>
           ) : null}
-          {user?.role === 'ROLE_ADMIN' ? (
-            <OrganizerDashboardSecondaryButton
-              type="button"
-              onClick={() => navigate('/admin/organizer-applications')}
-            >
-              Demandes organisateur
-            </OrganizerDashboardSecondaryButton>
-          ) : null}
         </OrganizerDashboardActions>
       </OrganizerDashboardHeader>
 
@@ -317,6 +326,15 @@ export function OrganizerDashboardPage() {
       {isLoading ? (
         <OrganizerDashboardMessage $tone="neutral">
           Chargement du tableau de bord organisateur...
+        </OrganizerDashboardMessage>
+      ) : null}
+      {!isLoading && hasActivePayoutAccount === false ? (
+        <OrganizerDashboardMessage $tone="neutral">
+          Ajoute ton moyen de retrait pour pouvoir demander tes paiements après tes
+          événements.{' '}
+          <button type="button" onClick={() => navigate('/organizer/bank')}>
+            Configurer
+          </button>
         </OrganizerDashboardMessage>
       ) : null}
 
@@ -346,7 +364,7 @@ export function OrganizerDashboardPage() {
           <OrganizerDashboardMetricHint>Tous évènements confondus</OrganizerDashboardMetricHint>
         </OrganizerDashboardMetric>
         <OrganizerDashboardMetric>
-          <OrganizerDashboardMetricLabel>Scans realises</OrganizerDashboardMetricLabel>
+          <OrganizerDashboardMetricLabel>Scans réalisés</OrganizerDashboardMetricLabel>
           <OrganizerDashboardMetricValue>
             {dashboard?.stats.scans.total ?? 0}
           </OrganizerDashboardMetricValue>
@@ -365,10 +383,10 @@ export function OrganizerDashboardPage() {
         <OrganizerDashboardMetric>
           <OrganizerDashboardMetricLabel>Brouillons</OrganizerDashboardMetricLabel>
           <OrganizerDashboardMetricValue>{draftEvents.length}</OrganizerDashboardMetricValue>
-          <OrganizerDashboardMetricHint>A finaliser avant publication</OrganizerDashboardMetricHint>
+          <OrganizerDashboardMetricHint>À finaliser avant publication</OrganizerDashboardMetricHint>
         </OrganizerDashboardMetric>
         <OrganizerDashboardMetric>
-          <OrganizerDashboardMetricLabel>A venir</OrganizerDashboardMetricLabel>
+          <OrganizerDashboardMetricLabel>À venir</OrganizerDashboardMetricLabel>
           <OrganizerDashboardMetricValue>{upcomingEvents.length}</OrganizerDashboardMetricValue>
           <OrganizerDashboardMetricHint>Dans le calendrier</OrganizerDashboardMetricHint>
         </OrganizerDashboardMetric>
@@ -400,7 +418,7 @@ export function OrganizerDashboardPage() {
             <OrganizerDashboardPanelTitle>Mes évènements</OrganizerDashboardPanelTitle>
             <OrganizerDashboardText>
               Change un statut, ouvre une fiche, puis complété les billets et le
-              suivi operationnel.
+              suivi opérationnel.
             </OrganizerDashboardText>
           </div>
           <OrganizerDashboardSecondaryButton
@@ -508,7 +526,7 @@ export function OrganizerDashboardPage() {
                 </OrganizerDashboardMiniMetricValue>
               </OrganizerDashboardMiniMetric>
               <OrganizerDashboardMiniMetric>
-                <OrganizerDashboardMiniMetricLabel>Scans valides</OrganizerDashboardMiniMetricLabel>
+                <OrganizerDashboardMiniMetricLabel>Scans validés</OrganizerDashboardMiniMetricLabel>
                 <OrganizerDashboardMiniMetricValue>
                   {event.scans.valid}
                 </OrganizerDashboardMiniMetricValue>
@@ -534,7 +552,7 @@ export function OrganizerDashboardPage() {
                 <option value="draft">Brouillon</option>
                 <option value="published">Public</option>
                 {event.status === 'cancelled' ? (
-                  <option value="cancelled">Annule</option>
+                  <option value="cancelled">Annulé</option>
                 ) : null}
               </OrganizerDashboardEventSelect>
               <OrganizerDashboardSecondaryButton

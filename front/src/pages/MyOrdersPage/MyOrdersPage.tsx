@@ -111,7 +111,7 @@ export function MyOrdersPage() {
                 <MyTicketsPendingTitleGroup>
                   <MyTicketsMetaRow>
                     <MyTicketsTag>{orderTypeLabel(order)}</MyTicketsTag>
-                    <MyTicketsTag>Payee</MyTicketsTag>
+                    <MyTicketsTag>Payée</MyTicketsTag>
                     <MyTicketsTag>{order.reference}</MyTicketsTag>
                   </MyTicketsMetaRow>
                   <MyTicketsPendingTitle>{order.event.title ?? 'Commande EventFlow'}</MyTicketsPendingTitle>
