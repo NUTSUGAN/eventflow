@@ -110,6 +110,46 @@ export type AdminUserStatusUpdateResponse = {
   user: AdminUserSummary
 }
 
+export type AdminEventReportStatus = 'pending' | 'reviewed' | 'resolved' | 'rejected'
+
+export type AdminEventReportSummary = {
+  id: number
+  reason: string | null
+  details: string | null
+  status: AdminEventReportStatus
+  createdAt: string | null
+  event: {
+    id: number | null
+    title: string | null
+    status: string | null
+    startDatetime: string | null
+    city: string | null
+  }
+  reporter: {
+    id: number | null
+    fullName: string
+    email: string | null
+  }
+  organizer: {
+    id: number | null
+    fullName: string | null
+    email: string | null
+  }
+}
+
+export type AdminEventReportsResponse = {
+  items: AdminEventReportSummary[]
+}
+
+export type AdminEventReportResponse = {
+  report: AdminEventReportSummary
+}
+
+export type AdminEventReportUpdateResponse = {
+  message: string
+  report: AdminEventReportSummary
+}
+
 export type AdminPlatformStats = {
   orders: {
     total: number

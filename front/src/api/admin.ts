@@ -3,6 +3,10 @@ import type {
   AdminCategory,
   AdminCategoryPayload,
   AdminCategoryResponse,
+  AdminEventReportResponse,
+  AdminEventReportsResponse,
+  AdminEventReportStatus,
+  AdminEventReportUpdateResponse,
   AdminEventStatus,
   AdminEventSummary,
   AdminEventUpdateResponse,
@@ -74,6 +78,43 @@ export async function getAdminUsers(
       role: filters.role && filters.role !== 'all' ? filters.role : undefined,
     },
   })
+
+  return response.data
+}
+
+export async function getAdminEventReports(
+  status?: AdminEventReportStatus,
+): Promise<AdminEventReportsResponse> {
+  const response = await apiClient.get<AdminEventReportsResponse>(
+    '/api/admin/event-reports',
+    {
+      params: {
+        status,
+      },
+    },
+  )
+
+  return response.data
+}
+
+export async function getAdminEventReport(
+  reportId: number,
+): Promise<AdminEventReportResponse> {
+  const response = await apiClient.get<AdminEventReportResponse>(
+    `/api/admin/event-reports/${reportId}`,
+  )
+
+  return response.data
+}
+
+export async function updateAdminEventReportStatus(
+  reportId: number,
+  status: AdminEventReportStatus,
+): Promise<AdminEventReportUpdateResponse> {
+  const response = await apiClient.patch<AdminEventReportUpdateResponse>(
+    `/api/admin/event-reports/${reportId}`,
+    { status },
+  )
 
   return response.data
 }

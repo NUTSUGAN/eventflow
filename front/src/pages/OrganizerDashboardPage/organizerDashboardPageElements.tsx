@@ -80,6 +80,89 @@ export const OrganizerDashboardSecondaryButton = styled.button`
   }
 `
 
+export const OrganizerDashboardHeaderActions = styled(OrganizerDashboardActions)`
+  @media (max-width: 720px) {
+    display: none;
+  }
+`
+
+export const OrganizerDashboardMobileActions = styled.div`
+  display: none;
+
+  @media (max-width: 720px) {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52px;
+    gap: 8px;
+    width: min(100%, 420px);
+  }
+
+  ${OrganizerDashboardPrimaryButton} {
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`
+
+export const OrganizerDashboardMobileActionMenu = styled.details`
+  position: relative;
+  z-index: 20;
+`
+
+export const OrganizerDashboardMobileActionSummary = styled.summary`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 12px;
+  border: 1px solid rgba(235, 148, 81, 0.34);
+  background: rgba(235, 148, 81, 0.1);
+  color: #fff4ea;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: rgba(235, 148, 81, 0.72);
+    box-shadow: 0 0 0 3px rgba(235, 148, 81, 0.14);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.18s ease;
+  }
+
+  details[open] & svg {
+    transform: rotate(180deg);
+  }
+`
+
+export const OrganizerDashboardMobileActionList = styled.div`
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  gap: 8px;
+  width: min(270px, calc(100vw - 40px));
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(28, 23, 20, 0.98);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+
+  ${OrganizerDashboardSecondaryButton} {
+    width: 100%;
+    text-align: left;
+  }
+`
+
 export const OrganizerDashboardGrid = styled.section`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

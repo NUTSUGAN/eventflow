@@ -34,7 +34,7 @@ final class EventReportController extends AbstractController
 
         if (!$reporter instanceof User) {
             return $this->json([
-                'message' => 'Connecte-toi pour signaler un l’évènement.',
+                'message' => 'Connecte-toi pour signaler un évènement.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -42,13 +42,13 @@ final class EventReportController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
         if ($event->getOrganizer()?->getId() === $reporter->getId()) {
             return $this->json([
-                'message' => 'Tu ne peux pas signaler ton propre l’évènement.',
+                'message' => 'Tu ne peux pas signaler ton propre évènement.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -98,7 +98,7 @@ final class EventReportController extends AbstractController
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to('admin@eventflow.local')
-                    ->subject("Nouveau signalement d’évènement EventFlow")
+                    ->subject('Nouveau signalement d’évènement EventFlow')
                     ->text($this->buildAdminNotificationBody($event, $reporter, $eventReport, $frontendAppUrl))
             );
         } catch (\Throwable) {

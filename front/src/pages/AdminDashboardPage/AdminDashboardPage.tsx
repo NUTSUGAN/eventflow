@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { FaChevronDown } from 'react-icons/fa6'
 import { useNavigate } from 'react-router-dom'
 import {
   createAdminCategory,
@@ -28,6 +29,7 @@ import {
   AdminDashboardForm,
   AdminDashboardGrid,
   AdminDashboardHeader,
+  AdminDashboardHeaderActions,
   AdminDashboardHeaderText,
   AdminDashboardInput,
   AdminDashboardLabel,
@@ -36,6 +38,10 @@ import {
   AdminDashboardMetric,
   AdminDashboardMetricLabel,
   AdminDashboardMetricValue,
+  AdminDashboardMobileActionList,
+  AdminDashboardMobileActionMenu,
+  AdminDashboardMobileActions,
+  AdminDashboardMobileActionSummary,
   AdminDashboardPanel,
   AdminDashboardPanelHeader,
   AdminDashboardPanelTitle,
@@ -59,10 +65,30 @@ type CategoryFormState = {
   description: string
 }
 
+type DashboardAction = {
+  label: string
+  path: string
+}
+
 const emptyCategoryForm: CategoryFormState = {
   name: '',
   description: '',
 }
+
+const adminPrimaryAction: DashboardAction = {
+  label: 'Demandes organisateur',
+  path: '/admin/organizer-applications',
+}
+
+const adminSecondaryActions: DashboardAction[] = [
+  { label: 'Utilisateurs', path: '/admin/users' },
+  { label: 'Commandes', path: '/admin/orders' },
+  { label: 'Billets & scans', path: '/admin/tickets' },
+  { label: 'Events Booster', path: '/admin/promotions' },
+  { label: 'Retraits', path: '/admin/withdrawals' },
+  { label: 'Créer un évènement', path: '/organizer/events/new' },
+  { label: 'Signalements', path: '/admin/event-reports' },
+]
 
 function formatDate(value: string | null): string {
   if (!value) {
@@ -136,6 +162,7 @@ function readApiMessage(error: unknown, fallback: string): string {
 
 export function AdminDashboardPage() {
   const navigate = useNavigate()
+  const [nowTimestamp] = useState(() => Date.now())
   const [activeTab, setActiveTab] = useState<AdminDashboardTabId>('overview')
   const [applications, setApplications] = useState<AdminOrganizerApplication[]>([])
   const [events, setEvents] = useState<AdminEventSummary[]>([])
@@ -272,10 +299,10 @@ export function AdminDashboardPage() {
             return false
           }
 
-          return new Date(event.startDatetime).getTime() >= Date.now()
+          return new Date(event.startDatetime).getTime() >= nowTimestamp
         })
         .slice(0, 6),
-    [events],
+    [events, nowTimestamp],
   )
   const eventPagination = usePagination(filteredEvents, {
     pageSize: 20,
@@ -361,7 +388,7 @@ export function AdminDashboardPage() {
             et les indicateurs de la plateforme depuis un point d’entrée unique.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
-        <AdminDashboardActions>
+        <AdminDashboardHeaderActions>
           <AdminDashboardPrimaryButton
             type="button"
             onClick={() => navigate('/admin/organizer-applications')}
@@ -390,7 +417,7 @@ export function AdminDashboardPage() {
             type="button"
             onClick={() => navigate('/admin/promotions')}
           >
-            Campagnes Booster
+            Events Booster
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
@@ -404,7 +431,40 @@ export function AdminDashboardPage() {
           >
             Créer un évènement
           </AdminDashboardSecondaryButton>
-        </AdminDashboardActions>
+          <AdminDashboardSecondaryButton
+            type="button"
+            onClick={() => navigate('/admin/event-reports')}
+          >
+            Signalements
+          </AdminDashboardSecondaryButton>
+        </AdminDashboardHeaderActions>
+        <AdminDashboardMobileActions>
+          <AdminDashboardPrimaryButton
+            type="button"
+            onClick={() => navigate(adminPrimaryAction.path)}
+          >
+            {adminPrimaryAction.label}
+          </AdminDashboardPrimaryButton>
+          <AdminDashboardMobileActionMenu>
+            <AdminDashboardMobileActionSummary
+              aria-label="Afficher les autres actions"
+              title="Autres actions"
+            >
+              <FaChevronDown aria-hidden="true" focusable="false" />
+            </AdminDashboardMobileActionSummary>
+            <AdminDashboardMobileActionList>
+              {adminSecondaryActions.map((action) => (
+                <AdminDashboardSecondaryButton
+                  key={action.path}
+                  type="button"
+                  onClick={() => navigate(action.path)}
+                >
+                  {action.label}
+                </AdminDashboardSecondaryButton>
+              ))}
+            </AdminDashboardMobileActionList>
+          </AdminDashboardMobileActionMenu>
+        </AdminDashboardMobileActions>
       </AdminDashboardHeader>
 
       <AdminDashboardTabs>

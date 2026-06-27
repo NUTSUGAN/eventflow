@@ -35,4 +35,34 @@ class EventReportRepository extends ServiceEntityRepository
 
         return $eventReport;
     }
+
+    /**
+     * @return EventReport[]
+     */
+    public function findForAdmin(?string $status = null): array
+    {
+        $queryBuilder = $this->createQueryBuilder('eventReport')
+            ->innerJoin('eventReport.event', 'reportedEvent')
+            ->addSelect('reportedEvent')
+            ->innerJoin('eventReport.reporter', 'reporter')
+            ->addSelect('reporter')
+            ->leftJoin('reportedEvent.organizer', 'organizer')
+            ->addSelect('organizer')
+            ->leftJoin('reportedEvent.location', 'location')
+            ->addSelect('location')
+            ->orderBy('eventReport.createdAt', 'DESC')
+        ;
+
+        if (null !== $status) {
+            $queryBuilder
+                ->andWhere('eventReport.status = :status')
+                ->setParameter('status', $status)
+            ;
+        }
+
+        /** @var EventReport[] $reports */
+        $reports = $queryBuilder->getQuery()->getResult();
+
+        return $reports;
+    }
 }

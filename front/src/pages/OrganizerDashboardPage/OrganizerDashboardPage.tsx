@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { FaChevronDown } from 'react-icons/fa6'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
@@ -14,12 +15,12 @@ import type {
   OrganizerEventStatus,
 } from '../../types/organizerEvent'
 import {
-  OrganizerDashboardActions,
   OrganizerDashboardBadge,
   OrganizerDashboardEyebrow,
   OrganizerDashboardEventSelect,
   OrganizerDashboardGrid,
   OrganizerDashboardHeader,
+  OrganizerDashboardHeaderActions,
   OrganizerDashboardHeaderText,
   OrganizerDashboardList,
   OrganizerDashboardMessage,
@@ -30,6 +31,10 @@ import {
   OrganizerDashboardMiniMetric,
   OrganizerDashboardMiniMetricLabel,
   OrganizerDashboardMiniMetricValue,
+  OrganizerDashboardMobileActionList,
+  OrganizerDashboardMobileActionMenu,
+  OrganizerDashboardMobileActions,
+  OrganizerDashboardMobileActionSummary,
   OrganizerDashboardPanel,
   OrganizerDashboardPanelHeader,
   OrganizerDashboardPanelTitle,
@@ -46,7 +51,24 @@ import {
   OrganizerDashboardTitle,
 } from './organizerDashboardPageElements'
 
+type DashboardAction = {
+  label: string
+  path: string
+}
+
 const emptyDashboardEvents: OrganizerDashboardEventSummary[] = []
+
+const organizerPrimaryAction: DashboardAction = {
+  label: 'Créer un évènement',
+  path: '/organizer/events/new',
+}
+
+const organizerBaseSecondaryActions: DashboardAction[] = [
+  { label: 'Mes évènements', path: '/organizer/events' },
+  { label: 'Mes campagnes Booster', path: '/organizer/promotions' },
+  { label: 'Retraits', path: '/organizer/withdrawals' },
+  { label: 'Banque', path: '/organizer/bank' },
+]
 
 function formatDashboardDate(date: string | null): string {
   if (!date) {
@@ -212,6 +234,19 @@ export function OrganizerDashboardPage() {
     [events, nowTimestamp],
   )
   const latestEvents = useMemo(() => events.slice(0, 3), [events])
+  const organizerSecondaryActions = useMemo(() => {
+    const actions = [...organizerBaseSecondaryActions]
+
+    if (user?.canAccessStaffTools) {
+      actions.push({ label: 'Scanner les billets', path: '/staff/scan' })
+    }
+
+    if (user?.canManageStaff) {
+      actions.push({ label: 'Gérer mon staff', path: '/organizer/staff' })
+    }
+
+    return actions
+  }, [user?.canAccessStaffTools, user?.canManageStaff])
 
   async function handleStatusChange(
     event: OrganizerDashboardEventSummary,
@@ -267,7 +302,7 @@ export function OrganizerDashboardPage() {
               : 'Suis tes évènements, tes ventes, tes billets et les controles d’accès depuis un seul espace.'}
           </OrganizerDashboardText>
         </OrganizerDashboardHeaderText>
-        <OrganizerDashboardActions>
+        <OrganizerDashboardHeaderActions>
           <OrganizerDashboardPrimaryButton
             type="button"
             onClick={() => navigate('/organizer/events/new')}
@@ -314,7 +349,34 @@ export function OrganizerDashboardPage() {
               Gérer mon staff
             </OrganizerDashboardSecondaryButton>
           ) : null}
-        </OrganizerDashboardActions>
+        </OrganizerDashboardHeaderActions>
+        <OrganizerDashboardMobileActions>
+          <OrganizerDashboardPrimaryButton
+            type="button"
+            onClick={() => navigate(organizerPrimaryAction.path)}
+          >
+            {organizerPrimaryAction.label}
+          </OrganizerDashboardPrimaryButton>
+          <OrganizerDashboardMobileActionMenu>
+            <OrganizerDashboardMobileActionSummary
+              aria-label="Afficher les autres actions"
+              title="Autres actions"
+            >
+              <FaChevronDown aria-hidden="true" focusable="false" />
+            </OrganizerDashboardMobileActionSummary>
+            <OrganizerDashboardMobileActionList>
+              {organizerSecondaryActions.map((action) => (
+                <OrganizerDashboardSecondaryButton
+                  key={action.path}
+                  type="button"
+                  onClick={() => navigate(action.path)}
+                >
+                  {action.label}
+                </OrganizerDashboardSecondaryButton>
+              ))}
+            </OrganizerDashboardMobileActionList>
+          </OrganizerDashboardMobileActionMenu>
+        </OrganizerDashboardMobileActions>
       </OrganizerDashboardHeader>
 
       {statusMessage ? (

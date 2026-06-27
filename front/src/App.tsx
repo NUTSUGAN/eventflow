@@ -7,6 +7,8 @@ import { AccountPage } from './pages/AccountPage/AccountPage'
 import { AccountEmailChangeConfirmPage } from './pages/AccountPage/AccountEmailChangeConfirmPage'
 import { ContactPage } from './pages/ContactPage/ContactPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
+import { AdminEventReportDetailPage } from './pages/AdminEventReportsPage/AdminEventReportDetailPage'
+import { AdminEventReportsPage } from './pages/AdminEventReportsPage/AdminEventReportsPage'
 import { AdminOrganizerApplicationsPage } from './pages/AdminOrganizerApplicationsPage/AdminOrganizerApplicationsPage'
 import { AdminOrdersPage } from './pages/AdminOrdersPage/AdminOrdersPage'
 import { AdminPromotionsPage } from './pages/AdminPromotionsPage/AdminPromotionsPage'
@@ -63,6 +65,8 @@ function App() {
           <Route path="/" element={<EventsListPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/event-reports" element={<AdminEventReportsPage />} />
+          <Route path="/admin/event-reports/:reportId" element={<AdminEventReportDetailPage />} />
           <Route path="/admin/promotions" element={<AdminPromotionsPage />} />
           <Route path="/admin/promotions/:promotionId" element={<AdminPromotionDetailPage />} />
           <Route path="/admin/tickets" element={<AdminTicketsPage />} />
