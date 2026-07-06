@@ -31,7 +31,7 @@ final readonly class UploadedImageStorage
         $mimeType = $file->getMimeType() ?? $file->getClientMimeType() ?? '';
 
         if (!str_starts_with($mimeType, 'image/')) {
-            throw new \RuntimeException('Le fichier envoye doit etre une image.');
+            throw new \RuntimeException('Le fichier envoyé doit être une image.');
         }
 
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -61,13 +61,13 @@ final readonly class UploadedImageStorage
     public function storeUploadedVideo(UploadedFile $file, string $folder, string $fallbackName): string
     {
         if (!$file->isValid()) {
-            throw new \RuntimeException('La video envoyee est invalide ou trop lourde.');
+            throw new \RuntimeException('La vidéo envoyée est invalide ou trop lourde.');
         }
 
         $mimeType = $file->getMimeType() ?? $file->getClientMimeType() ?? '';
 
         if (!str_starts_with($mimeType, 'video/')) {
-            throw new \RuntimeException('Le fichier envoye doit etre une video.');
+            throw new \RuntimeException('Le fichier envoyé doit être une vidéo.');
         }
 
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -103,13 +103,13 @@ final readonly class UploadedImageStorage
         $mimeType = strtolower((string) ($matches[1] ?? ''));
 
         if (!str_starts_with($mimeType, 'image/')) {
-            throw new \RuntimeException('La photo de profil doit etre une image.');
+            throw new \RuntimeException('La photo de profil doit être une image.');
         }
 
         $rawData = base64_decode((string) ($matches[2] ?? ''), true);
 
         if (false === $rawData || '' === $rawData) {
-            throw new \RuntimeException('Impossible de decoder la photo de profil.');
+            throw new \RuntimeException('Impossible de décoder la photo de profil.');
         }
 
         $extension = match ($mimeType) {
@@ -134,7 +134,7 @@ final readonly class UploadedImageStorage
         $targetPath = $uploadDir.'/'.$filename;
 
         if (false === file_put_contents($targetPath, $rawData)) {
-            throw new \RuntimeException('Impossible d enregistrer la photo de profil.');
+            throw new \RuntimeException('Impossible d’enregistrer la photo de profil.');
         }
 
         return '/uploads/'.$folder.'/'.$filename;
@@ -196,10 +196,10 @@ final readonly class UploadedImageStorage
             );
 
             if ($response->getStatusCode() >= 400) {
-                throw new \RuntimeException('Supabase Storage a refuse l image envoyee.');
+                throw new \RuntimeException('Supabase Storage a refusé le média envoyé.');
             }
         } catch (TransportException|\RuntimeException) {
-            throw new \RuntimeException('Impossible d enregistrer l image sur Supabase Storage.');
+            throw new \RuntimeException('Impossible d’enregistrer le média sur Supabase Storage.');
         }
 
         return $this->getSupabaseBaseUrl().'/storage/v1/object/public/'.$this->supabaseStorageBucket.'/'.$objectPath;
@@ -258,13 +258,13 @@ final readonly class UploadedImageStorage
     private function getUploadErrorMessage(int $errorCode): string
     {
         return match ($errorCode) {
-            \UPLOAD_ERR_INI_SIZE, \UPLOAD_ERR_FORM_SIZE => 'L image envoyee est trop lourde pour le serveur. Essaie un fichier plus leger.',
-            \UPLOAD_ERR_PARTIAL => 'L image n a ete envoyee que partiellement. Reessaie l envoi.',
-            \UPLOAD_ERR_NO_FILE => 'Aucune image n a ete envoyee. Selectionne une image puis reessaie.',
-            \UPLOAD_ERR_NO_TMP_DIR => 'Le serveur ne trouve pas le dossier temporaire pour recevoir l image.',
-            \UPLOAD_ERR_CANT_WRITE => 'Le serveur n a pas pu enregistrer l image envoyee.',
-            \UPLOAD_ERR_EXTENSION => 'Une extension du serveur a bloque l envoi de l image.',
-            default => 'Le fichier image envoye est invalide ou incomplet.',
+            \UPLOAD_ERR_INI_SIZE, \UPLOAD_ERR_FORM_SIZE => 'L’image envoyée est trop lourde pour le serveur. Essaie un fichier plus léger.',
+            \UPLOAD_ERR_PARTIAL => 'L’image n’a été envoyée que partiellement. Réessaie l’envoi.',
+            \UPLOAD_ERR_NO_FILE => 'Aucune image n’a été envoyée. Sélectionne une image puis réessaie.',
+            \UPLOAD_ERR_NO_TMP_DIR => 'Le serveur ne trouve pas le dossier temporaire pour recevoir l’image.',
+            \UPLOAD_ERR_CANT_WRITE => 'Le serveur n’a pas pu enregistrer l’image envoyée.',
+            \UPLOAD_ERR_EXTENSION => 'Une extension du serveur a bloqué l’envoi de l’image.',
+            default => 'Le fichier image envoyé est invalide ou incomplet.',
         };
     }
 }

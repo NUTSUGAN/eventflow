@@ -923,7 +923,7 @@ class AuthController extends AbstractController
         $rawData = base64_decode((string) ($matches[2] ?? ''), true);
 
         if (false === $rawData || '' === $rawData) {
-            throw new \RuntimeException('Impossible de decoder la photo de profil.');
+            throw new \RuntimeException('Impossible de décoder la photo de profil.');
         }
 
         $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/profiles';
@@ -944,7 +944,7 @@ class AuthController extends AbstractController
         $targetPath = $uploadDir.'/'.$filename;
 
         if (false === file_put_contents($targetPath, $rawData)) {
-            throw new \RuntimeException('Impossible denregistrer la photo de profil.');
+            throw new \RuntimeException('Impossible d’enregistrer la photo de profil.');
         }
 
         return '/uploads/profiles/'.$filename;
