@@ -101,7 +101,7 @@ final class OrganizerWithdrawalController extends AbstractController
         }
 
         $isOwner = $withdrawal->getOrganizer()?->getId() === $user->getId();
-        $isAdmin = User::ROLE_ADMIN === $user->getEffectiveRole();
+        $isAdmin = $user->isAdminAccount();
 
         if (!$isOwner && !$isAdmin) {
             return $this->json(['message' => 'Ce suivi de retrait ne t’appartient pas.'], Response::HTTP_FORBIDDEN);
@@ -150,6 +150,6 @@ final class OrganizerWithdrawalController extends AbstractController
 
     private function isOrganizerOrAdmin(User $user): bool
     {
-        return in_array($user->getEffectiveRole(), [User::ROLE_ORGANIZER, User::ROLE_ADMIN], true);
+        return User::ROLE_ORGANIZER === $user->getEffectiveRole() || $user->isAdminAccount();
     }
 }

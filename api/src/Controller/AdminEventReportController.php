@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/event-reports')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_SUPPORT')]
 final class AdminEventReportController extends AbstractController
 {
     #[Route('', name: 'api_admin_event_report_index', methods: ['GET'])]

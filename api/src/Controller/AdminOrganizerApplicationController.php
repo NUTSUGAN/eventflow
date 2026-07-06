@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/organizer-applications')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_SUPPORT')]
 final class AdminOrganizerApplicationController extends AbstractController
 {
     #[Route('', name: 'api_admin_organizer_application_index', methods: ['GET'])]
@@ -59,7 +59,7 @@ final class AdminOrganizerApplicationController extends AbstractController
             ->setReviewedAt($now)
         ;
 
-        if ($user->getRole() !== User::ROLE_ADMIN) {
+        if (!$user->isAdminAccount()) {
             $user->setRole(User::ROLE_ORGANIZER);
         }
 
@@ -107,7 +107,7 @@ final class AdminOrganizerApplicationController extends AbstractController
             ->setReviewedAt(new \DateTimeImmutable())
         ;
 
-        if ($user->getBaseRole() !== User::ROLE_ADMIN) {
+        if (!$user->isAdminAccount()) {
             $user->setRole(User::ROLE_CLIENT);
         }
 

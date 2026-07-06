@@ -14,6 +14,7 @@ use App\Repository\CheckinRepository;
 use App\Repository\AbonnementOrganisateurRepository;
 use App\Repository\EventRepository;
 use App\Repository\WithdrawalSettingRepository;
+use App\Service\UploadedImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -26,6 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/organizer/events')]
 final class OrganizerEventController extends AbstractController
 {
+    use OrganizerAdminReadOnlyTrait;
+
     private const ORGANIZER_TIMEZONE = 'Europe/Paris';
     private const ALLOWED_STATUSES = ['draft', 'published'];
     private const DEFAULT_CATEGORIES = [
@@ -35,29 +38,34 @@ final class OrganizerEventController extends AbstractController
         ],
         [
             'name' => 'Festival',
-            'description' => 'Festivals, grands rassemblements et formats multi-scenes.',
+            'description' => 'Festivals, grands rassemblements et formats multi-scènes.',
         ],
         [
-            'name' => 'Conference',
-            'description' => 'Conferences, talks et évènements professionnels.',
+            'name' => 'Conférence',
+            'description' => 'Conférences, talks et évènements professionnels.',
         ],
         [
             'name' => 'Atelier',
-            'description' => 'Ateliers pratiques, masterclass et sessions guidees.',
+            'description' => 'Ateliers pratiques, masterclass et sessions guidées.',
         ],
         [
             'name' => 'Spectacle',
-            'description' => 'Spectacles, stand-up, theatre et performances artistiques.',
+            'description' => 'Spectacles, stand-up, théâtre et performances artistiques.',
         ],
         [
             'name' => 'Exposition',
-            'description' => 'Expositions, pop-up culturels et experiences immersives.',
+            'description' => 'Expositions, pop-up culturels et expériences immersives.',
         ],
         [
             'name' => 'Sport',
             'description' => 'Rencontres sportives, tournois et évènements fitness.',
         ],
     ];
+
+    public function __construct(
+        private readonly UploadedImageStorage $imageStorage,
+    ) {
+    }
 
     #[Route('/options', name: 'api_organizer_event_options', methods: ['GET'])]
     public function options(
@@ -68,7 +76,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -99,7 +107,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -130,7 +138,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -213,9 +221,13 @@ final class OrganizerEventController extends AbstractController
     ): JsonResponse {
         $user = $this->getUser();
 
+        if ($user instanceof User && null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
+        }
+
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -366,7 +378,7 @@ final class OrganizerEventController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'l’évènement crée avec succès.',
+            'message' => 'L’évènement a été créé avec succès.',
             'event' => $this->serializeEvent($event),
         ], Response::HTTP_CREATED);
     }
@@ -382,7 +394,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -425,7 +437,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -441,6 +453,10 @@ final class OrganizerEventController extends AbstractController
             return $this->json([
                 'message' => 'l’évènement introuvable.',
             ], Response::HTTP_NOT_FOUND);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
         }
 
         $data = $this->getRequestData($request);
@@ -544,7 +560,7 @@ final class OrganizerEventController extends AbstractController
         if ($allocatedTicketStock > (int) $capacity) {
             return $this->json([
                 'message' => sprintf(
-                    'La capacité de l’l’évènement (%d) ne peut pas être inférieure au stock déjà alloue aux billets (%d).',
+                    'La capacité de l’évènement (%d) ne peut pas être inférieure au stock déjà alloué aux billets (%d).',
                     (int) $capacity,
                     $allocatedTicketStock
                 ),
@@ -586,21 +602,27 @@ final class OrganizerEventController extends AbstractController
 
         if ($eventVideoFile instanceof UploadedFile && $endDatetime >= $now) {
             return $this->json([
-                'message' => 'La vidéo souvenir peut être ajoutee uniquement quand l’l’évènement est terminé.',
+                'message' => 'La vidéo souvenir peut être ajoutée uniquement quand l’évènement est terminé.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         try {
             if ($thumbnailFile instanceof UploadedFile) {
+                $previousThumbnailPhoto = $event->getThumbnailPhoto();
                 $event->setThumbnailPhoto($this->uploadImage($thumbnailFile));
+                $this->imageStorage->remove($previousThumbnailPhoto);
             }
 
             if ($coverFile instanceof UploadedFile) {
+                $previousCoverPhoto = $event->getCoverPhoto();
                 $event->setCoverPhoto($this->uploadImage($coverFile));
+                $this->imageStorage->remove($previousCoverPhoto);
             }
 
             if ($eventVideoFile instanceof UploadedFile) {
+                $previousEventVideo = $event->getEventVideo();
                 $event->setEventVideo($this->uploadVideo($eventVideoFile));
+                $this->imageStorage->remove($previousEventVideo);
             }
         } catch (\Throwable $exception) {
             return $this->json([
@@ -636,7 +658,7 @@ final class OrganizerEventController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'La fiche l’évènement a été mise à jour avec succès.',
+            'message' => 'La fiche de l’évènement a été mise à jour avec succès.',
             'event' => $this->serializeEvent($event),
         ]);
     }
@@ -652,7 +674,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -660,6 +682,10 @@ final class OrganizerEventController extends AbstractController
             return $this->json([
                 'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], Response::HTTP_FORBIDDEN);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
         }
 
         $event = $eventRepository->find($eventId);
@@ -671,7 +697,7 @@ final class OrganizerEventController extends AbstractController
         }
 
         if (
-            $user->getRole() !== User::ROLE_ADMIN &&
+            !$user->isAdminAccount() &&
             $event->getOrganizer()?->getId() !== $user->getId()
         ) {
             return $this->json([
@@ -690,7 +716,7 @@ final class OrganizerEventController extends AbstractController
 
         if ($event->getStatus() === $status) {
             return $this->json([
-                'message' => 'Le statut de cet l’évènement est déjà à jour.',
+                'message' => 'Le statut de cet évènement est déjà à jour.',
                 'event' => $this->serializeEvent($event),
             ]);
         }
@@ -699,7 +725,7 @@ final class OrganizerEventController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Le statut de l’l’évènement a été mis à jour.',
+            'message' => 'Le statut de l’évènement a été mis à jour.',
             'event' => $this->serializeEvent($event),
         ]);
     }
@@ -759,7 +785,7 @@ final class OrganizerEventController extends AbstractController
         $roles = $user->getRoles();
 
         return in_array(User::ROLE_ORGANIZER, $roles, true)
-            || in_array(User::ROLE_ADMIN, $roles, true);
+            || $user->isAdminAccount();
     }
 
     private function resolveOrganizerEvent(
@@ -774,7 +800,7 @@ final class OrganizerEventController extends AbstractController
         }
 
         if (
-            $user->getRole() !== User::ROLE_ADMIN &&
+            !$user->isAdminAccount() &&
             $event->getOrganizer()?->getId() !== $user->getId()
         ) {
             return null;
@@ -823,6 +849,8 @@ final class OrganizerEventController extends AbstractController
 
     private function uploadImage(UploadedFile $file): string
     {
+        return $this->imageStorage->storeUploadedImage($file, 'events', 'event');
+
         if (!$file->isValid()) {
             throw new \RuntimeException($this->getUploadErrorMessage($file->getError()));
         }
@@ -862,13 +890,15 @@ final class OrganizerEventController extends AbstractController
 
     private function uploadVideo(UploadedFile $file): string
     {
+        return $this->imageStorage->storeUploadedVideo($file, 'events/videos', 'event_video');
+
         if (!$file->isValid()) {
             throw new \RuntimeException('La vidéo envoyée est invalide ou trop lourde.');
         }
 
         $mimeType = $file->getClientMimeType() ?? '';
 
-        if (!str_starts_with($mimeType, 'vidéo/')) {
+        if (!str_starts_with($mimeType, 'video/')) {
             throw new \RuntimeException('Le fichier envoyé doit être une vidéo.');
         }
 
@@ -1274,7 +1304,7 @@ final class OrganizerEventController extends AbstractController
                 $ticketSalesEndAt > $startDatetime
             ) {
                 return sprintf(
-                    'Le billet "%s" se vend encore apres le nouveau début de l’l’évènement. Ajuste ses dates de vente ou la date de l’l’évènement.',
+                    'Le billet "%s" se vend encore après le nouveau début de l’évènement. Ajuste ses dates de vente ou la date de l’évènement.',
                     $ticketType->getName() ?? 'Sans nom'
                 );
             }

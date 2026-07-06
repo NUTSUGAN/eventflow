@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminOrders } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { canViewAdminOrders } from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
 import { usePagination } from '../../hooks/usePagination'
 import type { AdminOrderSummary } from '../../types/admin'
@@ -80,7 +81,7 @@ export function AdminOrdersPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canViewAdminOrders(user)) {
           navigate('/account', { replace: true })
           return
         }

@@ -62,7 +62,7 @@ final class OrganizerStaffService
 
         $staffUserBaseRole = $staffUser->getBaseRole();
 
-        if ($staffUserBaseRole === User::ROLE_ADMIN) {
+        if (User::isAdminRole($staffUserBaseRole)) {
             throw new \DomainException('Tu ne peux pas ajouter un administrateur dans ton staff.');
         }
 
@@ -145,7 +145,7 @@ final class OrganizerStaffService
      */
     public function getAccessibleOrganizerIds(User $user): array
     {
-        if ($user->getRole() === User::ROLE_ADMIN) {
+        if ($user->isAdminAccount()) {
             return [];
         }
 
@@ -165,7 +165,7 @@ final class OrganizerStaffService
 
     public function canAccessEvent(User $user, Event $event): bool
     {
-        if ($user->getRole() === User::ROLE_ADMIN) {
+        if ($user->isAdminAccount()) {
             return true;
         }
 

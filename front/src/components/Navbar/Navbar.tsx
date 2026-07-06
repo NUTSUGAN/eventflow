@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getCurrentUser, logoutUser, readCachedCurrentUser } from '../../api/auth'
 import { getSearchSuggestions } from '../../api/events'
+import { canUseOrganizerAdminTools, isAdminUser } from '../../auth/adminPermissions'
 import type { AuthUser } from '../../types/auth'
 import type {
   SearchSuggestionEvent,
@@ -230,8 +231,7 @@ export function Navbar() {
         setCurrentUser(refreshedUser)
 
         const userHasOrganizerAccess =
-          refreshedUser.role === 'ROLE_ORGANIZER' ||
-          refreshedUser.role === 'ROLE_ADMIN'
+          canUseOrganizerAdminTools(refreshedUser)
 
         navigate(userHasOrganizerAccess ? '/organizer/dashboard' : '/organizer-access')
       } catch {
@@ -245,7 +245,7 @@ export function Navbar() {
   }
 
   const hasOrganizerAccess =
-    currentUser?.role === 'ROLE_ORGANIZER' || currentUser?.role === 'ROLE_ADMIN'
+    canUseOrganizerAdminTools(currentUser)
 
   function handleAuthNavigation(mode: 'login' | 'register', intent: '' | 'organizer' = '') {
     setIsSearchOpen(false)
@@ -510,7 +510,7 @@ export function Navbar() {
                 >
                   {hasOrganizerAccess ? 'Espace organisateur' : 'Devenir organisateur'}
                 </ProfileDropdownAction>
-                {currentUser.role === 'ROLE_ADMIN' ? (
+                {isAdminUser(currentUser) ? (
                   <ProfileDropdownAction
                     type="button"
                     onClick={() => {
@@ -590,7 +590,7 @@ export function Navbar() {
               >
                 {hasOrganizerAccess ? 'Espace organisateur' : 'Devenir organisateur'}
               </MobileMenuLink>
-              {currentUser.role === 'ROLE_ADMIN' ? (
+              {isAdminUser(currentUser) ? (
                 <MobileMenuLink
                   type="button"
                   onClick={() => {

@@ -53,7 +53,12 @@ export type AdminEventUpdateResponse = {
   event: AdminEventSummary
 }
 
-export type AdminUserRole = 'ROLE_CLIENT' | 'ROLE_ORGANIZER' | 'ROLE_ADMIN'
+export type AdminUserRole =
+  | 'ROLE_CLIENT'
+  | 'ROLE_ORGANIZER'
+  | 'ROLE_ADMIN'
+  | 'ROLE_ADMIN_SUPPORT'
+  | 'ROLE_ADMIN_FINANCE'
 export type AdminAccountStatus = 'active' | 'disabled' | 'blocked'
 
 export type AdminUserSummary = {
@@ -258,4 +263,36 @@ export type AdminTicketSummary = {
       email: string | null
     }
   } | null
+}
+
+export type AdminAuditLogSummary = {
+  id: number
+  action: string
+  resourceType: string
+  resourceId: string | null
+  resourceLabel: string | null
+  status: string
+  metadata: Record<string, unknown>
+  createdAt: string
+  actor: {
+    id: number | null
+    email: string | null
+    fullName: string | null
+    role: string
+  }
+}
+
+export type AdminAuditLogsResponse = {
+  items: AdminAuditLogSummary[]
+}
+
+export type AdminAccountSummary = {
+  id: number
+  email: string | null
+  firstName: string | null
+  lastName: string | null
+  fullName: string
+  role: string
+  accountStatus: string
+  createdAt: string | null
 }

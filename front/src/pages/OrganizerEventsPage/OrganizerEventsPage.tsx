@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import { getBackendPublicUrl } from '../../api/client'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
 import {
@@ -121,7 +122,7 @@ export function OrganizerEventsPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           const organizerState = await getMyOrganizerApplication()
 
           if (isMounted) {

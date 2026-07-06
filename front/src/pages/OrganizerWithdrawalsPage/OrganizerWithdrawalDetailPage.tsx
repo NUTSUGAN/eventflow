@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import { getOrganizerWithdrawal } from '../../api/withdrawals'
 import type { WithdrawalStatus, WithdrawalSummary } from '../../types/withdrawal'
 import {
@@ -119,7 +120,7 @@ export function OrganizerWithdrawalDetailPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           navigate('/organizer-access', { replace: true })
           return
         }

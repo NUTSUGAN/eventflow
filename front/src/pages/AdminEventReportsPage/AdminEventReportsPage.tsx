@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { getAdminEventReports } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent } from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
 import { usePagination } from '../../hooks/usePagination'
 import type {
@@ -110,7 +111,7 @@ export function AdminEventReportsPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return
         }

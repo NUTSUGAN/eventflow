@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminTickets } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent } from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
 import { usePagination } from '../../hooks/usePagination'
 import type { AdminTicketSummary } from '../../types/admin'
@@ -113,7 +114,7 @@ export function AdminTicketsPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return
         }

@@ -6,6 +6,7 @@ import {
   updateAdminEventReportStatus,
 } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent } from '../../auth/adminPermissions'
 import type {
   AdminEventReportStatus,
   AdminEventReportSummary,
@@ -117,7 +118,7 @@ export function AdminEventReportDetailPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return
         }

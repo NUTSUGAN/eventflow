@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const AdminDashboardSection = styled.main`
-  width: min(1240px, calc(100% - 40px));
+  width: min(1300px, calc(100% - 40px));
   margin: 56px auto 96px;
   display: grid;
   gap: 22px;

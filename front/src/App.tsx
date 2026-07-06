@@ -9,6 +9,7 @@ import { ContactPage } from './pages/ContactPage/ContactPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminEventReportDetailPage } from './pages/AdminEventReportsPage/AdminEventReportDetailPage'
 import { AdminEventReportsPage } from './pages/AdminEventReportsPage/AdminEventReportsPage'
+import { AdminLogsPage } from './pages/AdminLogsPage/AdminLogsPage'
 import { AdminOrganizerApplicationsPage } from './pages/AdminOrganizerApplicationsPage/AdminOrganizerApplicationsPage'
 import { AdminOrdersPage } from './pages/AdminOrdersPage/AdminOrdersPage'
 import { AdminPromotionsPage } from './pages/AdminPromotionsPage/AdminPromotionsPage'
@@ -64,6 +65,7 @@ function App() {
         <Routes>
           <Route path="/" element={<EventsListPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/logs" element={<AdminLogsPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
           <Route path="/admin/event-reports" element={<AdminEventReportsPage />} />
           <Route path="/admin/event-reports/:reportId" element={<AdminEventReportDetailPage />} />

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent } from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
 import { usePagination } from '../../hooks/usePagination'
 import {
@@ -87,7 +88,7 @@ export function AdminOrganizerApplicationsPage() {
       try {
         const user = await getCurrentUser()
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return
         }
@@ -319,7 +320,7 @@ export function AdminOrganizerApplicationsPage() {
         <AdminOrganizerApplicationsState>
           Chargement des demandes organisateur...
         </AdminOrganizerApplicationsState>
-      ) : currentUser?.role !== 'ROLE_ADMIN' ? (
+      ) : !canManageAdminContent(currentUser) ? (
         <AdminOrganizerApplicationsState>
           Cette vue est réservée à l’administration EventFlow.
         </AdminOrganizerApplicationsState>

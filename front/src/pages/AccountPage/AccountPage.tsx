@@ -7,6 +7,7 @@ import {
   requestEmailChange,
   updateCurrentUser,
 } from '../../api/auth'
+import { canUseOrganizerAdminTools, isAdminUser } from '../../auth/adminPermissions'
 import type { AuthUser } from '../../types/auth'
 import {
   AccountActions,
@@ -93,7 +94,11 @@ function getInitials(user: AuthUser): string {
 function getFriendlyRoleLabel(role: string): string {
   switch (role) {
     case 'ROLE_ADMIN':
-      return 'Administrateur'
+      return 'Super administrateur'
+    case 'ROLE_ADMIN_SUPPORT':
+      return 'Admin support'
+    case 'ROLE_ADMIN_FINANCE':
+      return 'Admin finance'
     case 'ROLE_ORGANIZER':
       return 'Organisateur'
     case 'ROLE_STAFF':
@@ -148,7 +153,7 @@ export function AccountPage() {
   const [emailChangeStatusMessage, setEmailChangeStatusMessage] = useState<string | null>(null)
 
   const hasOrganizerAccess =
-    user?.role === 'ROLE_ORGANIZER' || user?.role === 'ROLE_ADMIN'
+    canUseOrganizerAdminTools(user)
 
   useEffect(() => {
     let isMounted = true
@@ -422,7 +427,7 @@ export function AccountPage() {
             >
               {hasOrganizerAccess ? 'Espace organisateur' : 'Devenir organisateur'}
             </AccountSecondaryButton>
-            {user.role === 'ROLE_ADMIN' ? (
+            {isAdminUser(user) ? (
               <AccountSecondaryButton type="button" onClick={() => navigate('/admin')}>
                 Ouvrir la console admin
               </AccountSecondaryButton>

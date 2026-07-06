@@ -395,7 +395,7 @@ class EventRepository extends ServiceEntityRepository
             ->addOrderBy('event.id', 'DESC')
         ;
 
-        if ($user->getRole() === User::ROLE_ADMIN) {
+        if ($user->isAdminAccount()) {
             /** @var list<Event> $events */
             $events = $queryBuilder->getQuery()->getResult();
 

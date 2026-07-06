@@ -10,6 +10,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\LocationRepository;
 use App\Repository\UserRepository;
+use App\Service\UploadedImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -19,10 +20,15 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/events')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_SUPPORT')]
 final class AdminEventController extends AbstractController
 {
     private const ALLOWED_STATUSES = ['draft', 'published', 'cancelled'];
+
+    public function __construct(
+        private readonly UploadedImageStorage $imageStorage,
+    ) {
+    }
 
     #[Route('', name: 'api_admin_event_index', methods: ['GET'])]
     public function index(EventRepository $eventRepository): JsonResponse
@@ -118,7 +124,7 @@ final class AdminEventController extends AbstractController
 
         if (
             !in_array(User::ROLE_ORGANIZER, $organizer->getRoles(), true) &&
-            !in_array(User::ROLE_ADMIN, $organizer->getRoles(), true)
+            !$organizer->isAdminAccount()
         ) {
             return $this->json([
                 'message' => 'L’utilisateur sélectionné doit être organisateur ou administrateur.'
@@ -247,7 +253,7 @@ final class AdminEventController extends AbstractController
             }
         if (
             !in_array(User::ROLE_ORGANIZER, $organizer->getRoles(), true) &&
-            !in_array(User::ROLE_ADMIN, $organizer->getRoles(), true)
+            !$organizer->isAdminAccount()
         ) {
             return $this->json([
                 'message' => 'L’utilisateur sélectionné doit être organisateur ou administrateur.'
@@ -354,6 +360,8 @@ final class AdminEventController extends AbstractController
 
     private function uploadImage(UploadedFile $file): string
     {
+        return $this->imageStorage->storeUploadedImage($file, 'events', 'event');
+
         $mimeType = $file->getMimeType() ?? '';
 
         if (!str_starts_with($mimeType, 'image/')) {
@@ -379,6 +387,10 @@ final class AdminEventController extends AbstractController
 
     private function removeUploadedFile(?string $relativePath): void
     {
+        $this->imageStorage->remove($relativePath);
+
+        return;
+
         if (!$relativePath) {
             return;
         }

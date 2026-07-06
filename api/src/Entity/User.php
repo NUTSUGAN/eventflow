@@ -17,6 +17,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const ROLE_ORGANIZER = 'ROLE_ORGANIZER';
     public const ROLE_STAFF = 'ROLE_STAFF';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const ROLE_ADMIN_SUPPORT = 'ROLE_ADMIN_SUPPORT';
+    public const ROLE_ADMIN_FINANCE = 'ROLE_ADMIN_FINANCE';
+
+    public const ADMIN_ROLES = [
+        self::ROLE_ADMIN,
+        self::ROLE_ADMIN_SUPPORT,
+        self::ROLE_ADMIN_FINANCE,
+    ];
 
     public const ACCOUNT_STATUS_ACTIVE = 'active';
     public const ACCOUNT_STATUS_DISABLED = 'disabled';
@@ -243,7 +251,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $baseRole = $this->getBaseRole();
         $roles = [$baseRole];
 
-        if ($this->hasActiveStaffMembership() && !in_array($baseRole, [self::ROLE_ADMIN, self::ROLE_ORGANIZER], true)) {
+        if (self::ROLE_ADMIN === $baseRole) {
+            $roles[] = self::ROLE_ADMIN_SUPPORT;
+            $roles[] = self::ROLE_ADMIN_FINANCE;
+        }
+
+        if ($this->hasActiveStaffMembership() && !in_array($baseRole, [self::ROLE_ORGANIZER, ...self::ADMIN_ROLES], true)) {
             array_unshift($roles, self::ROLE_STAFF);
         } elseif ($this->hasActiveStaffMembership()) {
             $roles[] = self::ROLE_STAFF;
@@ -268,9 +281,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return in_array(
             $this->getBaseRole(),
-            [self::ROLE_ORGANIZER, self::ROLE_ADMIN],
+            [self::ROLE_ORGANIZER, ...self::ADMIN_ROLES],
             true,
         );
+    }
+
+    public static function isAdminRole(?string $role): bool
+    {
+        return is_string($role) && in_array($role, self::ADMIN_ROLES, true);
+    }
+
+    public function isAdminAccount(): bool
+    {
+        return self::isAdminRole($this->getBaseRole());
+    }
+
+    public function isSuperAdminAccount(): bool
+    {
+        return self::ROLE_ADMIN === $this->getBaseRole();
     }
 
     public function canManageStaff(): bool
@@ -730,6 +758,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             self::ROLE_ORGANIZER,
             self::ROLE_STAFF,
             self::ROLE_ADMIN,
+            self::ROLE_ADMIN_SUPPORT,
+            self::ROLE_ADMIN_FINANCE,
         ], true) ? $role : self::ROLE_CLIENT;
     }
 

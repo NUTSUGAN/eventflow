@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import { getOrganizerPromotion } from '../../api/promotions'
 import type { PromotionCampaign } from '../../types/promotion'
 import {
@@ -91,7 +92,7 @@ export function OrganizerPromotionDetailPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           navigate('/organizer-access', { replace: true })
           return
         }

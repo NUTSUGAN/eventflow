@@ -6,6 +6,7 @@ import {
   updateAdminUserRole,
 } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminAccounts, canManageAdminContent } from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
 import { usePagination } from '../../hooks/usePagination'
 import type {
@@ -48,6 +49,16 @@ import {
 
 type RoleFilter = AdminUserRole | 'all'
 type AdminUsersTabId = 'users' | 'subscribers'
+type AdminRoleChoice = Extract<
+  AdminUserRole,
+  'ROLE_ADMIN' | 'ROLE_ADMIN_SUPPORT' | 'ROLE_ADMIN_FINANCE'
+>
+
+const adminRoleChoices: Array<{ role: AdminRoleChoice; label: string }> = [
+  { role: 'ROLE_ADMIN', label: 'Super admin' },
+  { role: 'ROLE_ADMIN_SUPPORT', label: 'Admin support' },
+  { role: 'ROLE_ADMIN_FINANCE', label: 'Admin finance' },
+]
 
 function formatDate(value: string | null): string {
   if (!value) {
@@ -63,7 +74,11 @@ function formatDate(value: string | null): string {
 function getRoleLabel(role: string): string {
   switch (role) {
     case 'ROLE_ADMIN':
-      return 'Admin'
+      return 'Super admin'
+    case 'ROLE_ADMIN_SUPPORT':
+      return 'Admin support'
+    case 'ROLE_ADMIN_FINANCE':
+      return 'Admin finance'
     case 'ROLE_ORGANIZER':
       return 'Organisateur'
     default:
@@ -74,6 +89,8 @@ function getRoleLabel(role: string): string {
 function getRoleTone(role: string): 'success' | 'warning' | 'danger' | 'neutral' {
   switch (role) {
     case 'ROLE_ADMIN':
+    case 'ROLE_ADMIN_SUPPORT':
+    case 'ROLE_ADMIN_FINANCE':
       return 'danger'
     case 'ROLE_ORGANIZER':
       return 'success'
@@ -85,9 +102,9 @@ function getRoleTone(role: string): 'success' | 'warning' | 'danger' | 'neutral'
 function getAccountStatusLabel(accountStatus: string): string {
   switch (accountStatus) {
     case 'blocked':
-      return 'Bloque'
+      return 'Bloqué'
     case 'disabled':
-      return 'Desactive'
+      return 'Désactivé'
     default:
       return 'Actif'
   }
@@ -139,6 +156,8 @@ function formatEventflowSubscriptionTargets(user: AdminUserSummary): string {
 
 export function AdminUsersPage() {
   const navigate = useNavigate()
+  const [canEditAdmins, setCanEditAdmins] = useState(false)
+  const [adminRoleChoiceUserId, setAdminRoleChoiceUserId] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState<AdminUsersTabId>('users')
   const [users, setUsers] = useState<AdminUserSummary[]>([])
   const [search, setSearch] = useState('')
@@ -175,7 +194,7 @@ export function AdminUsersPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return
         }
@@ -183,6 +202,7 @@ export function AdminUsersPage() {
         const nextUsers = await getAdminUsers()
 
         if (isMounted) {
+          setCanEditAdmins(canManageAdminAccounts(user))
           setUsers(nextUsers)
         }
       } catch (error) {
@@ -250,9 +270,10 @@ export function AdminUsersPage() {
           currentUser.id === user.id ? response.user : currentUser,
         ),
       )
+      setAdminRoleChoiceUserId(null)
       setStatusMessage(response.message)
     } catch (error) {
-      setErrorMessage(readApiMessage(error, 'Impossible de modifier ce role.'))
+      setErrorMessage(readApiMessage(error, 'Impossible de modifier ce rôle.'))
     } finally {
       setUpdatingUserId(null)
     }
@@ -300,12 +321,12 @@ export function AdminUsersPage() {
       ])
 
     if (rows.length === 0) {
-      setErrorMessage('Aucun’abonne EventFlow à exporter.')
+      setErrorMessage('Aucun abonné EventFlow à exporter.')
       return
     }
 
     const csv = [
-      ['Prénom', 'Nom', 'Nom complet', 'Email', 'Role', 'Organisateurs suivis', 'Date inscription'],
+      ['Prénom', 'Nom', 'Nom complet', 'Email', 'Rôle', 'Organisateurs suivis', 'Date inscription'],
       ...rows,
     ]
       .map((row) => row.map(escapeCsvValue).join(';'))
@@ -330,7 +351,7 @@ export function AdminUsersPage() {
           <AdminDashboardEyebrow>Administration</AdminDashboardEyebrow>
           <AdminDashboardTitle>Gestion utilisateurs</AdminDashboardTitle>
           <AdminDashboardText>
-            Comptes, roles et historique utile pour suivre l’activité plateforme.
+            Comptes, rôles et historique utile pour suivre l’activité plateforme.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>
@@ -402,7 +423,7 @@ export function AdminUsersPage() {
             />
           </AdminDashboardField>
           <AdminDashboardField>
-            <AdminDashboardLabel>Role</AdminDashboardLabel>
+            <AdminDashboardLabel>Rôle</AdminDashboardLabel>
             <AdminDashboardSelect
               value={roleFilter}
               onChange={(event) => setRoleFilter(event.target.value as RoleFilter)}
@@ -410,7 +431,9 @@ export function AdminUsersPage() {
               <option value="all">Tous</option>
               <option value="ROLE_CLIENT">Clients</option>
               <option value="ROLE_ORGANIZER">Organisateurs</option>
-              <option value="ROLE_ADMIN">Admins</option>
+              {canEditAdmins ? <option value="ROLE_ADMIN">Super admins</option> : null}
+              {canEditAdmins ? <option value="ROLE_ADMIN_SUPPORT">Admins support</option> : null}
+              {canEditAdmins ? <option value="ROLE_ADMIN_FINANCE">Admins finance</option> : null}
             </AdminDashboardSelect>
           </AdminDashboardField>
           <AdminDashboardPrimaryButton type="submit" disabled={isLoading}>
@@ -476,14 +499,34 @@ export function AdminUsersPage() {
                     Passer organisateur
                   </AdminDashboardSecondaryButton>
                 ) : null}
-                {user.role !== 'ROLE_ADMIN' ? (
+                {canEditAdmins && user.role !== 'ROLE_ADMIN' && adminRoleChoiceUserId !== user.id ? (
                   <AdminDashboardSecondaryButton
                     type="button"
                     disabled={updatingUserId === user.id}
-                    onClick={() => void handleRoleUpdate(user, 'ROLE_ADMIN')}
+                    onClick={() =>
+                      setAdminRoleChoiceUserId((current) =>
+                        current === user.id ? null : user.id,
+                      )
+                    }
                   >
                     Passer admin
                   </AdminDashboardSecondaryButton>
+                ) : null}
+                {canEditAdmins && adminRoleChoiceUserId === user.id ? (
+                  <>
+                    {adminRoleChoices
+                      .filter((choice) => choice.role !== user.role)
+                      .map((choice) => (
+                        <AdminDashboardSecondaryButton
+                          key={choice.role}
+                          type="button"
+                          disabled={updatingUserId === user.id}
+                          onClick={() => void handleRoleUpdate(user, choice.role)}
+                        >
+                          {choice.label}
+                        </AdminDashboardSecondaryButton>
+                      ))}
+                  </>
                 ) : null}
                 {user.accountStatus !== 'active' ? (
                   <AdminDashboardSecondaryButton
@@ -537,7 +580,7 @@ export function AdminUsersPage() {
           </AdminDashboardPanelHeader>
           {eventflowSubscribers.length === 0 ? (
             <AdminDashboardMessage $tone="neutral">
-              Aucun’abonne EventFlow dans cette selection.
+              Aucun abonné EventFlow dans cette sélection.
             </AdminDashboardMessage>
           ) : (
             <AdminDashboardList>

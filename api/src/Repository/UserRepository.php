@@ -102,7 +102,11 @@ class UserRepository extends ServiceEntityRepository
     /**
      * @return list<User>
      */
-    public function findForAdminList(?string $query = null, ?string $role = null): array
+    public function findForAdminList(
+        ?string $query = null,
+        ?string $role = null,
+        bool $includeAdminAccounts = false,
+    ): array
     {
         $queryBuilder = $this->createQueryBuilder('user')
             ->leftJoin('user.organizerApplication', 'organizerApplication')
@@ -135,6 +139,43 @@ class UserRepository extends ServiceEntityRepository
             $queryBuilder
                 ->andWhere('user.role = :role')
                 ->setParameter('role', $role)
+            ;
+        }
+
+        if (!$includeAdminAccounts) {
+            $queryBuilder
+                ->andWhere('user.role NOT IN (:adminRoles)')
+                ->setParameter('adminRoles', User::ADMIN_ROLES)
+            ;
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * @return list<User>
+     */
+    public function findAdminAccounts(?string $query = null): array
+    {
+        $queryBuilder = $this->createQueryBuilder('user')
+            ->andWhere('user.role IN (:adminRoles)')
+            ->setParameter('adminRoles', User::ADMIN_ROLES)
+            ->orderBy('user.id', 'DESC')
+            ->setMaxResults(200)
+        ;
+
+        $normalizedQuery = null !== $query ? mb_strtolower(trim($query)) : '';
+
+        if ('' !== $normalizedQuery) {
+            $queryBuilder
+                ->andWhere(
+                    'LOWER(user.email) LIKE :query
+                    OR LOWER(user.firstName) LIKE :query
+                    OR LOWER(user.lastName) LIKE :query
+                    OR LOWER(CONCAT(user.firstName, \' \', user.lastName)) LIKE :query
+                    OR LOWER(CONCAT(user.lastName, \' \', user.firstName)) LIKE :query'
+                )
+                ->setParameter('query', '%'.$normalizedQuery.'%')
             ;
         }
 

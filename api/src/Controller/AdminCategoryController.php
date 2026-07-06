@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/categories')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_SUPPORT')]
 class AdminCategoryController extends AbstractController
 {
     #[Route('', name: 'api_admin_category_index', methods: ['GET'])]

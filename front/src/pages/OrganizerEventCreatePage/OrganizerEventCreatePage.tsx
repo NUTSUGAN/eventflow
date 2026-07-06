@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import {
   createOrganizerEvent,
   getOrganizerEventFormOptions,
@@ -118,7 +119,7 @@ export function OrganizerEventCreatePage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           navigate('/organizer-access', { replace: true })
           return
         }

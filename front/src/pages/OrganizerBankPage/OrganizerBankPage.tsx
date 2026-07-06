@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import {
   getOrganizerPayoutAccount,
   saveOrganizerPayoutAccount,
@@ -108,7 +109,7 @@ export function OrganizerBankPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           navigate('/organizer-access', { replace: true })
           return
         }

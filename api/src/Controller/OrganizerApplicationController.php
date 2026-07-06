@@ -56,7 +56,7 @@ final class OrganizerApplicationController extends AbstractController
             ], 401);
         }
 
-        if (in_array($user->getRole(), [User::ROLE_ORGANIZER, User::ROLE_ADMIN], true)) {
+        if ($user->isOrganizerOrAdmin()) {
             return $this->json([
                 'message' => 'Ton accès organisateur est déjà actif.',
             ], 409);

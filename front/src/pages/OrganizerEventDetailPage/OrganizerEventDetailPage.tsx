@@ -1,8 +1,12 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
-import { PromotionBoosterPanel } from '../../components/PromotionBoosterPanel/PromotionBoosterPanel'
-import { getBackendPublicUrl } from '../../api/client'
+import {
+  ADMIN_ORGANIZER_READ_ONLY_MESSAGE,
+  canEditOrganizerResource,
+  canUseOrganizerAdminTools,
+  isAdminUser,
+} from '../../auth/adminPermissions'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
 import {
   getOrganizerEvent,
@@ -35,10 +39,8 @@ import type {
 import {
   OrganizerEventDetailActions,
   OrganizerEventDetailBackButton,
-  OrganizerEventDetailCover,
   OrganizerEventDetailDangerButton,
   OrganizerEventDetailError,
-  OrganizerEventDetailEyebrow,
   OrganizerEventDetailField,
   OrganizerEventDetailForm,
   OrganizerEventDetailGrid,
@@ -50,10 +52,7 @@ import {
   OrganizerEventDetailGuestName,
   OrganizerEventDetailGuestSection,
   OrganizerEventDetailGuestText,
-  OrganizerEventDetailHero,
-  OrganizerEventDetailHeroContent,
   OrganizerEventDetailHint,
-  OrganizerEventDetailInfoPanel,
   OrganizerEventDetailInfoText,
   OrganizerEventDetailInfoTitle,
   OrganizerEventDetailInput,
@@ -63,22 +62,7 @@ import {
   OrganizerEventDetailMediaGrid,
   OrganizerEventDetailMediaLabel,
   OrganizerEventDetailMediaPreview,
-  OrganizerEventDetailOverviewGrid,
-  OrganizerEventDetailOverviewStat,
-  OrganizerEventDetailOverviewStatHint,
-  OrganizerEventDetailOverviewStatLabel,
-  OrganizerEventDetailOverviewStatValue,
   OrganizerEventDetailPrimaryButton,
-  OrganizerEventDetailScanStaffCard,
-  OrganizerEventDetailScanStaffHeader,
-  OrganizerEventDetailScanStaffList,
-  OrganizerEventDetailScanStaffMeta,
-  OrganizerEventDetailScanStaffName,
-  OrganizerEventDetailScanStaffTotal,
-  OrganizerEventDetailScanStat,
-  OrganizerEventDetailScanStatLabel,
-  OrganizerEventDetailScanStatValue,
-  OrganizerEventDetailScanSummaryGrid,
   OrganizerEventDetailSecondaryButton,
   OrganizerEventDetailSection,
   OrganizerEventDetailSelect,
@@ -89,11 +73,9 @@ import {
   OrganizerEventDetailSplitText,
   OrganizerEventDetailSplitTitle,
   OrganizerEventDetailState,
-  OrganizerEventDetailStatusBadge,
   OrganizerEventDetailSuccess,
   OrganizerEventDetailTabButton,
   OrganizerEventDetailTabs,
-  OrganizerEventDetailText,
   OrganizerEventDetailTextarea,
   OrganizerEventDetailTicketBadge,
   OrganizerEventDetailTicketCard,
@@ -112,9 +94,19 @@ import {
   OrganizerEventDetailTicketStats,
   OrganizerEventDetailTicketText,
   OrganizerEventDetailTicketTitle,
-  OrganizerEventDetailTitle,
   OrganizerEventDetailVideoPreview,
 } from './organizerEventDetailPageElements'
+import {
+  formatCurrencyFromString,
+  formatOrganizerDate,
+  resolveMediaUrl,
+} from './organizerEventDetailFormatters'
+import {
+  OrganizerEventBoosterSection,
+  OrganizerEventHero,
+  OrganizerEventOverviewSection,
+  OrganizerEventScanSection,
+} from './OrganizerEventDetailSections'
 
 const emptyOptions: OrganizerEventFormOptions = {
   categories: [],
@@ -181,7 +173,7 @@ const organizerEventDetailTabs: Array<{
   id: OrganizerEventDetailTab
   label: string
 }> = [
-  { id: 'overview', label: 'Apercu' },
+  { id: 'overview', label: 'Aperçu' },
   { id: 'event', label: 'évènement' },
   { id: 'booster', label: 'Booster' },
   { id: 'scan', label: 'Scan' },
@@ -212,62 +204,6 @@ function addMinutesToDateTimeLocal(value: string, minutes: number): string {
   date.setMinutes(date.getMinutes() + minutes)
 
   return formatDateTimeLocal(date)
-}
-
-function formatOrganizerDate(value: string | null): string {
-  if (!value) {
-    return 'Date à confirmer'
-  }
-
-  return new Intl.DateTimeFormat('fr-FR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
-}
-
-function formatCurrencyFromString(value: string): string {
-  const amount = Number.parseFloat(value)
-
-  if (!Number.isFinite(amount)) {
-    return 'Tarif invalide'
-  }
-
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount)
-}
-
-function formatCurrencyAmount(value: string | number | undefined): string {
-  const amount =
-    typeof value === 'number' ? value : Number.parseFloat(value ?? '0')
-
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Number.isFinite(amount) ? amount : 0)
-}
-
-function formatStatusLabel(status: string): string {
-  return status === 'published' ? 'Public' : 'Brouillon'
-}
-
-function resolveMediaUrl(path: string | null): string | undefined {
-  if (!path) {
-    return undefined
-  }
-
-  if (/^https?:\/\//i.test(path)) {
-    return path
-  }
-
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-
-  return `${getBackendPublicUrl()}${normalizedPath}`
 }
 
 function buildEventFormFromEvent(
@@ -346,6 +282,8 @@ export function OrganizerEventDetailPage() {
   )
   const [currentDateTime] = useState(() => formatDateTimeLocal(new Date()))
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
+  const isAdminReadOnly = isAdminUser(currentUser)
+  const canEditOrganizerEvent = canEditOrganizerResource(currentUser)
   const [event, setEvent] = useState<OrganizerEventSummary | null>(null)
   const [options, setOptions] = useState<OrganizerEventFormOptions>(emptyOptions)
   const [ticketTypes, setTicketTypes] = useState<OrganizerTicketType[]>([])
@@ -466,7 +404,7 @@ export function OrganizerEventDetailPage() {
   const ticketSectionMessage =
     ticketSuccessMessage ??
     (createdFromEventSetup
-      ? "évènement créé avec succès. Tu peux maintenant ajouter les billets de cet évènement."
+      ? "?v?nement cr?? avec succ?s. Tu peux maintenant ajouter les billets de cet ?v?nement."
       : null)
   const scanStats = event?.scanStats ?? null
   const scanStaffMembers = scanStats?.staffMembers ?? []
@@ -508,7 +446,7 @@ export function OrganizerEventDetailPage() {
 
     async function loadOrganizerEventDetail() {
       if (!eventId) {
-        setEventErrorMessage("Impossible de retrouver l’évènement organisateur demande.")
+        setEventErrorMessage("Impossible de retrouver l’évènement organisateur demandé.")
         setIsLoading(false)
         return
       }
@@ -524,7 +462,7 @@ export function OrganizerEventDetailPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           const organizerState = await getMyOrganizerApplication()
 
           if (isMounted) {
@@ -601,6 +539,11 @@ export function OrganizerEventDetailPage() {
     submitEvent.preventDefault()
 
     if (!eventId || isSavingEvent) {
+      return
+    }
+
+    if (!canEditOrganizerEvent) {
+      setEventErrorMessage(ADMIN_ORGANIZER_READ_ONLY_MESSAGE)
       return
     }
 
@@ -723,6 +666,11 @@ export function OrganizerEventDetailPage() {
       return
     }
 
+    if (!canEditOrganizerEvent) {
+      setTicketErrorMessage(ADMIN_ORGANIZER_READ_ONLY_MESSAGE)
+      return
+    }
+
     setIsSavingTicket(true)
     setTicketErrorMessage(null)
     setTicketSuccessMessage(null)
@@ -751,6 +699,11 @@ export function OrganizerEventDetailPage() {
     submitEvent.preventDefault()
 
     if (isSavingTicket) {
+      return
+    }
+
+    if (!canEditOrganizerEvent) {
+      setTicketErrorMessage(ADMIN_ORGANIZER_READ_ONLY_MESSAGE)
       return
     }
 
@@ -788,6 +741,11 @@ export function OrganizerEventDetailPage() {
       return
     }
 
+    if (!canEditOrganizerEvent) {
+      setTicketErrorMessage(ADMIN_ORGANIZER_READ_ONLY_MESSAGE)
+      return
+    }
+
     setDeletingTicketId(ticketTypeId)
     setTicketErrorMessage(null)
     setTicketSuccessMessage(null)
@@ -819,6 +777,11 @@ export function OrganizerEventDetailPage() {
     submitEvent.preventDefault()
 
     if (!eventId || isSendingGuestTicket) {
+      return
+    }
+
+    if (!canEditOrganizerEvent) {
+      setGuestTicketErrorMessage(ADMIN_ORGANIZER_READ_ONLY_MESSAGE)
       return
     }
 
@@ -931,36 +894,7 @@ export function OrganizerEventDetailPage() {
           Revenir à mes évènements
         </OrganizerEventDetailBackButton>
 
-        <OrganizerEventDetailHero>
-          <OrganizerEventDetailCover
-            $imageUrl={resolveMediaUrl(event.coverPhoto ?? event.thumbnailPhoto ?? null)}
-          />
-          <OrganizerEventDetailHeroContent>
-            <OrganizerEventDetailEyebrow>Espace organisateur</OrganizerEventDetailEyebrow>
-            <OrganizerEventDetailTitle>{event.title ?? 'Fiche évènement'}</OrganizerEventDetailTitle>
-            <OrganizerEventDetailText>
-              {currentUser
-                ? `${currentUser.firstName}, pilote cette fiche avec ses ventes, ses scans, sa billetterie et ses réglages depuis les onglets.`
-                : "Retrouve ici la fiche organisateur de ton évènement et sa billetterie."}
-            </OrganizerEventDetailText>
-            <OrganizerEventDetailStatusBadge $published={event.status === 'published'}>
-              {formatStatusLabel(event.status ?? 'draft')}
-            </OrganizerEventDetailStatusBadge>
-
-            <OrganizerEventDetailInfoPanel>
-              <OrganizerEventDetailInfoTitle>Resume de la fiche</OrganizerEventDetailInfoTitle>
-              <OrganizerEventDetailInfoText>
-                {event.category.name ?? 'Catégorie'} - {event.location.city ?? 'Ville'}
-              </OrganizerEventDetailInfoText>
-              <OrganizerEventDetailInfoText>
-                Début: {formatOrganizerDate(event.startDatetime ?? null)}
-              </OrganizerEventDetailInfoText>
-              <OrganizerEventDetailInfoText>
-                Capacité maximale: {event.capacity ?? 0} place(s)
-              </OrganizerEventDetailInfoText>
-            </OrganizerEventDetailInfoPanel>
-          </OrganizerEventDetailHeroContent>
-        </OrganizerEventDetailHero>
+        <OrganizerEventHero event={event} currentUser={currentUser} />
 
         <OrganizerEventDetailTabs aria-label="Sections de la fiche évènement">
           {organizerEventDetailTabs.map((tab) => (
@@ -976,84 +910,13 @@ export function OrganizerEventDetailPage() {
         </OrganizerEventDetailTabs>
 
         {activeTab === 'overview' ? (
-          <OrganizerEventDetailSplitSection>
-            <OrganizerEventDetailSplitHeader>
-              <OrganizerEventDetailSplitEyebrow>Apercu</OrganizerEventDetailSplitEyebrow>
-              <OrganizerEventDetailSplitTitle>Performance de l’évènement</OrganizerEventDetailSplitTitle>
-              <OrganizerEventDetailSplitText>
-                Retrouve les chiffres clés de cette fiche avant de passer aux réglages, au scan ou aux billets.
-              </OrganizerEventDetailSplitText>
-            </OrganizerEventDetailSplitHeader>
-
-            <OrganizerEventDetailOverviewGrid>
-              <OrganizerEventDetailOverviewStat>
-                <OrganizerEventDetailOverviewStatLabel>CA total</OrganizerEventDetailOverviewStatLabel>
-                <OrganizerEventDetailOverviewStatValue>
-                  {formatCurrencyAmount(eventSales.revenueTotal)}
-                </OrganizerEventDetailOverviewStatValue>
-                <OrganizerEventDetailOverviewStatHint>
-                  Paiements confirmés uniquement
-                </OrganizerEventDetailOverviewStatHint>
-              </OrganizerEventDetailOverviewStat>
-
-              <OrganizerEventDetailOverviewStat>
-                <OrganizerEventDetailOverviewStatLabel>Commandes</OrganizerEventDetailOverviewStatLabel>
-                <OrganizerEventDetailOverviewStatValue>
-                  {eventSales.paidOrders}
-                </OrganizerEventDetailOverviewStatValue>
-                <OrganizerEventDetailOverviewStatHint>
-                  Commandes payées sur cet évènement
-                </OrganizerEventDetailOverviewStatHint>
-              </OrganizerEventDetailOverviewStat>
-
-              <OrganizerEventDetailOverviewStat>
-                <OrganizerEventDetailOverviewStatLabel>Billets vendus</OrganizerEventDetailOverviewStatLabel>
-                <OrganizerEventDetailOverviewStatValue>
-                  {eventSales.ticketsSold}
-                </OrganizerEventDetailOverviewStatValue>
-                <OrganizerEventDetailOverviewStatHint>
-                  Places vendues tous types confondus
-                </OrganizerEventDetailOverviewStatHint>
-              </OrganizerEventDetailOverviewStat>
-
-              <OrganizerEventDetailOverviewStat>
-                <OrganizerEventDetailOverviewStatLabel>Staff scan</OrganizerEventDetailOverviewStatLabel>
-                <OrganizerEventDetailOverviewStatValue>
-                  {staffScanParticipants}
-                </OrganizerEventDetailOverviewStatValue>
-                <OrganizerEventDetailOverviewStatHint>
-                  Membre(s) ayant participe au scan
-                </OrganizerEventDetailOverviewStatHint>
-              </OrganizerEventDetailOverviewStat>
-            </OrganizerEventDetailOverviewGrid>
-
-            <OrganizerEventDetailScanSummaryGrid>
-              <OrganizerEventDetailScanStat>
-                <OrganizerEventDetailScanStatLabel>Scans total</OrganizerEventDetailScanStatLabel>
-                <OrganizerEventDetailScanStatValue>
-                  {eventScans.total}
-                </OrganizerEventDetailScanStatValue>
-              </OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStat>
-                <OrganizerEventDetailScanStatLabel>Scans validés</OrganizerEventDetailScanStatLabel>
-                <OrganizerEventDetailScanStatValue>
-                  {eventScans.valid}
-                </OrganizerEventDetailScanStatValue>
-              </OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStat>
-                <OrganizerEventDetailScanStatLabel>Types billets</OrganizerEventDetailScanStatLabel>
-                <OrganizerEventDetailScanStatValue>
-                  {ticketTypes.length}
-                </OrganizerEventDetailScanStatValue>
-              </OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStat>
-                <OrganizerEventDetailScanStatLabel>Places restantes</OrganizerEventDetailScanStatLabel>
-                <OrganizerEventDetailScanStatValue>
-                  {totalAvailableTickets}
-                </OrganizerEventDetailScanStatValue>
-              </OrganizerEventDetailScanStat>
-            </OrganizerEventDetailScanSummaryGrid>
-          </OrganizerEventDetailSplitSection>
+          <OrganizerEventOverviewSection
+            eventSales={eventSales}
+            eventScans={eventScans}
+            staffScanParticipants={staffScanParticipants}
+            ticketTypeCount={ticketTypes.length}
+            totalAvailableTickets={totalAvailableTickets}
+          />
         ) : null}
 
         {activeTab === 'event' ? (
@@ -1072,8 +935,17 @@ export function OrganizerEventDetailPage() {
           {eventSuccessMessage ? (
             <OrganizerEventDetailSuccess>{eventSuccessMessage}</OrganizerEventDetailSuccess>
           ) : null}
+          {isAdminReadOnly ? (
+            <OrganizerEventDetailState>
+              {ADMIN_ORGANIZER_READ_ONLY_MESSAGE}
+            </OrganizerEventDetailState>
+          ) : null}
 
           <OrganizerEventDetailForm onSubmit={handleEventSubmit}>
+            <fieldset
+              disabled={!canEditOrganizerEvent}
+              style={{ border: 0, display: 'contents', margin: 0, padding: 0 }}
+            >
             <OrganizerEventDetailGrid>
               <OrganizerEventDetailField>
                 <OrganizerEventDetailLabel>Titre</OrganizerEventDetailLabel>
@@ -1106,7 +978,7 @@ export function OrganizerEventDetailPage() {
                   required
                 />
                 <OrganizerEventDetailHint>
-                  La capacité ne peut pas descendre sous le stock déjà alloue aux billets.
+                  La capacité ne peut pas descendre sous le stock déjà alloué aux billets.
                 </OrganizerEventDetailHint>
               </OrganizerEventDetailField>
             </OrganizerEventDetailGrid>
@@ -1381,7 +1253,7 @@ export function OrganizerEventDetailPage() {
                     <OrganizerEventDetailLabel>Ajouter ou remplacer la vidéo</OrganizerEventDetailLabel>
                     <OrganizerEventDetailInput
                       type="file"
-                      accept="vidéo/*"
+                      accept="video/*"
                       onChange={(changeEvent) =>
                         setEventForm((current) => ({
                           ...current,
@@ -1436,109 +1308,17 @@ export function OrganizerEventDetailPage() {
                 </OrganizerEventDetailSecondaryButton>
               ) : null}
             </OrganizerEventDetailActions>
+            </fieldset>
           </OrganizerEventDetailForm>
         </OrganizerEventDetailSplitSection>
         ) : null}
 
         {activeTab === 'booster' && event ? (
-          <OrganizerEventDetailSplitSection>
-            <PromotionBoosterPanel eventId={event.id} eventStatus={event.status} />
-          </OrganizerEventDetailSplitSection>
+          <OrganizerEventBoosterSection event={event} isAdminReadOnly={isAdminReadOnly} />
         ) : null}
 
         {activeTab === 'scan' ? (
-        <OrganizerEventDetailSplitSection>
-          <OrganizerEventDetailSplitHeader>
-            <OrganizerEventDetailSplitEyebrow>Scan</OrganizerEventDetailSplitEyebrow>
-            <OrganizerEventDetailSplitTitle>Activite du staff</OrganizerEventDetailSplitTitle>
-            <OrganizerEventDetailSplitText>
-              Suis le nombre de scans realises pour cet évènement, avec le detail
-              par membre du staff ou organisateur ayant utilisé le poste de scan.
-            </OrganizerEventDetailSplitText>
-          </OrganizerEventDetailSplitHeader>
-
-          <OrganizerEventDetailScanSummaryGrid>
-            <OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStatLabel>Total scans</OrganizerEventDetailScanStatLabel>
-              <OrganizerEventDetailScanStatValue>
-                {scanStats?.totalScans ?? 0}
-              </OrganizerEventDetailScanStatValue>
-            </OrganizerEventDetailScanStat>
-            <OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStatLabel>Valides</OrganizerEventDetailScanStatLabel>
-              <OrganizerEventDetailScanStatValue>
-                {scanStats?.validScans ?? 0}
-              </OrganizerEventDetailScanStatValue>
-            </OrganizerEventDetailScanStat>
-            <OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStatLabel>Déjà utilisés</OrganizerEventDetailScanStatLabel>
-              <OrganizerEventDetailScanStatValue>
-                {scanStats?.alreadyUsedScans ?? 0}
-              </OrganizerEventDetailScanStatValue>
-            </OrganizerEventDetailScanStat>
-            <OrganizerEventDetailScanStat>
-              <OrganizerEventDetailScanStatLabel>Invalides</OrganizerEventDetailScanStatLabel>
-              <OrganizerEventDetailScanStatValue>
-                {scanStats?.invalidScans ?? 0}
-              </OrganizerEventDetailScanStatValue>
-            </OrganizerEventDetailScanStat>
-          </OrganizerEventDetailScanSummaryGrid>
-
-          {scanStaffMembers.length > 0 ? (
-            <OrganizerEventDetailScanStaffList>
-              {scanStaffMembers.map((staffSummary) => (
-                <OrganizerEventDetailScanStaffCard
-                  key={staffSummary.staffUser.id ?? staffSummary.staffUser.email ?? staffSummary.staffUser.displayName}
-                >
-                  <OrganizerEventDetailScanStaffHeader>
-                    <div>
-                      <OrganizerEventDetailScanStaffName>
-                        {staffSummary.staffUser.displayName}
-                      </OrganizerEventDetailScanStaffName>
-                      <OrganizerEventDetailScanStaffMeta>
-                        {staffSummary.staffUser.email ?? 'Email indisponible'}
-                      </OrganizerEventDetailScanStaffMeta>
-                    </div>
-                    <OrganizerEventDetailScanStaffTotal>
-                      {staffSummary.totalScans} scan(s)
-                    </OrganizerEventDetailScanStaffTotal>
-                  </OrganizerEventDetailScanStaffHeader>
-
-                  <OrganizerEventDetailTicketStats>
-                    <OrganizerEventDetailTicketStat>
-                      <OrganizerEventDetailTicketStatLabel>Total</OrganizerEventDetailTicketStatLabel>
-                      <OrganizerEventDetailTicketStatValue>
-                        {staffSummary.totalScans}
-                      </OrganizerEventDetailTicketStatValue>
-                    </OrganizerEventDetailTicketStat>
-                    <OrganizerEventDetailTicketStat>
-                      <OrganizerEventDetailTicketStatLabel>Valides</OrganizerEventDetailTicketStatLabel>
-                      <OrganizerEventDetailTicketStatValue>
-                        {staffSummary.validScans}
-                      </OrganizerEventDetailTicketStatValue>
-                    </OrganizerEventDetailTicketStat>
-                    <OrganizerEventDetailTicketStat>
-                      <OrganizerEventDetailTicketStatLabel>Déjà utilisés</OrganizerEventDetailTicketStatLabel>
-                      <OrganizerEventDetailTicketStatValue>
-                        {staffSummary.alreadyUsedScans}
-                      </OrganizerEventDetailTicketStatValue>
-                    </OrganizerEventDetailTicketStat>
-                    <OrganizerEventDetailTicketStat>
-                      <OrganizerEventDetailTicketStatLabel>Invalides</OrganizerEventDetailTicketStatLabel>
-                      <OrganizerEventDetailTicketStatValue>
-                        {staffSummary.invalidScans}
-                      </OrganizerEventDetailTicketStatValue>
-                    </OrganizerEventDetailTicketStat>
-                  </OrganizerEventDetailTicketStats>
-                </OrganizerEventDetailScanStaffCard>
-              ))}
-            </OrganizerEventDetailScanStaffList>
-          ) : (
-            <OrganizerEventDetailState>
-              Aucun scan n’a encore été enregistré pour cet évènement.
-            </OrganizerEventDetailState>
-          )}
-        </OrganizerEventDetailSplitSection>
+          <OrganizerEventScanSection scanStats={scanStats} />
         ) : null}
 
         {activeTab === 'tickets' ? (
@@ -1557,6 +1337,11 @@ export function OrganizerEventDetailPage() {
           {ticketSectionMessage ? (
             <OrganizerEventDetailSuccess>{ticketSectionMessage}</OrganizerEventDetailSuccess>
           ) : null}
+          {isAdminReadOnly ? (
+            <OrganizerEventDetailState>
+              {ADMIN_ORGANIZER_READ_ONLY_MESSAGE}
+            </OrganizerEventDetailState>
+          ) : null}
 
           <OrganizerEventDetailTicketSection>
           <OrganizerEventDetailTicketHeader>
@@ -1569,7 +1354,7 @@ export function OrganizerEventDetailPage() {
           </OrganizerEventDetailTicketHeader>
 
           <OrganizerEventDetailTicketGrid>
-            <OrganizerEventDetailTicketCreateCard>
+            <OrganizerEventDetailTicketCreateCard style={{ display: canEditOrganizerEvent ? undefined : 'none' }}>
               <OrganizerEventDetailInfoTitle>Créer un billet</OrganizerEventDetailInfoTitle>
               <OrganizerEventDetailInfoText>
                 Definis un type de billet, son prix, son stock et sa fenêtre de vente.
@@ -1703,7 +1488,7 @@ export function OrganizerEventDetailPage() {
                       required
                     />
                     <OrganizerEventDetailHint>
-                      La vente doit se terminér avant le début de l’évènement.
+                      La vente doit se terminer avant le début de l’évènement.
                     </OrganizerEventDetailHint>
                   </OrganizerEventDetailField>
                 </OrganizerEventDetailGrid>
@@ -1726,7 +1511,7 @@ export function OrganizerEventDetailPage() {
                   </OrganizerEventDetailField>
 
                   <OrganizerEventDetailField>
-                    <OrganizerEventDetailLabel>Visibilite du billet</OrganizerEventDetailLabel>
+                    <OrganizerEventDetailLabel>Visibilité du billet</OrganizerEventDetailLabel>
                     <OrganizerEventDetailSelect
                       value={ticketForm.isActive ? 'active' : 'inactive'}
                       onChange={(changeEvent) =>
@@ -1919,7 +1704,7 @@ export function OrganizerEventDetailPage() {
                             />
                           </OrganizerEventDetailField>
                           <OrganizerEventDetailField>
-                            <OrganizerEventDetailLabel>Visibilite du billet</OrganizerEventDetailLabel>
+                            <OrganizerEventDetailLabel>Visibilité du billet</OrganizerEventDetailLabel>
                             <OrganizerEventDetailSelect
                               value={editingTicketForm.isActive ? 'active' : 'inactive'}
                               onChange={(changeEvent) =>
@@ -1953,7 +1738,7 @@ export function OrganizerEventDetailPage() {
                         </OrganizerEventDetailActions>
                       </OrganizerEventDetailForm>
                     ) : (
-                      <OrganizerEventDetailTicketCardActions>
+                      <OrganizerEventDetailTicketCardActions style={{ display: canEditOrganizerEvent ? undefined : 'none' }}>
                         <OrganizerEventDetailSecondaryButton
                           type="button"
                           onClick={() => {
@@ -2008,7 +1793,7 @@ export function OrganizerEventDetailPage() {
             ) : null}
 
             <OrganizerEventDetailGuestGrid>
-              <OrganizerEventDetailTicketCreateCard>
+              <OrganizerEventDetailTicketCreateCard style={{ display: canEditOrganizerEvent ? undefined : 'none' }}>
                 <OrganizerEventDetailInfoTitle>Envoyer un billet invité</OrganizerEventDetailInfoTitle>
                 <OrganizerEventDetailInfoText>
                   Le billet consomme une place disponible du type choisi et reste
@@ -2104,7 +1889,7 @@ export function OrganizerEventDetailPage() {
                           {guestTicket.displayCode}
                         </OrganizerEventDetailGuestText>
                         <OrganizerEventDetailGuestText>
-                          Envoye: {formatOrganizerDate(guestTicket.sentAt)}
+                          Envoyé : {formatOrganizerDate(guestTicket.sentAt)}
                         </OrganizerEventDetailGuestText>
                         <OrganizerEventDetailGuestText>
                           Passage scan:{' '}

@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/organizer')]
 final class OrganizerPromotionController extends AbstractController
 {
+    use OrganizerAdminReadOnlyTrait;
+
     #[Route('/events/{eventId<\d+>}/promotions/options', name: 'api_organizer_promotion_options', methods: ['GET'])]
     public function options(
         int $eventId,
@@ -74,9 +76,13 @@ final class OrganizerPromotionController extends AbstractController
 
         [$event, $user] = $access;
 
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
+        }
+
         if ('published' !== strtolower((string) $event->getStatus())) {
             return $this->json([
-                'message' => 'Publie cet l’évènement avant de demander une promotion.',
+                'message' => 'Publie cet évènement avant de demander une promotion.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
@@ -135,7 +141,7 @@ final class OrganizerPromotionController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
         if (!$user->isOrganizerOrAdmin()) {
@@ -158,16 +164,16 @@ final class OrganizerPromotionController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (User::ROLE_ADMIN !== $user->getBaseRole() && $campaign->getOrganizer()?->getId() !== $user->getId()) {
+        if (!$user->isAdminAccount() && $campaign->getOrganizer()?->getId() !== $user->getId()) {
             return $this->json(['message' => 'Cette campagne ne vous appartient pas.'], Response::HTTP_FORBIDDEN);
         }
 
         if (null === $campaign->getPaidAt()) {
             return $this->json([
-                'message' => 'Le suivi sera disponible apres validation et paiement de la campagne.',
+                'message' => 'Le suivi sera disponible après validation et paiement de la campagne.',
             ], Response::HTTP_CONFLICT);
         }
 
@@ -184,10 +190,14 @@ final class OrganizerPromotionController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (User::ROLE_ADMIN !== $user->getBaseRole() && $campaign->getOrganizer()?->getId() !== $user->getId()) {
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
+        }
+
+        if (!$user->isAdminAccount() && $campaign->getOrganizer()?->getId() !== $user->getId()) {
             return $this->json(['message' => 'Cette campagne ne vous appartient pas.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -219,10 +229,14 @@ final class OrganizerPromotionController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (User::ROLE_ADMIN !== $user->getBaseRole() && $campaign->getOrganizer()?->getId() !== $user->getId()) {
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
+        }
+
+        if (!$user->isAdminAccount() && $campaign->getOrganizer()?->getId() !== $user->getId()) {
             return $this->json(['message' => 'Cette campagne ne vous appartient pas.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -247,7 +261,7 @@ final class OrganizerPromotionController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
         if (!$user->isOrganizerOrAdmin()) {
@@ -260,7 +274,7 @@ final class OrganizerPromotionController extends AbstractController
             return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
-        if (User::ROLE_ADMIN !== $user->getBaseRole() && $event->getOrganizer()?->getId() !== $user->getId()) {
+        if (!$user->isAdminAccount() && $event->getOrganizer()?->getId() !== $user->getId()) {
             return $this->json(['message' => 'Vous ne pouvez promouvoir que vos évènements.'], Response::HTTP_FORBIDDEN);
         }
 

@@ -21,7 +21,7 @@ final class OrganizerPayoutAccountController extends AbstractController
         $user = $this->getOrganizerUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Acces reserve aux organisateurs.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Accès réservé aux organisateurs.'], Response::HTTP_FORBIDDEN);
         }
 
         $active = $payoutAccountRepository->findActiveForOrganizer($user);
@@ -42,7 +42,7 @@ final class OrganizerPayoutAccountController extends AbstractController
         $user = $this->getOrganizerUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Acces reserve aux organisateurs.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Accès réservé aux organisateurs.'], Response::HTTP_FORBIDDEN);
         }
 
         $data = $request->toArray();
@@ -179,7 +179,7 @@ final class OrganizerPayoutAccountController extends AbstractController
 
         $roles = $user->getRoles();
 
-        if (!in_array(User::ROLE_ORGANIZER, $roles, true) && !in_array(User::ROLE_ADMIN, $roles, true)) {
+        if (!in_array(User::ROLE_ORGANIZER, $roles, true) && !$user->isAdminAccount()) {
             return null;
         }
 

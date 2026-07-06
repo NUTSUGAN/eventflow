@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent, canManageAdminFinance } from '../../auth/adminPermissions'
 import {
   approvePromotion,
   getAdminPromotions,
@@ -73,6 +74,7 @@ export function AdminPromotionsPage() {
   const [busyId, setBusyId] = useState<number | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [canEditRates, setCanEditRates] = useState(false)
 
   function applyData(campaignData: Awaited<ReturnType<typeof getAdminPromotions>>, rateData: PromotionRate[]) {
     setCampaigns(campaignData.items)
@@ -82,10 +84,10 @@ export function AdminPromotionsPage() {
     setRateValues(Object.fromEntries(rateData.map((rate) => [rate.id, rate.priceAmount])))
   }
 
-  async function load() {
+  async function load(includeRates = canEditRates) {
     const [campaignData, rateData] = await Promise.all([
       getAdminPromotions(page, 20, status),
-      getPromotionRates(),
+      includeRates ? getPromotionRates() : Promise.resolve([]),
     ])
     applyData(campaignData, rateData)
   }
@@ -95,11 +97,16 @@ export function AdminPromotionsPage() {
 
     getCurrentUser(true)
       .then((user) => {
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return null
         }
-        return Promise.all([getAdminPromotions(page, 20, status), getPromotionRates()])
+        const nextCanEditRates = canManageAdminFinance(user)
+        setCanEditRates(nextCanEditRates)
+        return Promise.all([
+          getAdminPromotions(page, 20, status),
+          nextCanEditRates ? getPromotionRates() : Promise.resolve([]),
+        ])
       })
       .then((data) => {
         if (!mounted || !data) return
@@ -128,6 +135,10 @@ export function AdminPromotionsPage() {
   }
 
   async function saveRate(rateId: number) {
+    if (!canEditRates) {
+      return
+    }
+
     setBusyId(rateId)
     setError(null)
 
@@ -224,6 +235,7 @@ export function AdminPromotionsPage() {
           <AdminPagination page={page} pageSize={20} totalItems={total} totalPages={totalPages} itemLabel="campagnes" onPageChange={setPage} />
         </div>
 
+        {canEditRates ? (
         <AdminPromotionSide>
           <AdminPromotionCardTitle>Grille tarifaire</AdminPromotionCardTitle>
           <AdminPromotionText>Ces prix servent aux nouvelles campagnes. Les campagnes existantes gardent leur tarif.</AdminPromotionText>
@@ -239,6 +251,7 @@ export function AdminPromotionsPage() {
             </AdminPromotionRate>
           ))}
         </AdminPromotionSide>
+        ) : null}
       </AdminPromotionLayout>
     </AdminPromotionPage>
   )

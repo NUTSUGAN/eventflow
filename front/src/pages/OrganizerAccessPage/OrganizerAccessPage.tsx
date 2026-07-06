@@ -2,6 +2,7 @@ import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent, canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import {
   getMyOrganizerApplication,
   submitOrganizerApplication,
@@ -103,8 +104,7 @@ export function OrganizerAccessPage() {
         const organizerState = await getMyOrganizerApplication()
 
         if (
-          currentUser.role === 'ROLE_ORGANIZER' ||
-          currentUser.role === 'ROLE_ADMIN'
+          canUseOrganizerAdminTools(currentUser)
         ) {
           if (isMounted) {
             navigate('/organizer/dashboard', { replace: true })
@@ -172,7 +172,7 @@ export function OrganizerAccessPage() {
   }
 
   const hasOrganizerAccess =
-    user?.role === 'ROLE_ORGANIZER' || user?.role === 'ROLE_ADMIN'
+    canUseOrganizerAdminTools(user)
 
   return (
     <OrganizerAccessSection>
@@ -208,7 +208,7 @@ export function OrganizerAccessPage() {
               >
                 Ouvrir mon espace organisateur
               </OrganizerAccessPrimaryButton>
-              {user?.role === 'ROLE_ADMIN' ? (
+              {canManageAdminContent(user) ? (
                 <OrganizerAccessSecondaryButton
                   type="button"
                   onClick={() => navigate('/admin/organizer-applications')}

@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/withdrawals')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_FINANCE')]
 final class AdminWithdrawalController extends AbstractController
 {
     #[Route('', name: 'api_admin_withdrawal_index', methods: ['GET'])]

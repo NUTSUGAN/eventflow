@@ -20,10 +20,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/promotions')]
-#[IsGranted('ROLE_ADMIN')]
 final class AdminPromotionController extends AbstractController
 {
     #[Route('', name: 'api_admin_promotion_index', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN_SUPPORT')]
     public function index(
         Request $request,
         PromotionCampaignRepository $repository,
@@ -54,12 +54,14 @@ final class AdminPromotionController extends AbstractController
     }
 
     #[Route('/rates', name: 'api_admin_promotion_rates', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN_FINANCE')]
     public function rates(PromotionPricingService $pricingService): JsonResponse
     {
         return $this->json(['items' => $pricingService->getCatalog()]);
     }
 
     #[Route('/rates/{id<\d+>}', name: 'api_admin_promotion_rate_update', methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN_FINANCE')]
     public function updateRate(
         PromotionChannelRate $rate,
         Request $request,
@@ -83,12 +85,14 @@ final class AdminPromotionController extends AbstractController
     }
 
     #[Route('/{id<\d+>}', name: 'api_admin_promotion_show', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN_SUPPORT')]
     public function show(PromotionCampaign $campaign, PromotionCampaignService $campaignService): JsonResponse
     {
         return $this->json($campaignService->serialize($campaign));
     }
 
     #[Route('/{id<\d+>}/approve', name: 'api_admin_promotion_approve', methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN_SUPPORT')]
     public function approve(
         PromotionCampaign $campaign,
         Request $request,
@@ -130,6 +134,7 @@ final class AdminPromotionController extends AbstractController
     }
 
     #[Route('/{id<\d+>}/reject', name: 'api_admin_promotion_reject', methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN_SUPPORT')]
     public function reject(
         PromotionCampaign $campaign,
         Request $request,
@@ -172,6 +177,7 @@ final class AdminPromotionController extends AbstractController
     }
 
     #[Route('/{id<\d+>}/channels/{channelId<\d+>}', name: 'api_admin_promotion_channel_update', methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN_SUPPORT')]
     public function updateChannel(
         PromotionCampaign $campaign,
         int $channelId,

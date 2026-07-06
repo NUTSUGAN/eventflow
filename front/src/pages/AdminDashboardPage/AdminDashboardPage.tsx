@@ -10,9 +10,18 @@ import {
   updateAdminEventStatus,
 } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
+import {
+  canManageAdminContent,
+  canManageAdminFinance,
+  canViewAdminLogs,
+  canViewAdminOrders,
+  isAdminRoleName,
+  isAdminUser,
+} from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
 import { usePagination } from '../../hooks/usePagination'
 import { getAdminOrganizerApplications } from '../../api/organizerApplication'
+import type { AuthUser } from '../../types/auth'
 import type {
   AdminCategory,
   AdminEventStatus,
@@ -73,11 +82,6 @@ type DashboardAction = {
 const emptyCategoryForm: CategoryFormState = {
   name: '',
   description: '',
-}
-
-const adminPrimaryAction: DashboardAction = {
-  label: 'Demandes organisateur',
-  path: '/admin/organizer-applications',
 }
 
 const adminSecondaryActions: DashboardAction[] = [
@@ -142,7 +146,7 @@ function getOrganizerName(event: AdminEventSummary): string {
 }
 
 function isAdminOrOrganizerRole(role: string | null): boolean {
-  return role === 'ROLE_ORGANIZER' || role === 'ROLE_ADMIN'
+  return role === 'ROLE_ORGANIZER' || isAdminRoleName(role)
 }
 
 function readApiMessage(error: unknown, fallback: string): string {
@@ -170,6 +174,7 @@ export function AdminDashboardPage() {
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [users, setUsers] = useState<AdminUserSummary[]>([])
   const [stats, setStats] = useState<AdminPlatformStats | null>(null)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [categoryForm, setCategoryForm] =
     useState<CategoryFormState>(emptyCategoryForm)
   const [isLoading, setIsLoading] = useState(true)
@@ -188,11 +193,12 @@ export function AdminDashboardPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!isAdminUser(user)) {
           navigate('/account', { replace: true })
           return
         }
 
+        const canAccessContent = canManageAdminContent(user)
         const [
           nextApplications,
           nextEvents,
@@ -200,10 +206,10 @@ export function AdminDashboardPage() {
           nextUsers,
           nextStats,
         ] = await Promise.all([
-          getAdminOrganizerApplications(),
-          getAdminEvents(),
-          getAdminCategories(),
-          getAdminUsers(),
+          canAccessContent ? getAdminOrganizerApplications() : Promise.resolve([]),
+          canAccessContent ? getAdminEvents() : Promise.resolve([]),
+          canAccessContent ? getAdminCategories() : Promise.resolve([]),
+          canAccessContent ? getAdminUsers() : Promise.resolve([]),
           getAdminStats(),
         ])
 
@@ -211,6 +217,7 @@ export function AdminDashboardPage() {
           return
         }
 
+        setCurrentUser(user)
         setApplications(nextApplications)
         setEvents(nextEvents)
         setCategories(nextCategories)
@@ -240,6 +247,55 @@ export function AdminDashboardPage() {
       isMounted = false
     }
   }, [navigate])
+
+  const canAccessContent = canManageAdminContent(currentUser)
+  const canAccessFinance = canManageAdminFinance(currentUser)
+  const canAccessOrders = canViewAdminOrders(currentUser)
+  const canAccessLogs = canViewAdminLogs(currentUser)
+  const primaryAction: DashboardAction | null = canAccessContent
+    ? { label: 'Demandes organisateur', path: '/admin/organizer-applications' }
+    : canAccessOrders
+      ? { label: 'Commandes', path: '/admin/orders' }
+      : null
+  const secondaryActions = useMemo<DashboardAction[]>(() => {
+    const actions: DashboardAction[] = []
+    const contentPaths = new Set([
+      '/admin/users',
+      '/admin/tickets',
+      '/admin/promotions',
+      '/organizer/events/new',
+      '/admin/event-reports',
+    ])
+    const orderPaths = new Set(['/admin/orders'])
+    const financePaths = new Set(['/admin/withdrawals'])
+
+    if (canAccessContent) {
+      actions.push(...adminSecondaryActions.filter((action) => contentPaths.has(action.path)))
+    }
+
+    if (canAccessOrders) {
+      actions.push(...adminSecondaryActions.filter((action) => orderPaths.has(action.path)))
+    }
+
+    if (canAccessFinance) {
+      actions.push(...adminSecondaryActions.filter((action) => financePaths.has(action.path)))
+    }
+
+    if (canAccessLogs) {
+      actions.push({ label: 'Logs', path: '/admin/logs' })
+    }
+
+    return actions
+  }, [canAccessContent, canAccessFinance, canAccessLogs, canAccessOrders])
+  const visibleTabs = useMemo<Array<[AdminDashboardTabId, string]>>(() => {
+    const tabs: Array<[AdminDashboardTabId, string]> = [['overview', 'Vue globale']]
+
+    if (canAccessContent) {
+      tabs.push(['events', 'Évènements'], ['categories', 'Catégories'])
+    }
+
+    return tabs
+  }, [canAccessContent])
 
   const pendingApplications = useMemo(
     () =>
@@ -391,59 +447,79 @@ export function AdminDashboardPage() {
         <AdminDashboardHeaderActions>
           <AdminDashboardPrimaryButton
             type="button"
-            onClick={() => navigate('/admin/organizer-applications')}
+            onClick={() => primaryAction && navigate(primaryAction.path)}
+            style={{ display: primaryAction ? undefined : 'none' }}
           >
-            Demandes organisateur
+            {primaryAction?.label ?? 'Admin'}
           </AdminDashboardPrimaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/users')}
+            style={{ display: secondaryActions.some((action) => action.path === '/admin/users') ? undefined : 'none' }}
           >
             Utilisateurs
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/orders')}
+            style={{ display: secondaryActions.some((action) => action.path === '/admin/orders') ? undefined : 'none' }}
           >
             Commandes
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/tickets')}
+            style={{ display: secondaryActions.some((action) => action.path === '/admin/tickets') ? undefined : 'none' }}
           >
             Billets & scans
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/promotions')}
+            style={{ display: secondaryActions.some((action) => action.path === '/admin/promotions') ? undefined : 'none' }}
           >
             Events Booster
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/withdrawals')}
+            style={{ display: secondaryActions.some((action) => action.path === '/admin/withdrawals') ? undefined : 'none' }}
           >
             Retraits
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/organizer/events/new')}
+            style={{ display: secondaryActions.some((action) => action.path === '/organizer/events/new') ? undefined : 'none' }}
           >
             Créer un évènement
           </AdminDashboardSecondaryButton>
           <AdminDashboardSecondaryButton
             type="button"
             onClick={() => navigate('/admin/event-reports')}
+            style={{ display: secondaryActions.some((action) => action.path === '/admin/event-reports') ? undefined : 'none' }}
           >
             Signalements
           </AdminDashboardSecondaryButton>
+          {secondaryActions
+            .filter((action) => !adminSecondaryActions.some((staticAction) => staticAction.path === action.path))
+            .map((action) => (
+              <AdminDashboardSecondaryButton
+                key={action.path}
+                type="button"
+                onClick={() => navigate(action.path)}
+              >
+                {action.label}
+              </AdminDashboardSecondaryButton>
+            ))}
         </AdminDashboardHeaderActions>
         <AdminDashboardMobileActions>
           <AdminDashboardPrimaryButton
             type="button"
-            onClick={() => navigate(adminPrimaryAction.path)}
+            onClick={() => primaryAction && navigate(primaryAction.path)}
+            style={{ display: primaryAction ? undefined : 'none' }}
           >
-            {adminPrimaryAction.label}
+            {primaryAction?.label ?? 'Admin'}
           </AdminDashboardPrimaryButton>
           <AdminDashboardMobileActionMenu>
             <AdminDashboardMobileActionSummary
@@ -453,7 +529,7 @@ export function AdminDashboardPage() {
               <FaChevronDown aria-hidden="true" focusable="false" />
             </AdminDashboardMobileActionSummary>
             <AdminDashboardMobileActionList>
-              {adminSecondaryActions.map((action) => (
+              {secondaryActions.map((action) => (
                 <AdminDashboardSecondaryButton
                   key={action.path}
                   type="button"
@@ -468,11 +544,7 @@ export function AdminDashboardPage() {
       </AdminDashboardHeader>
 
       <AdminDashboardTabs>
-        {[
-          ['overview', 'Vue globale'],
-          ['events', 'évènements'],
-          ['categories', 'Catégories'],
-        ].map(([tabId, label]) => (
+        {visibleTabs.map(([tabId, label]) => (
           <AdminDashboardTab
             key={tabId}
             type="button"
@@ -503,12 +575,14 @@ export function AdminDashboardPage() {
 
       {activeTab === 'overview' ? (
         <>
+          {canAccessContent ? (
+            <>
           <AdminDashboardPanel>
             <AdminDashboardPanelHeader>
               <div>
                 <AdminDashboardPanelTitle>Demandes à traiter</AdminDashboardPanelTitle>
                 <AdminDashboardText>
-                  Les demandes encore en’attente de validation’admin.
+                  Les demandes encore en attente de validation par l’admin.
                 </AdminDashboardText>
               </div>
               <AdminDashboardSecondaryButton
@@ -540,7 +614,7 @@ export function AdminDashboardPage() {
               ))}
               {pendingApplications.length === 0 ? (
                 <AdminDashboardMessage $tone="neutral">
-                  Aucune demande organisateur en’attente.
+                  Aucune demande organisateur en attente.
                 </AdminDashboardMessage>
               ) : null}
             </AdminDashboardList>
@@ -557,6 +631,29 @@ export function AdminDashboardPage() {
             </AdminDashboardPanelHeader>
             {renderEventList(upcomingEvents)}
           </AdminDashboardPanel>
+            </>
+          ) : null}
+
+          {!canAccessContent && canAccessFinance ? (
+            <AdminDashboardPanel>
+              <AdminDashboardPanelHeader>
+                <div>
+                  <AdminDashboardPanelTitle>Dashboard finance</AdminDashboardPanelTitle>
+                  <AdminDashboardText>
+                    Suivi des commandes, paiements, retraits et frais plateforme.
+                  </AdminDashboardText>
+                </div>
+                <AdminDashboardActions>
+                  <AdminDashboardSecondaryButton type="button" onClick={() => navigate('/admin/orders')}>
+                    Commandes
+                  </AdminDashboardSecondaryButton>
+                  <AdminDashboardSecondaryButton type="button" onClick={() => navigate('/admin/withdrawals')}>
+                    Retraits
+                  </AdminDashboardSecondaryButton>
+                </AdminDashboardActions>
+              </AdminDashboardPanelHeader>
+            </AdminDashboardPanel>
+          ) : null}
         </>
       ) : null}
 
@@ -564,7 +661,7 @@ export function AdminDashboardPage() {
         <AdminDashboardPanel>
           <AdminDashboardPanelHeader>
             <div>
-              <AdminDashboardPanelTitle>évènements</AdminDashboardPanelTitle>
+              <AdminDashboardPanelTitle>Évènements</AdminDashboardPanelTitle>
               <AdminDashboardText>
                 Change rapidement le statut d'un évènement ou ouvre sa fiche
                 organisateur.
@@ -736,7 +833,7 @@ export function AdminDashboardPage() {
             <AdminDashboardMetricValue>{organizerUsers.length}</AdminDashboardMetricValue>
           </AdminDashboardMetric>
           <AdminDashboardMetric>
-            <AdminDashboardMetricLabel>évènements publics</AdminDashboardMetricLabel>
+            <AdminDashboardMetricLabel>Évènements publics</AdminDashboardMetricLabel>
             <AdminDashboardMetricValue>{publishedEvents.length}</AdminDashboardMetricValue>
           </AdminDashboardMetric>
           <AdminDashboardMetric>
@@ -769,7 +866,7 @@ export function AdminDashboardPage() {
           </AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>
-          <AdminDashboardMetricLabel>Demandes en’attente</AdminDashboardMetricLabel>
+          <AdminDashboardMetricLabel>Demandes en attente</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>{pendingApplications.length}</AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>

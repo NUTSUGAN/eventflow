@@ -13,6 +13,8 @@ import type {
   AdminOrderSummary,
   AdminPlatformStats,
   AdminAccountStatus,
+  AdminAccountSummary,
+  AdminAuditLogsResponse,
   AdminTicketSummary,
   AdminUserFilters,
   AdminUserRole,
@@ -66,6 +68,38 @@ export async function getAdminOrders(): Promise<AdminOrderSummary[]> {
 
 export async function getAdminTickets(): Promise<AdminTicketSummary[]> {
   const response = await apiClient.get<AdminTicketSummary[]>('/api/admin/tickets')
+  return response.data
+}
+
+export async function getAdminAccounts(search = ''): Promise<AdminAccountSummary[]> {
+  const response = await apiClient.get<AdminAccountSummary[]>('/api/admin/admin-users', {
+    params: {
+      search: search.trim() || undefined,
+    },
+  })
+
+  return response.data
+}
+
+export async function getAdminAuditLogs(filters: {
+  admin?: string
+  role?: string
+  action?: string
+  resourceType?: string
+  from?: string
+  to?: string
+} = {}): Promise<AdminAuditLogsResponse> {
+  const response = await apiClient.get<AdminAuditLogsResponse>('/api/admin/logs', {
+    params: {
+      admin: filters.admin?.trim() || undefined,
+      role: filters.role?.trim() || undefined,
+      action: filters.action?.trim() || undefined,
+      resourceType: filters.resourceType?.trim() || undefined,
+      from: filters.from?.trim() || undefined,
+      to: filters.to?.trim() || undefined,
+    },
+  })
+
   return response.data
 }
 

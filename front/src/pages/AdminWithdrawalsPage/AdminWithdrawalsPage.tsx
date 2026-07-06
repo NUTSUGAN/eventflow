@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminFinance } from '../../auth/adminPermissions'
 import {
   getAdminWithdrawals,
   updateAdminWithdrawalSettings,
@@ -140,7 +141,7 @@ export function AdminWithdrawalsPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminFinance(user)) {
           navigate('/account', { replace: true })
           return
         }

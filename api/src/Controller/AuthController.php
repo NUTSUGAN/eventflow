@@ -10,6 +10,7 @@ use App\Repository\NewsletterSubscriptionRepository;
 use App\Repository\PasswordResetRequestRepository;
 use App\Repository\UserOauthAccountRepository;
 use App\Repository\UserRepository;
+use App\Service\UploadedImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -28,6 +29,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class AuthController extends AbstractController
 {
+    public function __construct(
+        private readonly UploadedImageStorage $imageStorage,
+    ) {
+    }
+
     private const GOOGLE_PROVIDER = 'google';
     private const GOOGLE_STATE_SESSION_KEY = 'auth.google.state';
     private const GOOGLE_PENDING_SESSION_KEY = 'auth.google.pending';
@@ -876,6 +882,8 @@ class AuthController extends AbstractController
 
     private function uploadProfileImage(UploadedFile $file): string
     {
+        return $this->imageStorage->storeUploadedImage($file, 'profiles', 'profile');
+
         $mimeType = $file->getMimeType() ?? '';
 
         if (!str_starts_with($mimeType, 'image/')) {
@@ -900,6 +908,8 @@ class AuthController extends AbstractController
 
     private function uploadProfileImageFromDataUrl(string $dataUrl): string
     {
+        return $this->imageStorage->storeDataUrlImage($dataUrl, 'profiles', 'profile');
+
         if (!preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/', $dataUrl, $matches)) {
             throw new \RuntimeException('Le format de la photo de profil est invalide.');
         }
@@ -942,6 +952,10 @@ class AuthController extends AbstractController
 
     private function removeUploadedProfilePhoto(?string $storedPath): void
     {
+        $this->imageStorage->remove($storedPath);
+
+        return;
+
         if (!is_string($storedPath) || !str_starts_with($storedPath, '/uploads/profiles/')) {
             return;
         }

@@ -1,4 +1,7 @@
 security:
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_ADMIN_SUPPORT, ROLE_ADMIN_FINANCE]
+
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
@@ -50,7 +53,9 @@ security:
         - { path: ^/api/guest-tickets, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/stripe/webhook$, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/organizers/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/admin/(admin-users|admin-invitations|roles), roles: ROLE_ADMIN }
+        - { path: ^/api/admin/users/\d+/(grant-admin|revoke-admin|change-admin-role)$, roles: ROLE_ADMIN }
+        - { path: ^/api/admin, roles: [ROLE_ADMIN, ROLE_ADMIN_SUPPORT, ROLE_ADMIN_FINANCE] }
         - { path: ^/api/orders, roles: ROLE_USER }
         - { path: ^/api/organizer/events, roles: ROLE_USER }
         - { path: ^/api/organizer/payout-account, roles: ROLE_USER }

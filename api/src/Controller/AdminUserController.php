@@ -16,23 +16,31 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/users')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_ADMIN_SUPPORT')]
 final class AdminUserController extends AbstractController
 {
     #[Route('', name: 'api_admin_user_index', methods: ['GET'])]
     public function index(Request $request, UserRepository $userRepository): JsonResponse
     {
         $role = $this->normalizeRoleFilter($request->query->get('role'));
+        $includeAdminAccounts = $this->isGranted(User::ROLE_ADMIN);
 
         if (false === $role) {
             return $this->json([
-                'message' => 'Filtre de role invalide.',
+                'message' => 'Filtre de rôle invalide.',
             ], 400);
+        }
+
+        if (!$includeAdminAccounts && User::isAdminRole($role)) {
+            return $this->json([
+                'message' => 'Accès réservé au super administrateur.',
+            ], 403);
         }
 
         $users = $userRepository->findForAdminList(
             $this->normalizeNullableString($request->query->get('search')),
             $role,
+            $includeAdminAccounts,
         );
 
         return $this->json(array_map(
@@ -63,8 +71,14 @@ final class AdminUserController extends AbstractController
 
         if (null === $role) {
             return $this->json([
-                'message' => 'Le role doit être ROLE_CLIENT, ROLE_ORGANIZER ou ROLE_ADMIN.',
+                'message' => 'Le rôle demandé est invalide.',
             ], 400);
+        }
+
+        if (!$this->isGranted(User::ROLE_ADMIN) && ($user->isAdminAccount() || User::isAdminRole($role))) {
+            return $this->json([
+                'message' => 'Seul le super administrateur peut modifier un compte admin.',
+            ], 403);
         }
 
         $currentUser = $this->getUser();
@@ -72,6 +86,7 @@ final class AdminUserController extends AbstractController
         if (
             $currentUser instanceof User &&
             $currentUser->getId() === $user->getId() &&
+            $user->isSuperAdminAccount() &&
             User::ROLE_ADMIN !== $role
         ) {
             return $this->json([
@@ -112,12 +127,19 @@ final class AdminUserController extends AbstractController
             ], 400);
         }
 
+        if (!$this->isGranted(User::ROLE_ADMIN) && $user->isAdminAccount()) {
+            return $this->json([
+                'message' => 'Seul le super administrateur peut modifier un compte admin.',
+            ], 403);
+        }
+
         $currentUser = $this->getUser();
 
         if (
             $currentUser instanceof User &&
             $currentUser->getId() === $user->getId() &&
-            User::ACCOUNT_STATUS_ACTIVE !== $accountStatus
+            User::ACCOUNT_STATUS_ACTIVE !== $accountStatus &&
+            $user->isAdminAccount()
         ) {
             return $this->json([
                 'message' => 'Tu ne peux pas désactiver ou bloquer ton propre compte admin.',
@@ -379,6 +401,8 @@ final class AdminUserController extends AbstractController
             'ROLE_USER', 'ROLE_CLIENT' => User::ROLE_CLIENT,
             'ROLE_ORGANIZER', 'ROLE_ORGANISATEUR' => User::ROLE_ORGANIZER,
             'ROLE_ADMIN' => User::ROLE_ADMIN,
+            'ROLE_ADMIN_SUPPORT' => User::ROLE_ADMIN_SUPPORT,
+            'ROLE_ADMIN_FINANCE' => User::ROLE_ADMIN_FINANCE,
             'ROLE_STAFF' => User::ROLE_STAFF,
             default => null,
         };

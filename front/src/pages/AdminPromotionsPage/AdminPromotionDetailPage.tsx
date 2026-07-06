@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canManageAdminContent } from '../../auth/adminPermissions'
 import { getAdminPromotion, updatePromotionChannel } from '../../api/promotions'
 import type {
   PromotionCampaign,
@@ -81,7 +82,7 @@ export function AdminPromotionDetailPage() {
       try {
         const user = await getCurrentUser(true)
 
-        if (user.role !== 'ROLE_ADMIN') {
+        if (!canManageAdminContent(user)) {
           navigate('/account', { replace: true })
           return
         }

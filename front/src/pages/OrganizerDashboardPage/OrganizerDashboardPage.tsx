@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { FaChevronDown } from 'react-icons/fa6'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import { getMyOrganizerApplication } from '../../api/organizerApplication'
 import { getOrganizerPayoutAccount } from '../../api/organizerPayoutAccount'
 import {
@@ -153,8 +154,7 @@ export function OrganizerDashboardPage() {
         const currentUser = await getCurrentUser(true)
 
         if (
-          currentUser.role !== 'ROLE_ORGANIZER' &&
-          currentUser.role !== 'ROLE_ADMIN'
+          !canUseOrganizerAdminTools(currentUser)
         ) {
           const organizerState = await getMyOrganizerApplication()
 

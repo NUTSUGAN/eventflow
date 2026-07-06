@@ -111,5 +111,31 @@ class UserTest extends TestCase
         self::assertSame('ROLE_ORGANIZER', User::ROLE_ORGANIZER);
         self::assertSame('ROLE_STAFF', User::ROLE_STAFF);
         self::assertSame('ROLE_ADMIN', User::ROLE_ADMIN);
+        self::assertSame('ROLE_ADMIN_SUPPORT', User::ROLE_ADMIN_SUPPORT);
+        self::assertSame('ROLE_ADMIN_FINANCE', User::ROLE_ADMIN_FINANCE);
+    }
+
+    public function testRoleAdminIsSuperAdminAndInheritsSpecializedAdminPermissions(): void
+    {
+        $user = (new User())->setRole(User::ROLE_ADMIN);
+
+        self::assertTrue($user->isSuperAdminAccount());
+        self::assertTrue($user->isAdminAccount());
+        self::assertContains(User::ROLE_ADMIN_SUPPORT, $user->getRoles());
+        self::assertContains(User::ROLE_ADMIN_FINANCE, $user->getRoles());
+    }
+
+    public function testSpecializedAdminRolesDoNotBecomeSuperAdmin(): void
+    {
+        $support = (new User())->setRole(User::ROLE_ADMIN_SUPPORT);
+        $finance = (new User())->setRole(User::ROLE_ADMIN_FINANCE);
+
+        self::assertTrue($support->isAdminAccount());
+        self::assertFalse($support->isSuperAdminAccount());
+        self::assertNotContains(User::ROLE_ADMIN, array_diff($support->getRoles(), [User::ROLE_ADMIN_SUPPORT]));
+
+        self::assertTrue($finance->isAdminAccount());
+        self::assertFalse($finance->isSuperAdminAccount());
+        self::assertNotContains(User::ROLE_ADMIN, array_diff($finance->getRoles(), [User::ROLE_ADMIN_FINANCE]));
     }
 }

@@ -18,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/organizer')]
 class OrganizerTicketTypeController extends AbstractController
 {
+    use OrganizerAdminReadOnlyTrait;
+
     private const ORGANIZER_TIMEZONE = 'Europe/Paris';
 
     #[Route('/events/{eventId}/ticket-types', name: 'api_organizer_ticket_type_create', methods: ['POST'])]
@@ -33,7 +35,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], 401);
         }
 
@@ -41,6 +43,10 @@ class OrganizerTicketTypeController extends AbstractController
             return $this->json([
                 'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
         }
 
         $event = $eventRepository->find($eventId);
@@ -109,13 +115,13 @@ class OrganizerTicketTypeController extends AbstractController
 
         if ($salesStartAt >= $event->getStartDatetime()) {
             return $this->json([
-                'message' => 'Le début de vente doit intervenir avant le début de l’l’évènement.',
+                'message' => 'Le début de vente doit intervenir avant le début de l’évènement.',
             ], 400);
         }
 
         if ($salesEndAt > $event->getStartDatetime()) {
             return $this->json([
-                'message' => 'La fin de vente ne peut pas depasser le début de l’l’évènement.',
+                'message' => 'La fin de vente ne peut pas dépasser le début de l’évènement.',
             ], 400);
         }
 
@@ -125,7 +131,7 @@ class OrganizerTicketTypeController extends AbstractController
         if ($nextEventStock > (int) $event->getCapacity()) {
             return $this->json([
                 'message' => sprintf(
-                    'Le stock total des billets (%d) depasserait la capacité de l’l’évènement (%d).',
+                    'Le stock total des billets (%d) dépasserait la capacité de l’évènement (%d).',
                     $nextEventStock,
                     (int) $event->getCapacity()
                 ),
@@ -156,7 +162,7 @@ class OrganizerTicketTypeController extends AbstractController
         );
 
         return $this->json([
-            'message' => 'Billet crée avec succès.',
+            'message' => 'Billet créé avec succès.',
             'ticketType' => $this->serializeTicketType($ticketType, $reservedQuantity),
         ], 201);
     }
@@ -172,7 +178,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], 401);
         }
 
@@ -224,7 +230,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], 401);
         }
 
@@ -232,6 +238,10 @@ class OrganizerTicketTypeController extends AbstractController
             return $this->json([
                 'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
         }
 
         $ticketType = $ticketTypeRepository->find($id);
@@ -345,13 +355,13 @@ class OrganizerTicketTypeController extends AbstractController
         if ($event instanceof Event) {
             if ($salesStartAt >= $event->getStartDatetime()) {
                 return $this->json([
-                    'message' => 'Le début de vente doit intervenir avant le début de l’l’évènement.',
+                    'message' => 'Le début de vente doit intervenir avant le début de l’évènement.',
                 ], 400);
             }
 
             if ($salesEndAt > $event->getStartDatetime()) {
                 return $this->json([
-                    'message' => 'La fin de vente ne peut pas depasser le début de l’l’évènement.',
+                    'message' => 'La fin de vente ne peut pas dépasser le début de l’évènement.',
                 ], 400);
             }
 
@@ -364,7 +374,7 @@ class OrganizerTicketTypeController extends AbstractController
             if ($nextEventStock > (int) $event->getCapacity()) {
                 return $this->json([
                     'message' => sprintf(
-                        'Le stock total des billets (%d) depasserait la capacité de l’l’évènement (%d).',
+                        'Le stock total des billets (%d) dépasserait la capacité de l’évènement (%d).',
                         $nextEventStock,
                         (int) $event->getCapacity()
                     ),
@@ -395,7 +405,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->json([
-                'message' => 'Non authentifie.',
+                'message' => 'Non authentifié.',
             ], 401);
         }
 
@@ -403,6 +413,10 @@ class OrganizerTicketTypeController extends AbstractController
             return $this->json([
                 'message' => 'Accès réservé aux organisateurs ou administrateurs.',
             ], 403);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
         }
 
         $ticketType = $ticketTypeRepository->find($id);
@@ -453,7 +467,7 @@ class OrganizerTicketTypeController extends AbstractController
 
     private function isAdmin(User $user): bool
     {
-        return in_array(User::ROLE_ADMIN, $user->getRoles(), true);
+        return $user->isAdminAccount();
     }
 
     private function isOrganizer(User $user): bool

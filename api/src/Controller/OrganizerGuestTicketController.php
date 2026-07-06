@@ -26,6 +26,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class OrganizerGuestTicketController extends AbstractController
 {
+    use OrganizerAdminReadOnlyTrait;
+
     private const PUBLIC_TIMEZONE = 'Europe/Paris';
 
     #[Route('/api/organizer/events/{eventId}/guest-tickets', name: 'api_organizer_guest_tickets_index', methods: ['GET'])]
@@ -39,7 +41,7 @@ final class OrganizerGuestTicketController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
         $event = $eventRepository->find($eventId);
@@ -76,7 +78,11 @@ final class OrganizerGuestTicketController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof User) {
-            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+            return $response;
         }
 
         $event = $eventRepository->find($eventId);
@@ -95,7 +101,7 @@ final class OrganizerGuestTicketController extends AbstractController
         $ticketTypeId = (int) ($payload['ticketTypeId'] ?? 0);
 
         if ('' === $recipientEmail || false === filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
-            return $this->json(['message' => 'Renseigne un email invite valide.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Renseigne un email invité valide.'], Response::HTTP_BAD_REQUEST);
         }
 
         if ($ticketTypeId <= 0) {
@@ -108,7 +114,7 @@ final class OrganizerGuestTicketController extends AbstractController
             !$ticketType instanceof TicketType
             || $ticketType->getEvent()?->getId() !== $event?->getId()
         ) {
-            return $this->json(['message' => 'Ce type de billet ne correspond pas à cet l’évènement.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => 'Ce type de billet ne correspond pas à cet évènement.'], Response::HTTP_BAD_REQUEST);
         }
 
         if (!$ticketType->isActive()) {
@@ -176,7 +182,7 @@ final class OrganizerGuestTicketController extends AbstractController
         return $this->json([
             'message' => null !== $ticket->getSentAt()
                 ? 'Invitation créée et envoyée par email.'
-                : 'Invitation créée, mais l\'email n\'a pas pu être envoyé pour le moment.',
+                : 'Invitation créée, mais l’email n’a pas pu être envoyé pour le moment.',
             'guestTicket' => $this->serializeGuestTicket($request, $ticket, $checkinRepository),
         ], Response::HTTP_CREATED);
     }
@@ -191,7 +197,7 @@ final class OrganizerGuestTicketController extends AbstractController
         $ticket = $ticketRepository->findInvitationByQrToken($token);
 
         if (!$ticket instanceof Ticket) {
-            return $this->json(['message' => 'Billet invite introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'Billet invité introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
         return $this->json([
@@ -226,7 +232,7 @@ final class OrganizerGuestTicketController extends AbstractController
                     "Code : EVF-%06d\n\n".
                     "Ouvre ton billet et presente le QR code au scan :\n%s\n\n".
                     "A très vite sur EventFlow.\n",
-                    '' !== $recipientName ? $recipientName : 'invite',
+                    '' !== $recipientName ? $recipientName : 'invité',
                     (string) ($event?->getTitle() ?? 'EventFlow'),
                     $this->formatDateTimeForFrontend($event?->getStartDatetime()) ?? 'Date à confirmer',
                     (string) ($location?->getAddress() ?? $location?->getCity() ?? 'Lieu à confirmer'),
@@ -288,7 +294,7 @@ final class OrganizerGuestTicketController extends AbstractController
 
     private function canManageEvent(User $user, Event $event): bool
     {
-        if (in_array(User::ROLE_ADMIN, $user->getRoles(), true)) {
+        if ($user->isAdminAccount()) {
             return true;
         }
 

@@ -9,33 +9,35 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin/stats')]
-#[IsGranted('ROLE_ADMIN')]
 final class AdminStatsController extends AbstractController
 {
     #[Route('', name: 'api_admin_stats_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): JsonResponse
     {
+        $canViewFinance = $this->isGranted('ROLE_ADMIN_FINANCE');
+        $canViewOrders = $this->isGranted('ROLE_ADMIN_SUPPORT') || $canViewFinance;
+        $canViewRevenue = $canViewOrders;
+
         return $this->json([
             'orders' => [
-                'total' => $this->countEntities($entityManager, Order::class),
-                'paid' => $this->countEntities($entityManager, Order::class, [
+                'total' => $canViewOrders ? $this->countEntities($entityManager, Order::class) : 0,
+                'paid' => $canViewOrders ? $this->countEntities($entityManager, Order::class, [
                     'status' => Order::STATUS_PAID,
-                ]),
-                'pendingPayment' => $this->countEntities($entityManager, Order::class, [
+                ]) : 0,
+                'pendingPayment' => $canViewOrders ? $this->countEntities($entityManager, Order::class, [
                     'status' => Order::STATUS_PENDING_PAYMENT,
-                ]),
-                'cancelled' => $this->countEntities($entityManager, Order::class, [
+                ]) : 0,
+                'cancelled' => $canViewOrders ? $this->countEntities($entityManager, Order::class, [
                     'status' => Order::STATUS_CANCELLED,
-                ]),
-                'expired' => $this->countEntities($entityManager, Order::class, [
+                ]) : 0,
+                'expired' => $canViewOrders ? $this->countEntities($entityManager, Order::class, [
                     'status' => Order::STATUS_EXPIRED,
-                ]),
+                ]) : 0,
             ],
             'revenue' => [
-                'total' => $this->sumPaidRevenue($entityManager),
+                'total' => $canViewRevenue ? $this->sumPaidRevenue($entityManager) : '0.00',
                 'currency' => Order::DEFAULT_CURRENCY,
             ],
             'tickets' => [

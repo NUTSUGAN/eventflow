@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
+import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import {
   getOrganizerPromotions,
   startPromotionCheckout,
@@ -67,7 +68,7 @@ export function OrganizerPromotionsPage() {
           return null
         }
 
-        if (user.role !== 'ROLE_ORGANIZER' && user.role !== 'ROLE_ADMIN') {
+        if (!canUseOrganizerAdminTools(user)) {
           navigate('/organizer-access', { replace: true })
           return null
         }
