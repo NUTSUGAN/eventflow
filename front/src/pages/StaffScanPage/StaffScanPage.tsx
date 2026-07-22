@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Html5Qrcode,
@@ -264,37 +264,21 @@ export function StaffScanPage() {
     }
   }, [])
 
-  useEffect(() => {
-    const normalizedToken = scanValue.trim()
-
-    if (normalizedToken.length < 16 || !selectedEventId || isSubmitting) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void submitScan(normalizedToken, 'keyboard_pause')
-    }, 220)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [isSubmitting, scanValue, selectedEventId])
-
   const selectedEvent = useMemo(
     () => events.find((event) => event.id === selectedEventId) ?? null,
     [events, selectedEventId],
   )
 
-  function focusKeyboardScanner() {
+  const focusKeyboardScanner = useCallback(() => {
     window.setTimeout(() => {
       inputRef.current?.focus()
     }, 10)
-  }
+  }, [])
 
-  async function submitScan(
+  const submitScan = useCallback(async (
     rawToken?: string,
     inputSource: ScanInputSource = 'keyboard_pause',
-  ) {
+  ) => {
     const scanPayload = (rawToken ?? scanValue).trim()
 
     if (scanPayload === '' || !selectedEventId || isSubmittingRef.current) {
@@ -347,7 +331,23 @@ export function StaffScanPage() {
       setIsSubmitting(false)
       focusKeyboardScanner()
     }
-  }
+  }, [focusKeyboardScanner, scanValue, selectedEvent?.title, selectedEventId])
+
+  useEffect(() => {
+    const normalizedToken = scanValue.trim()
+
+    if (normalizedToken.length < 16 || !selectedEventId || isSubmitting) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void submitScan(normalizedToken, 'keyboard_pause')
+    }, 220)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [isSubmitting, scanValue, selectedEventId, submitScan])
 
   async function ensureScanner(): Promise<Html5Qrcode> {
     if (!scannerRef.current) {

@@ -53,6 +53,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'account_status', length: 20, options: ['default' => self::ACCOUNT_STATUS_ACTIVE])]
     private ?string $accountStatus = self::ACCOUNT_STATUS_ACTIVE;
 
+    #[ORM\Column(name: 'failed_login_attempts', options: ['default' => 0])]
+    private int $failedLoginAttempts = 0;
+
+    #[ORM\Column(name: 'last_failed_login_at', nullable: true)]
+    private ?\DateTimeImmutable $lastFailedLoginAt = null;
+
     #[ORM\Column(name: 'profile_photo', length: 255, nullable: true)]
     private ?string $profilePhoto = null;
 
@@ -585,6 +591,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function canAuthenticate(): bool
     {
         return self::ACCOUNT_STATUS_ACTIVE === $this->getAccountStatus();
+    }
+
+    public function getFailedLoginAttempts(): int
+    {
+        return max(0, $this->failedLoginAttempts);
+    }
+
+    public function setFailedLoginAttempts(int $failedLoginAttempts): static
+    {
+        $this->failedLoginAttempts = max(0, $failedLoginAttempts);
+
+        return $this;
+    }
+
+    public function incrementFailedLoginAttempts(?\DateTimeImmutable $failedAt = null): int
+    {
+        ++$this->failedLoginAttempts;
+        $this->lastFailedLoginAt = $failedAt ?? new \DateTimeImmutable();
+
+        return $this->getFailedLoginAttempts();
+    }
+
+    public function resetFailedLoginAttempts(): static
+    {
+        $this->failedLoginAttempts = 0;
+        $this->lastFailedLoginAt = null;
+
+        return $this;
+    }
+
+    public function getLastFailedLoginAt(): ?\DateTimeImmutable
+    {
+        return $this->lastFailedLoginAt;
     }
 
     /**

@@ -35,14 +35,13 @@ function formatDateTime(value: string | null): string {
 
 export function GuestTicketPage() {
   const { token } = useParams()
+  const hasToken = Boolean(token)
   const [guestTicket, setGuestTicket] = useState<OrganizerGuestTicket | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(hasToken)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!token) {
-      setErrorMessage('Billet invité introuvable.')
-      setIsLoading(false)
+    if (!hasToken) {
       return
     }
 
@@ -74,9 +73,14 @@ export function GuestTicketPage() {
     return () => {
       isMounted = false
     }
-  }, [token])
+  }, [hasToken, token])
 
-  if (isLoading) {
+  const displayedIsLoading = hasToken ? isLoading : false
+  const displayedErrorMessage = hasToken
+    ? errorMessage
+    : 'Billet invité introuvable.'
+
+  if (displayedIsLoading) {
     return (
       <TicketDetailShell>
         <TicketDetailState>Chargement du billet invité...</TicketDetailState>
@@ -87,7 +91,7 @@ export function GuestTicketPage() {
   if (!guestTicket || !guestTicket.qrToken) {
     return (
       <TicketDetailShell>
-        <TicketDetailState>{errorMessage ?? 'Billet invité indisponible.'}</TicketDetailState>
+        <TicketDetailState>{displayedErrorMessage ?? 'Billet invité indisponible.'}</TicketDetailState>
       </TicketDetailShell>
     )
   }
@@ -99,7 +103,7 @@ export function GuestTicketPage() {
           <TicketDetailHeroText>
             <TicketDetailEyebrow>Invitation EventFlow</TicketDetailEyebrow>
             <TicketDetailTitle>
-              {guestTicket.event.title ?? 'évènement EventFlow'}
+              {guestTicket.event.title ?? 'Événement EventFlow'}
             </TicketDetailTitle>
             <TicketDetailSubtitle>
               {guestTicket.ticketType.name ?? 'Invitation'} -{' '}

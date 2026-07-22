@@ -33,7 +33,8 @@ L'application se compose de plusieurs espaces :
 - Scan QR : html5-qrcode et douchette clavier
 - Tests backend : PHPUnit
 - Qualite frontend : TypeScript, ESLint
-- Environnement local : Docker pour le backend, Nginx, PHP-FPM et Mailpit
+- Environnement local : Docker Compose pour le backend, Nginx, PHP-FPM,
+  Mailpit et le frontend React
 
 ## Structure du projet
 
@@ -41,12 +42,12 @@ L'application se compose de plusieurs espaces :
 api/                 Application Symfony
 front/               Application React / Vite
 docker/              Configuration PHP-FPM et Nginx
-docker-compose.yml   Services locaux backend, nginx et mailpit
+docker-compose.yml   Services locaux backend, nginx, frontend et mailpit
 ```
 
 ## Lancement local
 
-### 1. Backend Symfony avec Docker
+### 1. Application complète avec Docker Compose
 
 Depuis la racine du projet :
 
@@ -54,7 +55,13 @@ Depuis la racine du projet :
 docker compose up -d --build
 ```
 
-Le backend est ensuite accessible sur :
+Le frontend React est ensuite accessible sur :
+
+```text
+http://localhost:5173
+```
+
+Le backend Symfony est accessible sur :
 
 ```text
 http://localhost:8080
@@ -75,9 +82,9 @@ http://localhost:8025
 La configuration Docker actuelle utilise une base MySQL / MariaDB locale
 accessible depuis le conteneur via `host.docker.internal`.
 
-### 2. Frontend React
+### 2. Frontend React hors Docker
 
-Le frontend se lance actuellement separement depuis le dossier `front` :
+Le frontend peut aussi se lancer separement depuis le dossier `front` :
 
 ```bash
 cd front
@@ -91,9 +98,8 @@ L'application React est ensuite accessible sur :
 http://localhost:5173
 ```
 
-Note : l'integration complete de React dans Docker est prevue dans les
-ameliorations restantes afin de lancer toute l'application avec une seule
-commande.
+La commande Docker Compose reste la commande recommandee pour lancer tout
+l'environnement MVP de maniere homogene.
 
 ## Variables d'environnement
 
@@ -116,6 +122,9 @@ STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 STRIPE_CHECKOUT_SUCCESS_URL
 STRIPE_CHECKOUT_CANCEL_URL
+SUPABASE_URL
+SUPABASE_STORAGE_KEY
+SUPABASE_STORAGE_BUCKET
 ```
 
 ## Commandes utiles backend
@@ -137,6 +146,27 @@ docker compose exec app php bin/console about
 docker compose exec app php bin/phpunit
 ```
 
+Commande Docker Compose complete :
+
+```bash
+docker compose up -d --build
+```
+
+Si `api/composer.lock` change et qu'un volume Docker `eventflow_vendor` existe
+deja, synchroniser les dependances du conteneur avec :
+
+```bash
+docker compose exec app composer install
+```
+
+Services exposes :
+
+```text
+Frontend React : http://localhost:5173
+Backend API    : http://localhost:8080
+Mailpit        : http://localhost:8025
+```
+
 ## Commandes utiles frontend
 
 Depuis le dossier `front` :
@@ -151,8 +181,7 @@ npm run lint
 Etat actuel :
 
 - `npm run build` fonctionne.
-- `npm run lint` detecte encore quelques erreurs React Hooks / rendu a corriger
-  avant une version finale.
+- `npm run lint` doit rester vert avant merge.
 
 ## Tests
 
@@ -189,7 +218,10 @@ au staff organisateur et a la gestion des mots de passe.
 - Scan des billets avec detection des billets invalides, valides ou deja utilises.
 - Tableau de bord organisateur avec CA, abonnes, billets vendus et scans.
 - Gestion des evenements, billets, staff et activite de scan cote organisateur.
-- Video souvenir locale visible sur les evenements passes.
+- Video souvenir visible sur les evenements passes.
+- Stockage Supabase Storage pour les photos et videos nouvellement envoyees,
+  avec conservation des anciens chemins locaux tant qu'ils n'ont pas ete
+  migres.
 - Corbeille publique des evenements termines.
 - Console admin avec utilisateurs, demandes organisateur, evenements,
   categories, commandes, paiements, billets et check-ins.
@@ -202,10 +234,17 @@ Mesures deja en place :
 
 - Hachage des mots de passe avec Symfony Security.
 - Authentification via Symfony Security.
+- Gestion Symfony des erreurs d'authentification en JSON.
+- Verification du statut de compte via `UserAccountStatusChecker` avant
+  authentification effective.
 - Controle des roles et des droits cote backend.
 - Routes admin protegees par `ROLE_ADMIN`.
 - Controle des acces organisateur et staff avant les actions sensibles.
 - Statut de compte actif / bloque.
+- Blocage persistant du compte apres trois echecs de connexion sur un compte
+  existant, avec remise a zero du compteur apres une connexion reussie.
+- Throttling Symfony `login_throttling` limite a trois tentatives sur quinze
+  minutes pour ralentir les essais repetes sur le formulaire de connexion.
 - QR Tokens non affiches publiquement en clair.
 - Verification serveur des billets lors du scan.
 - Utilisation de Doctrine ORM et du QueryBuilder pour limiter les risques
@@ -214,8 +253,6 @@ Mesures deja en place :
 
 Points a renforcer avant production :
 
-- Ajouter une protection anti brute force sur `/api/login` avec Symfony
-  `login_throttling` / RateLimiter.
 - Verifier et durcir les en-tetes HTTP de securite : CORS strict,
   clickjacking, Content-Security-Policy.
 - Completer les pages legales : mentions legales, conditions generales,
@@ -228,12 +265,9 @@ fonctionnels, mais les points suivants restent prevus avant une version finale :
 
 - Module Booster / Promotion pour mettre en avant un evenement.
 - Dashboard admin plus complet avec davantage d'indicateurs et de filtres.
-- Protection anti brute force sur le login.
 - Demande de retrait organisateur apres la fin d'un evenement avec calcul des
   frais.
 - Pages de footer : legal, conditions, aide, contact EventFlow.
-- Integration complete du frontend React dans Docker.
-- Correction des derniers retours ESLint.
 - Ajout de tests fonctionnels supplementaires sur les parcours client,
   organisateur et administrateur.
 

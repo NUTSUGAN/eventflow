@@ -41,8 +41,15 @@ class AuthController extends AbstractController
     private const PASSWORD_REQUIREMENTS_MESSAGE = 'Le mot de passe doit contenir au moins 8 caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.';
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    public function login(): JsonResponse
+    public function login(EntityManagerInterface $entityManager): JsonResponse
     {
+        $user = $this->getUser();
+
+        if ($user instanceof User && $user->getFailedLoginAttempts() > 0) {
+            $user->resetFailedLoginAttempts();
+            $entityManager->flush();
+        }
+
         return $this->json([
             'message' => 'Connexion prise en charge par Symfony Security.',
         ], Response::HTTP_OK);

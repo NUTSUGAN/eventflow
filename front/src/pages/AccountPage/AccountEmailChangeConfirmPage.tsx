@@ -17,16 +17,14 @@ import {
 export function AccountEmailChangeConfirmPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [isLoading, setIsLoading] = useState(true)
+  const token = searchParams.get('token')?.trim() ?? ''
+  const hasToken = token !== ''
+  const [isLoading, setIsLoading] = useState(hasToken)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    const token = searchParams.get('token')?.trim() ?? ''
-
-    if ('' === token) {
-      setErrorMessage('Le lien de validation est incomplet.')
-      setIsLoading(false)
+    if (!hasToken) {
       return
     }
 
@@ -68,7 +66,12 @@ export function AccountEmailChangeConfirmPage() {
     return () => {
       isMounted = false
     }
-  }, [searchParams])
+  }, [hasToken, token])
+
+  const displayedIsLoading = hasToken ? isLoading : false
+  const displayedErrorMessage = hasToken
+    ? errorMessage
+    : 'Le lien de validation est incomplet.'
 
   return (
     <AccountSection>
@@ -80,16 +83,16 @@ export function AccountEmailChangeConfirmPage() {
           </AccountSectionLead>
         </div>
 
-        {isLoading ? (
+        {displayedIsLoading ? (
           <AccountState>Vérification du lien en cours...</AccountState>
         ) : null}
 
-        {!isLoading && statusMessage ? (
+        {!displayedIsLoading && statusMessage ? (
           <AccountStatusMessage>{statusMessage}</AccountStatusMessage>
         ) : null}
 
-        {!isLoading && errorMessage ? (
-          <AccountErrorMessage>{errorMessage}</AccountErrorMessage>
+        {!displayedIsLoading && displayedErrorMessage ? (
+          <AccountErrorMessage>{displayedErrorMessage}</AccountErrorMessage>
         ) : null}
 
         <AccountActions>

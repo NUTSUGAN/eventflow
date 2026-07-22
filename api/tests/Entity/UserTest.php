@@ -49,6 +49,24 @@ class UserTest extends TestCase
         self::assertFalse($user->canAuthenticate());
     }
 
+    public function testFailedLoginAttemptsCanBeTrackedAndReset(): void
+    {
+        $user = new User();
+        $failedAt = new \DateTimeImmutable('2026-07-22 10:00:00');
+
+        self::assertSame(0, $user->getFailedLoginAttempts());
+        self::assertNull($user->getLastFailedLoginAt());
+
+        self::assertSame(1, $user->incrementFailedLoginAttempts($failedAt));
+        self::assertSame(1, $user->getFailedLoginAttempts());
+        self::assertSame($failedAt, $user->getLastFailedLoginAt());
+
+        $user->resetFailedLoginAttempts();
+
+        self::assertSame(0, $user->getFailedLoginAttempts());
+        self::assertNull($user->getLastFailedLoginAt());
+    }
+
     public function testActiveStaffMembershipAddsEffectiveStaffRole(): void
     {
         $user = (new User())->setRole('client');

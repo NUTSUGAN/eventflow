@@ -28,6 +28,22 @@ services:
     depends_on:
       - app
 
+  front:
+    build:
+      context: ./front
+    container_name: eventflow_front
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./front:/app
+      - eventflow_front_node_modules:/app/node_modules
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8080"
+      VITE_BACKEND_PUBLIC_URL: "http://localhost:8080"
+    depends_on:
+      - nginx
+
   mailpit:
     image: axllent/mailpit:latest
     container_name: eventflow_mailpit
@@ -37,3 +53,4 @@ services:
 volumes:
   eventflow_vendor:
   eventflow_var:
+  eventflow_front_node_modules:

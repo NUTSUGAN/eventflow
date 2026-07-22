@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 type UsePaginationOptions = {
   pageSize?: number
@@ -9,16 +9,45 @@ export function usePagination<T>(
   items: T[],
   { pageSize = 20, resetKey = '' }: UsePaginationOptions = {},
 ) {
-  const [page, setPage] = useState(1)
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize))
+  const [paginationState, setPaginationState] = useState({
+    page: 1,
+    pageSize,
+    resetKey,
+  })
 
-  useEffect(() => {
-    setPage(1)
-  }, [resetKey, pageSize])
+  const shouldReset =
+    paginationState.resetKey !== resetKey || paginationState.pageSize !== pageSize
 
-  useEffect(() => {
-    setPage((currentPage) => Math.min(currentPage, totalPages))
-  }, [totalPages])
+  if (shouldReset) {
+    setPaginationState({
+      page: 1,
+      pageSize,
+      resetKey,
+    })
+  }
+
+  const page = Math.min(shouldReset ? 1 : paginationState.page, totalPages)
+
+  const setPage = useCallback(
+    (nextPage: number | ((currentPage: number) => number)) => {
+      setPaginationState((currentState) => {
+        const currentPage =
+          currentState.resetKey === resetKey && currentState.pageSize === pageSize
+            ? Math.min(currentState.page, totalPages)
+            : 1
+        const resolvedPage =
+          typeof nextPage === 'function' ? nextPage(currentPage) : nextPage
+
+        return {
+          page: Math.min(Math.max(1, resolvedPage), totalPages),
+          pageSize,
+          resetKey,
+        }
+      })
+    },
+    [pageSize, resetKey, totalPages],
+  )
 
   const paginatedItems = useMemo(() => {
     const startIndex = (page - 1) * pageSize

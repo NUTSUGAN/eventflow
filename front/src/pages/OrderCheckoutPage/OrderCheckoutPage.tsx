@@ -152,9 +152,6 @@ export function OrderCheckoutPage() {
       }, 1500)
     }
 
-    setIsLoading(true)
-    setErrorMessage(null)
-
     if (isSuccessReturn) {
       void loadWithPolling()
     } else {

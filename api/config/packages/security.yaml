@@ -25,6 +25,10 @@ security:
             provider: app_user_provider
             user_checker: App\Security\UserAccountStatusChecker
 
+            login_throttling:
+                max_attempts: 3
+                interval: '15 minutes'
+
             json_login:
                 check_path: /api/login
                 username_path: email

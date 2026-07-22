@@ -102,20 +102,18 @@ function toExportAssetUrl(assetUrl: string | null): string | null {
 export function TicketDetailPage() {
   const navigate = useNavigate()
   const { ticketId: rawTicketId } = useParams()
+  const ticketId = Number.parseInt(rawTicketId ?? '', 10)
+  const hasValidTicketId = Number.isFinite(ticketId) && ticketId > 0
   const exportCardRef = useRef<HTMLDivElement | null>(null)
   const [ticket, setTicket] = useState<TicketRecord | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(hasValidTicketId)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null)
   const [downloadState, setDownloadState] = useState<'png' | 'pdf' | null>(null)
   const [exportCoverImage, setExportCoverImage] = useState<string | null>(null)
 
   useEffect(() => {
-    const ticketId = Number.parseInt(rawTicketId ?? '', 10)
-
-    if (!Number.isFinite(ticketId) || ticketId <= 0) {
-      setErrorMessage('Billet introuvable.')
-      setIsLoading(false)
+    if (!hasValidTicketId) {
       return
     }
 
@@ -162,7 +160,7 @@ export function TicketDetailPage() {
     return () => {
       isMounted = false
     }
-  }, [rawTicketId])
+  }, [hasValidTicketId, ticketId])
 
   const ticketFileBaseName = useMemo(() => {
     if (!ticket) {
@@ -308,7 +306,12 @@ export function TicketDetailPage() {
     }
   }
 
-  if (isLoading) {
+  const displayedIsLoading = hasValidTicketId ? isLoading : false
+  const displayedErrorMessage = hasValidTicketId
+    ? errorMessage
+    : 'Billet introuvable.'
+
+  if (displayedIsLoading) {
     return (
       <TicketDetailShell>
         <TicketDetailState>Chargement du billet...</TicketDetailState>
@@ -319,7 +322,7 @@ export function TicketDetailPage() {
   if (!ticket) {
     return (
       <TicketDetailShell>
-        <TicketDetailState>{errorMessage ?? 'Billet indisponible.'}</TicketDetailState>
+        <TicketDetailState>{displayedErrorMessage ?? 'Billet indisponible.'}</TicketDetailState>
         <MyTicketsActions>
           <MyTicketsPrimaryButton
             type="button"
