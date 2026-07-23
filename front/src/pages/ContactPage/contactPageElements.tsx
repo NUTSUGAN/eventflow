@@ -2,9 +2,15 @@ import styled from 'styled-components'
 
 export const ContactPageShell = styled.main`
   width: min(900px, calc(100% - 32px));
+  min-width: 0;
   margin: 0 auto;
   padding: 72px 0 44px;
   overflow: hidden;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    padding: 44px 0 40px;
+  }
 `
 
 export const ContactBackLink = styled.a`
@@ -31,6 +37,7 @@ export const ContactLead = styled.p`
 `
 
 export const ContactForm = styled.form`
+  min-width: 0;
   display: grid;
   gap: 18px;
   margin-top: 32px;
@@ -38,9 +45,14 @@ export const ContactForm = styled.form`
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+  }
 `
 
 export const ContactFormGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
@@ -62,6 +74,7 @@ export const ContactField = styled.div`
 
 const fieldStyles = `
   width: 100%;
+  min-width: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
@@ -110,9 +123,14 @@ export const ContactTextarea = styled.textarea`
 export const ContactActions = styled.div`
   display: flex;
   justify-content: flex-end;
+
+  @media (max-width: 560px) {
+    justify-content: stretch;
+  }
 `
 
 export const ContactButton = styled.button`
+  max-width: 100%;
   min-height: 46px;
   padding: 0 20px;
   border: 0;
@@ -120,7 +138,13 @@ export const ContactButton = styled.button`
   background: linear-gradient(180deg, var(--color-secondary) 0%, var(--color-primary) 100%);
   color: var(--color-text);
   font-weight: 900;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 
   &:disabled {
     cursor: not-allowed;

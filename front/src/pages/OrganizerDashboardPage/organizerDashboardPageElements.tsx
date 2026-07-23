@@ -2,12 +2,20 @@ import styled from 'styled-components'
 
 export const OrganizerDashboardSection = styled.main`
   width: min(1240px, calc(100% - 40px));
+  min-width: 0;
   margin: 56px auto 96px;
   display: grid;
   gap: 22px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+    gap: 16px;
+  }
 `
 
 export const OrganizerDashboardHeader = styled.section`
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -16,6 +24,7 @@ export const OrganizerDashboardHeader = styled.section`
 `
 
 export const OrganizerDashboardHeaderText = styled.div`
+  min-width: 0;
   display: grid;
   gap: 8px;
   max-width: 760px;
@@ -32,21 +41,30 @@ export const OrganizerDashboardTitle = styled.h1`
   margin: 0;
   color: #fffaf4;
   font-size: clamp(1.9rem, 3vw, 2.7rem);
+  overflow-wrap: anywhere;
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const OrganizerDashboardText = styled.p`
   margin: 0;
   color: rgba(255, 237, 222, 0.74);
   line-height: 1.65;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardActions = styled.div`
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 `
 
 export const OrganizerDashboardPrimaryButton = styled.button`
+  max-width: 100%;
   min-height: 46px;
   padding: 0 16px;
   border: none;
@@ -55,6 +73,8 @@ export const OrganizerDashboardPrimaryButton = styled.button`
   color: #fffaf4;
   font-size: 0.94rem;
   font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
@@ -64,6 +84,7 @@ export const OrganizerDashboardPrimaryButton = styled.button`
 `
 
 export const OrganizerDashboardSecondaryButton = styled.button`
+  max-width: 100%;
   min-height: 46px;
   padding: 0 16px;
   border-radius: 12px;
@@ -72,6 +93,8 @@ export const OrganizerDashboardSecondaryButton = styled.button`
   color: #fff3e5;
   font-size: 0.94rem;
   font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
@@ -90,11 +113,13 @@ export const OrganizerDashboardMobileActions = styled.div`
   display: none;
 
   @media (max-width: 720px) {
+    min-width: 0;
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 52px;
     gap: 8px;
-    width: min(100%, 420px);
+    width: 100%;
+    max-width: 420px;
   }
 
   ${OrganizerDashboardPrimaryButton} {
@@ -150,7 +175,7 @@ export const OrganizerDashboardMobileActionList = styled.div`
   right: 0;
   display: grid;
   gap: 8px;
-  width: min(270px, calc(100vw - 40px));
+  width: min(270px, calc(100vw - 24px));
   padding: 10px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -164,6 +189,7 @@ export const OrganizerDashboardMobileActionList = styled.div`
 `
 
 export const OrganizerDashboardGrid = styled.section`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
@@ -178,6 +204,7 @@ export const OrganizerDashboardGrid = styled.section`
 `
 
 export const OrganizerDashboardMetric = styled.article`
+  min-width: 0;
   display: grid;
   gap: 6px;
   min-height: 116px;
@@ -192,6 +219,7 @@ export const OrganizerDashboardMetricLabel = styled.span`
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardMetricValue = styled.span`
@@ -199,24 +227,34 @@ export const OrganizerDashboardMetricValue = styled.span`
   font-size: 1.8rem;
   font-weight: 900;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardMetricHint = styled.span`
   color: rgba(255, 237, 222, 0.62);
   font-size: 0.88rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardPanel = styled.section`
+  min-width: 0;
   display: grid;
   gap: 16px;
   padding: 20px;
   border-radius: 16px;
   background: linear-gradient(180deg, rgba(40, 31, 25, 0.96), rgba(27, 23, 20, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 560px) {
+    gap: 14px;
+    padding: 16px;
+    border-radius: 14px;
+  }
 `
 
 export const OrganizerDashboardPanelHeader = styled.div`
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -228,14 +266,17 @@ export const OrganizerDashboardPanelTitle = styled.h2`
   margin: 0 0 6px;
   color: #fff8f2;
   font-size: 1.15rem;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardList = styled.div`
+  min-width: 0;
   display: grid;
   gap: 10px;
 `
 
 export const OrganizerDashboardRow = styled.article`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(360px, 1fr) auto;
   align-items: center;
@@ -248,9 +289,14 @@ export const OrganizerDashboardRow = styled.article`
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
   }
+
+  @media (max-width: 560px) {
+    padding: 12px;
+  }
 `
 
 export const OrganizerDashboardRowMain = styled.div`
+  min-width: 0;
   display: grid;
   gap: 5px;
 `
@@ -259,15 +305,18 @@ export const OrganizerDashboardRowTitle = styled.h3`
   margin: 0;
   color: #fff8f2;
   font-size: 0.98rem;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardRowText = styled.p`
   margin: 0;
   color: rgba(255, 237, 222, 0.68);
   line-height: 1.45;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardRowStats = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
@@ -275,9 +324,14 @@ export const OrganizerDashboardRowStats = styled.div`
   @media (max-width: 640px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const OrganizerDashboardMiniMetric = styled.div`
+  min-width: 0;
   display: grid;
   gap: 3px;
   min-height: 58px;
@@ -292,6 +346,7 @@ export const OrganizerDashboardMiniMetricLabel = styled.span`
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardMiniMetricValue = styled.span`
@@ -299,9 +354,11 @@ export const OrganizerDashboardMiniMetricValue = styled.span`
   font-size: 0.96rem;
   font-weight: 900;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 `
 
 export const OrganizerDashboardRowActions = styled.div`
+  min-width: 0;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -314,6 +371,7 @@ export const OrganizerDashboardRowActions = styled.div`
 `
 
 export const OrganizerDashboardBadge = styled.span<{ $tone?: 'success' | 'warning' | 'danger' | 'neutral' }>`
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -334,9 +392,15 @@ export const OrganizerDashboardBadge = styled.span<{ $tone?: 'success' | 'warnin
   color: #fff4ea;
   font-size: 0.82rem;
   font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  text-align: center;
+  white-space: normal;
 `
 
 export const OrganizerDashboardEventSelect = styled.select`
+  width: 100%;
+  min-width: 0;
   min-height: 46px;
   padding: 0 13px;
   border-radius: 12px;
@@ -365,6 +429,7 @@ export const OrganizerDashboardEventSelect = styled.select`
 `
 
 export const OrganizerDashboardMessage = styled.div<{ $tone: 'neutral' | 'success' | 'danger' }>`
+  min-width: 0;
   padding: 13px 15px;
   border-radius: 12px;
   background:

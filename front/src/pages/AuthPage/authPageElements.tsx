@@ -2,13 +2,14 @@ import styled, { css } from 'styled-components'
 
 export const AuthLayout = styled.main`
   width: min(1120px, calc(100% - 48px));
+  min-width: 0;
   margin: 56px auto 96px;
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(380px, 0.95fr);
   gap: 32px;
 
   @media (max-width: 960px) {
-    width: min(100%, calc(100% - 32px));
+    width: min(100%, calc(100% - 24px));
     grid-template-columns: 1fr;
     margin-top: 32px;
   }
@@ -41,6 +42,10 @@ export const AuthTitle = styled.h1`
   line-height: 0.96;
   font-family: 'Montserrat', sans-serif;
   color: #fffaf4;
+
+  @media (max-width: 560px) {
+    font-size: clamp(2rem, 11vw, 3rem);
+  }
 `
 
 export const AuthSubtitle = styled.p`
@@ -67,9 +72,16 @@ export const AuthCard = styled.section`
   background: linear-gradient(180deg, rgba(42, 31, 25, 0.96), rgba(29, 24, 21, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.36);
+
+  @media (max-width: 560px) {
+    gap: 18px;
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const AuthTabs = styled.div`
+  min-width: 0;
   display: inline-grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
@@ -157,6 +169,8 @@ export const AuthFieldLabel = styled.label`
 `
 
 export const AuthTextInput = styled.input`
+  width: 100%;
+  min-width: 0;
   min-height: 50px;
   padding: 0 16px;
   border-radius: 14px;
@@ -206,17 +220,21 @@ export const AuthSupportButton = styled.button`
 `
 
 export const AuthActionsRow = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 `
 
 const buttonBase = css`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border-radius: 14px;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -226,6 +244,10 @@ const buttonBase = css`
   &:disabled {
     cursor: wait;
     opacity: 0.72;
+  }
+
+  @media (max-width: 560px) {
+    width: 100%;
   }
 `
 

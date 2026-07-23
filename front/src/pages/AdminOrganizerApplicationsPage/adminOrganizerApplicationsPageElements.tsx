@@ -2,7 +2,13 @@ import styled from 'styled-components'
 
 export const AdminOrganizerApplicationsSection = styled.main`
   width: min(1180px, calc(100% - 40px));
+  min-width: 0;
   margin: 72px auto 96px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+  }
 `
 
 export const AdminOrganizerApplicationsHeader = styled.section`
@@ -23,6 +29,10 @@ export const AdminOrganizerApplicationsTitle = styled.h1`
   margin: 0;
   color: #fffaf4;
   font-size: clamp(2rem, 3vw, 3rem);
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const AdminOrganizerApplicationsText = styled.p`
@@ -32,6 +42,7 @@ export const AdminOrganizerApplicationsText = styled.p`
 `
 
 export const AdminOrganizerApplicationsState = styled.div`
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
@@ -40,12 +51,20 @@ export const AdminOrganizerApplicationsState = styled.div`
 `
 
 export const AdminOrganizerApplicationsTabs = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
+  @media (max-width: 560px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
 `
 
 export const AdminOrganizerApplicationsTab = styled.button<{ $active: boolean }>`
+  flex: 0 0 auto;
   min-height: 44px;
   padding: 0 16px;
   border-radius: 14px;
@@ -57,11 +76,13 @@ export const AdminOrganizerApplicationsTab = styled.button<{ $active: boolean }>
   color: #fff8f2;
   font-size: 0.92rem;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 `
 
 export const AdminOrganizerApplicationsSearch = styled.input`
   width: 100%;
+  min-width: 0;
   min-height: 48px;
   padding: 0 16px;
   border-radius: 14px;
@@ -77,17 +98,24 @@ export const AdminOrganizerApplicationsSearch = styled.input`
 `
 
 export const AdminOrganizerApplicationsList = styled.section`
+  min-width: 0;
   display: grid;
   gap: 18px;
 `
 
 export const AdminOrganizerApplicationsCard = styled.article`
+  min-width: 0;
   display: grid;
   gap: 16px;
   padding: 24px;
   border-radius: 20px;
   background: linear-gradient(180deg, rgba(40, 31, 25, 0.96), rgba(28, 24, 21, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+    border-radius: 16px;
+  }
 `
 
 export const AdminOrganizerApplicationsMeta = styled.div`
@@ -97,6 +125,7 @@ export const AdminOrganizerApplicationsMeta = styled.div`
 `
 
 export const AdminOrganizerApplicationsBadge = styled.span<{ $tone?: 'pending' | 'approved' | 'rejected' }>`
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   min-height: 34px;
@@ -119,6 +148,9 @@ export const AdminOrganizerApplicationsBadge = styled.span<{ $tone?: 'pending' |
   color: #fff8f2;
   font-size: 0.88rem;
   font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const AdminOrganizerApplicationsCardTitle = styled.h2`
@@ -133,6 +165,7 @@ export const AdminOrganizerApplicationsApplicant = styled.p`
 `
 
 export const AdminOrganizerApplicationsGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -143,6 +176,7 @@ export const AdminOrganizerApplicationsGrid = styled.div`
 `
 
 export const AdminOrganizerApplicationsInfoCard = styled.div`
+  min-width: 0;
   padding: 16px 18px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.03);
@@ -164,6 +198,7 @@ export const AdminOrganizerApplicationsValue = styled.p`
 
 export const AdminOrganizerApplicationsTextarea = styled.textarea`
   width: 100%;
+  min-width: 0;
   min-height: 124px;
   padding: 14px 16px;
   border-radius: 16px;
@@ -180,12 +215,14 @@ export const AdminOrganizerApplicationsTextarea = styled.textarea`
 `
 
 export const AdminOrganizerApplicationsActions = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 `
 
 export const AdminOrganizerApplicationsPrimaryButton = styled.button`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 18px;
   border: none;
@@ -194,10 +231,17 @@ export const AdminOrganizerApplicationsPrimaryButton = styled.button`
   color: #fffaf4;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const AdminOrganizerApplicationsSecondaryButton = styled.button`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 18px;
   border-radius: 14px;
@@ -206,5 +250,11 @@ export const AdminOrganizerApplicationsSecondaryButton = styled.button`
   color: #fff3e5;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `

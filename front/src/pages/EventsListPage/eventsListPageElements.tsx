@@ -2,11 +2,12 @@ import styled from 'styled-components'
 
 export const PageSection = styled.main`
   width: min(1480px, calc(100% - 96px));
+  min-width: 0;
   margin: 0 auto;
   padding: 28px 0 64px;
 
   @media (max-width: 640px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     padding: 24px 0 48px;
   }
 `
@@ -37,6 +38,7 @@ export const PageTitle = styled.h1`
 `
 
 export const CardsGrid = styled.section`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -86,6 +88,7 @@ export const ErrorStateText = styled(StateText)`
 `
 
 export const MoreEventsButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 26px;
   display: inline-flex;
@@ -102,6 +105,8 @@ export const MoreEventsButton = styled.button`
   font-family: var(--font-heading);
   font-size: 0.96rem;
   letter-spacing: 0;
+  line-height: 1.2;
+  white-space: normal;
   box-shadow: var(--shadow-soft);
   cursor: pointer;
 

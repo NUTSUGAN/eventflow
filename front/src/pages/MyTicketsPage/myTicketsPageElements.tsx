@@ -2,9 +2,16 @@ import styled from 'styled-components'
 
 export const MyTicketsSection = styled.main`
   width: min(1180px, calc(100% - 48px));
+  min-width: 0;
   margin: 48px auto 96px;
   display: grid;
   gap: 24px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+    gap: 18px;
+  }
 `
 
 export const MyTicketsHero = styled.section`
@@ -18,6 +25,10 @@ export const MyTicketsTitle = styled.h1`
   color: var(--color-text);
   font-size: clamp(2.1rem, 5vw, 3.4rem);
   text-transform: uppercase;
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.7rem, 9vw, 2.4rem);
+  }
 `
 
 export const MyTicketsSubtitle = styled.p`
@@ -28,13 +39,21 @@ export const MyTicketsSubtitle = styled.p`
 `
 
 export const MyTicketsTabs = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 560px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
 `
 
 export const MyTicketsTabButton = styled.button<{ $active: boolean }>`
+  flex: 0 0 auto;
   min-height: 44px;
   padding: 0 4px;
   border: 0;
@@ -48,6 +67,7 @@ export const MyTicketsTabButton = styled.button<{ $active: boolean }>`
 `
 
 export const MyTicketsStateCard = styled.section`
+  min-width: 0;
   display: grid;
   gap: 18px;
   padding: 28px;
@@ -69,6 +89,7 @@ export const MyTicketsStateText = styled.p`
 `
 
 export const MyTicketsPrimaryButton = styled.button`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 18px;
   border: 0;
@@ -76,10 +97,17 @@ export const MyTicketsPrimaryButton = styled.button`
   background: #ece7e2;
   color: #201713;
   font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const MyTicketsInfoCard = styled.section`
+  min-width: 0;
   display: grid;
   gap: 10px;
   padding: 22px 24px;
@@ -106,6 +134,7 @@ export const MyTicketsGrid = styled.div`
 `
 
 export const MyTicketsCard = styled.article`
+  min-width: 0;
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
   gap: 18px;
@@ -117,6 +146,11 @@ export const MyTicketsCard = styled.article`
 
   @media (max-width: 820px) {
     grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 560px) {
+    padding: 14px;
+    border-radius: 16px;
   }
 `
 
@@ -147,6 +181,7 @@ export const MyTicketsCoverButton = styled.button<{ $imageUrl?: string }>`
 `
 
 export const MyTicketsCardBody = styled.div`
+  min-width: 0;
   display: grid;
   gap: 16px;
 `
@@ -158,6 +193,7 @@ export const MyTicketsMetaRow = styled.div`
 `
 
 export const MyTicketsTag = styled.span`
+  max-width: 100%;
   padding: 7px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
@@ -165,6 +201,9 @@ export const MyTicketsTag = styled.span`
   color: rgba(255, 255, 255, 0.78);
   font-size: 0.82rem;
   font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const MyTicketsEventTitle = styled.h2`
@@ -200,6 +239,7 @@ export const MyTicketsSummaryGrid = styled.dl`
 `
 
 export const MyTicketsSummaryItem = styled.div`
+  min-width: 0;
   display: grid;
   gap: 4px;
 `
@@ -217,12 +257,14 @@ export const MyTicketsSummaryValue = styled.dd`
 `
 
 export const MyTicketsActions = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 `
 
 export const MyTicketsSecondaryButton = styled.button`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 18px;
   border-radius: 12px;
@@ -230,10 +272,17 @@ export const MyTicketsSecondaryButton = styled.button`
   background: rgba(255, 255, 255, 0.03);
   color: var(--color-text);
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const MyTicketsDangerButton = styled.button`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 18px;
   border-radius: 12px;
@@ -241,7 +290,13 @@ export const MyTicketsDangerButton = styled.button`
   background: rgba(112, 37, 31, 0.22);
   color: #ffd5ca;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const MyTicketsStatusMessage = styled.div`
@@ -258,6 +313,7 @@ export const MyTicketsPendingList = styled.div`
 `
 
 export const MyTicketsPendingCard = styled.article`
+  min-width: 0;
   display: grid;
   gap: 18px;
   padding: 22px;
@@ -268,6 +324,7 @@ export const MyTicketsPendingCard = styled.article`
 `
 
 export const MyTicketsPendingHeader = styled.div`
+  min-width: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -314,12 +371,19 @@ export const MyTicketsPendingItem = styled.li`
 
 export const TicketDetailShell = styled.main`
   width: min(1080px, calc(100% - 48px));
+  min-width: 0;
   margin: 48px auto 96px;
   display: grid;
   gap: 24px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+  }
 `
 
 export const TicketDetailHeader = styled.section`
+  min-width: 0;
   display: grid;
   gap: 22px;
   padding: 22px;
@@ -341,6 +405,12 @@ export const TicketDetailHero = styled.div<{ $imageUrl?: string }>`
         : `linear-gradient(160deg, rgba(226, 139, 82, 0.52), rgba(45, 33, 27, 0.98))`};
   background-size: cover;
   background-position: center;
+
+  @media (max-width: 560px) {
+    min-height: 180px;
+    padding: 16px;
+    border-radius: 16px;
+  }
 `
 
 export const TicketDetailHeroText = styled.div`
@@ -368,6 +438,7 @@ export const TicketDetailSubtitle = styled.p`
 `
 
 export const TicketDetailGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
   gap: 18px;
@@ -378,6 +449,7 @@ export const TicketDetailGrid = styled.div`
 `
 
 export const TicketDetailCard = styled.section`
+  min-width: 0;
   display: grid;
   gap: 16px;
   padding: 20px;
@@ -393,6 +465,7 @@ export const TicketDetailCardTitle = styled.h2`
 `
 
 export const TicketDetailCodePanel = styled.div`
+  min-width: 0;
   min-height: 320px;
   padding: 22px;
   border-radius: 20px;
@@ -414,6 +487,11 @@ export const TicketDetailQrWrap = styled.div`
   background: #ffffff;
   box-shadow: inset 0 0 0 1px rgba(32, 23, 17, 0.08);
   line-height: 0;
+
+  svg {
+    width: 100%;
+    height: auto;
+  }
 `
 
 export const TicketDetailQrLogo = styled.span`

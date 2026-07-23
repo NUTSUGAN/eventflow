@@ -8,12 +8,13 @@ export const FooterContainer = styled.footer`
 
 export const FooterTop = styled.section`
   width: min(1280px, calc(100% - 64px));
+  min-width: 0;
   margin: 0 auto;
   padding: 26px 0 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
   @media (max-width: 640px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     padding: 22px 0;
   }
 `
@@ -41,6 +42,7 @@ export const FooterTrustList = styled.div`
 `
 
 export const FooterTrustItem = styled.div`
+  min-width: 0;
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -50,16 +52,19 @@ export const FooterTrustItem = styled.div`
   color: rgba(255, 255, 255, 0.76);
   font-size: 0.9rem;
   font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
   text-align: center;
 `
 
 export const FooterMain = styled.section`
   width: min(1280px, calc(100% - 64px));
+  min-width: 0;
   margin: 0 auto;
   padding: 28px 0 22px;
 
   @media (max-width: 640px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
   }
 `
 
@@ -74,6 +79,7 @@ export const FooterBrand = styled.a`
 `
 
 export const FooterTopAction = styled.button`
+  max-width: 100%;
   min-height: 42px;
   margin: 0 0 22px;
   padding: 0 16px;
@@ -82,6 +88,8 @@ export const FooterTopAction = styled.button`
   background: rgba(248, 143, 82, 0.09);
   color: var(--color-text);
   font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:hover,
@@ -92,6 +100,7 @@ export const FooterTopAction = styled.button`
 `
 
 export const FooterColumns = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 24px;
@@ -104,7 +113,10 @@ export const FooterColumns = styled.div`
   }
 
   @media (max-width: 560px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 28px;
+    row-gap: 44px;
+    padding: 24px 0 30px;
   }
 `
 
@@ -113,6 +125,10 @@ export const FooterColumn = styled.div`
   align-content: start;
   gap: 9px;
   min-width: 0;
+
+  @media (max-width: 560px) {
+    gap: 10px;
+  }
 `
 
 export const FooterColumnTitle = styled.h3`
@@ -120,6 +136,11 @@ export const FooterColumnTitle = styled.h3`
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: 0.98rem;
+
+  @media (max-width: 560px) {
+    font-size: 0.84rem;
+    text-transform: uppercase;
+  }
 `
 
 export const FooterLink = styled.button`
@@ -134,6 +155,11 @@ export const FooterLink = styled.button`
   font-size: 0.94rem;
   line-height: 1.35;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
 
   &:hover,
   &:focus-visible {

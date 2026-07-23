@@ -2,12 +2,19 @@ import styled from 'styled-components'
 
 export const StaffScanSection = styled.main`
   width: min(1120px, calc(100% - 40px));
+  min-width: 0;
   margin: 48px auto 96px;
   display: grid;
   gap: 18px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+  }
 `
 
 export const StaffScanHero = styled.section`
+  min-width: 0;
   display: grid;
   gap: 22px;
   padding: clamp(22px, 3vw, 34px);
@@ -16,6 +23,11 @@ export const StaffScanHero = styled.section`
     linear-gradient(180deg, rgba(36, 29, 25, 0.98), rgba(22, 20, 18, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
+
+  @media (max-width: 560px) {
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const StaffScanEyebrow = styled.span`
@@ -31,6 +43,10 @@ export const StaffScanTitle = styled.h1`
   color: #fffaf4;
   font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1;
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const StaffScanText = styled.p`
@@ -41,8 +57,9 @@ export const StaffScanText = styled.p`
 `
 
 export const StaffScanGrid = styled.section`
+  min-width: 0;
   display: grid;
-  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
   gap: 18px;
 
   @media (max-width: 980px) {
@@ -51,6 +68,7 @@ export const StaffScanGrid = styled.section`
 `
 
 export const StaffScanPanel = styled.section`
+  min-width: 0;
   display: grid;
   align-content: start;
   gap: 16px;
@@ -59,6 +77,11 @@ export const StaffScanPanel = styled.section`
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
   border: 1px solid rgba(255, 255, 255, 0.09);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+    border-radius: 14px;
+  }
 `
 
 export const StaffScanPanelTitle = styled.h2`
@@ -78,6 +101,7 @@ export const StaffScanInlineText = styled.p`
 `
 
 export const StaffScanField = styled.div`
+  min-width: 0;
   display: grid;
   gap: 10px;
 `
@@ -91,6 +115,8 @@ export const StaffScanLabel = styled.label`
 `
 
 export const StaffScanSelect = styled.select`
+  width: 100%;
+  min-width: 0;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 14px;
@@ -122,6 +148,7 @@ export const StaffScanHiddenInput = styled.input`
 `
 
 export const StaffScanDiagnosticsCard = styled.div`
+  min-width: 0;
   display: grid;
   gap: 14px;
   padding: 16px;
@@ -132,6 +159,7 @@ export const StaffScanDiagnosticsCard = styled.div`
 `
 
 export const StaffScanDiagnosticsGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -186,6 +214,7 @@ export const StaffScanDiagnosticsValue = styled.span<{ $tone?: 'active' | 'muted
 `
 
 export const StaffScanActions = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -196,6 +225,7 @@ export const StaffScanActions = styled.div`
 `
 
 export const StaffScanCameraViewport = styled.div<{ $visible: boolean }>`
+  min-width: 0;
   min-height: ${({ $visible }) => ($visible ? '280px' : '0')};
   max-height: ${({ $visible }) => ($visible ? '280px' : '0')};
   border-radius: 18px;
@@ -230,6 +260,7 @@ export const StaffScanCameraViewport = styled.div<{ $visible: boolean }>`
 `
 
 export const StaffScanPrimaryButton = styled.button<{ $active?: boolean; $wide?: boolean }>`
+  max-width: 100%;
   grid-column: ${({ $wide }) => ($wide ? '1 / -1' : 'auto')};
   min-height: 50px;
   padding: 0 18px;
@@ -245,6 +276,8 @@ export const StaffScanPrimaryButton = styled.button<{ $active?: boolean; $wide?:
   color: ${({ $active }) => ($active ? '#fffaf4' : 'rgba(255, 237, 222, 0.72)')};
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   box-shadow:
     ${({ $active }) =>
@@ -281,6 +314,7 @@ export const StaffScanPrimaryButton = styled.button<{ $active?: boolean; $wide?:
 `
 
 export const StaffScanSecondaryButton = styled.button<{ $wide?: boolean }>`
+  max-width: 100%;
   grid-column: ${({ $wide }) => ($wide ? '1 / -1' : 'auto')};
   min-height: 50px;
   padding: 0 18px;
@@ -290,6 +324,8 @@ export const StaffScanSecondaryButton = styled.button<{ $wide?: boolean }>`
   color: #fff3e5;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   transition:
     transform 140ms ease,
@@ -315,6 +351,7 @@ export const StaffScanSecondaryButton = styled.button<{ $wide?: boolean }>`
 `
 
 export const StaffScanMessage = styled.div<{ $tone: 'neutral' | 'success' | 'danger' }>`
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid
@@ -383,9 +420,16 @@ export const StaffScanStatusPill = styled.div<{ $tone: 'success' | 'danger' | 'n
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.3;
+
+  @media (max-width: 560px) {
+    width: 100%;
+    min-height: 64px;
+    border-radius: 14px;
+  }
 `
 
 export const StaffScanResultCard = styled.article`
+  min-width: 0;
   display: grid;
   gap: 14px;
   padding: 20px;
@@ -408,6 +452,7 @@ export const StaffScanResultMeta = styled.p`
 `
 
 export const StaffScanResultGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;

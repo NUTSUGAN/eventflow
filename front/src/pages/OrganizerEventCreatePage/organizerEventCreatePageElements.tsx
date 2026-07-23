@@ -2,10 +2,17 @@ import styled from 'styled-components'
 
 export const OrganizerEventCreateSection = styled.main`
   width: min(1080px, calc(100% - 40px));
+  min-width: 0;
   margin: 72px auto 96px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+  }
 `
 
 export const OrganizerEventCreateHero = styled.section`
+  min-width: 0;
   display: grid;
   gap: 22px;
   padding: 30px;
@@ -13,6 +20,12 @@ export const OrganizerEventCreateHero = styled.section`
   background: linear-gradient(180deg, rgba(40, 31, 25, 0.96), rgba(28, 24, 21, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+
+  @media (max-width: 560px) {
+    gap: 18px;
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const OrganizerEventCreateEyebrow = styled.span`
@@ -27,6 +40,10 @@ export const OrganizerEventCreateTitle = styled.h1`
   margin: 0;
   color: #fffaf4;
   font-size: clamp(2rem, 3vw, 3rem);
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const OrganizerEventCreateText = styled.p`
@@ -36,6 +53,7 @@ export const OrganizerEventCreateText = styled.p`
 `
 
 export const OrganizerEventCreateState = styled.div`
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
@@ -56,11 +74,13 @@ export const OrganizerEventCreateSuccess = styled(OrganizerEventCreateState)`
 `
 
 export const OrganizerEventCreateForm = styled.form`
+  min-width: 0;
   display: grid;
   gap: 18px;
 `
 
 export const OrganizerEventCreateGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -71,6 +91,7 @@ export const OrganizerEventCreateGrid = styled.div`
 `
 
 export const OrganizerEventCreateField = styled.label`
+  min-width: 0;
   display: grid;
   gap: 10px;
 `
@@ -83,6 +104,7 @@ export const OrganizerEventCreateLabel = styled.span`
 
 const fieldStyles = `
   width: 100%;
+  min-width: 0;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 14px;
@@ -125,12 +147,14 @@ export const OrganizerEventCreateHint = styled.span`
 `
 
 export const OrganizerEventCreateActions = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 `
 
 export const OrganizerEventCreatePrimaryButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border: none;
@@ -139,15 +163,22 @@ export const OrganizerEventCreatePrimaryButton = styled.button`
   color: #fffaf4;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
     cursor: wait;
     opacity: 0.72;
   }
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const OrganizerEventCreateSecondaryButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border-radius: 14px;
@@ -156,10 +187,17 @@ export const OrganizerEventCreateSecondaryButton = styled.button`
   color: #fff3e5;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const OrganizerEventCreateSummary = styled.div`
+  min-width: 0;
   display: grid;
   gap: 10px;
   padding: 18px;

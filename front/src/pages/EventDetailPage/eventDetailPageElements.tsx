@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 export const DetailSection = styled.main`
   width: min(1480px, calc(100% - 96px));
+  min-width: 0;
   margin: 0 auto;
   padding: 28px 0 72px;
 
@@ -12,6 +13,7 @@ export const DetailSection = styled.main`
 `
 
 export const DetailHero = styled.section`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: 28px;
@@ -39,6 +41,10 @@ export const DetailHeroCover = styled.div<{ $imageUrl: string }>`
   @media (max-width: 1040px) {
     min-height: 320px;
   }
+
+  @media (max-width: 560px) {
+    min-height: 240px;
+  }
 `
 
 export const DetailSponsoredBadge = styled.img`
@@ -53,13 +59,14 @@ export const DetailSponsoredBadge = styled.img`
   pointer-events: none;
 
   @media (max-width: 640px) {
-    right: -10px;
-    bottom: -28px;
-    width: 126px;
+    right: 8px;
+    bottom: -24px;
+    width: 112px;
   }
 `
 
 export const DetailEventVideoPanel = styled.section`
+  min-width: 0;
   display: grid;
   gap: 16px;
   margin: 0 0 28px;
@@ -80,6 +87,7 @@ export const DetailEventVideo = styled.video`
 `
 
 export const DetailHeroContent = styled.div`
+  min-width: 0;
   display: grid;
   align-content: start;
   gap: 18px;
@@ -93,6 +101,7 @@ export const DetailMetaBadgeRow = styled.div`
 `
 
 export const DetailMetaBadge = styled.span`
+  max-width: 100%;
   min-height: 38px;
   padding: 0 14px;
   display: inline-flex;
@@ -102,6 +111,9 @@ export const DetailMetaBadge = styled.span`
   background: rgba(255, 255, 255, 0.04);
   color: var(--color-text-muted);
   font-size: 0.9rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const DetailTitle = styled.h1`
@@ -109,6 +121,10 @@ export const DetailTitle = styled.h1`
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: clamp(2rem, 4vw, 3.2rem);
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.7rem, 9vw, 2.4rem);
+  }
 `
 
 export const DetailLead = styled.p`
@@ -138,6 +154,7 @@ export const DetailInfoGrid = styled.div`
 `
 
 export const DetailInfoItem = styled.div`
+  min-width: 0;
   min-height: 82px;
   padding: 18px;
   border-radius: 8px;
@@ -162,6 +179,7 @@ export const DetailInfoValue = styled.strong`
 
 export const DetailInfoSelect = styled.select`
   width: 100%;
+  min-width: 0;
   min-height: 42px;
   padding: 0 14px;
   border-radius: 8px;
@@ -179,6 +197,7 @@ export const DetailInfoSelect = styled.select`
 `
 
 export const DetailGrid = styled.section`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.9fr);
   gap: 28px;
@@ -190,16 +209,22 @@ export const DetailGrid = styled.section`
 `
 
 export const DetailBody = styled.div`
+  min-width: 0;
   display: grid;
   gap: 24px;
 `
 
 export const DetailPanel = styled.section`
+  min-width: 0;
   padding: 24px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: rgba(34, 31, 29, 0.9);
   box-shadow: var(--shadow-soft);
+
+  @media (max-width: 560px) {
+    padding: 18px;
+  }
 `
 
 export const DetailPanelHeader = styled.header`
@@ -238,6 +263,7 @@ export const DetailTicketList = styled.ul`
 `
 
 export const DetailTicketListItem = styled.li`
+  min-width: 0;
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -300,6 +326,7 @@ export const DetailTicketPrice = styled.strong`
 `
 
 export const TicketReserveButton = styled.button`
+  max-width: 100%;
   min-height: 44px;
   padding: 0 18px;
   border: 0;
@@ -312,6 +339,8 @@ export const TicketReserveButton = styled.button`
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: 0.92rem;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
@@ -341,6 +370,10 @@ export const DetailOrganizerIdentity = styled.div`
   display: flex;
   align-items: center;
   gap: 14px;
+
+  @media (max-width: 420px) {
+    align-items: flex-start;
+  }
 `
 
 export const DetailOrganizerAvatar = styled.div<{ $imageUrl?: string }>`
@@ -385,6 +418,7 @@ export const DetailOrganizerActions = styled.div`
 `
 
 export const DetailReportButton = styled.button`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 18px;
   border-radius: 999px;
@@ -393,10 +427,13 @@ export const DetailReportButton = styled.button`
   color: #fff1e7;
   font-family: var(--font-heading);
   font-size: 0.94rem;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 `
 
 export const FollowButton = styled.button<{ $active: boolean }>`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   display: inline-flex;
@@ -415,6 +452,8 @@ export const FollowButton = styled.button<{ $active: boolean }>`
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
@@ -424,6 +463,7 @@ export const FollowButton = styled.button<{ $active: boolean }>`
 `
 
 export const AuthPromptButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   display: inline-flex;
@@ -440,6 +480,8 @@ export const AuthPromptButton = styled.button`
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 `
 
@@ -450,6 +492,7 @@ export const FollowIcon = styled.svg`
 `
 
 export const DetailReportCard = styled.div`
+  min-width: 0;
   display: grid;
   gap: 14px;
   margin-top: 6px;
@@ -477,6 +520,7 @@ export const DetailFieldLabel = styled.span`
 
 export const DetailReportSelect = styled.select`
   width: 100%;
+  min-width: 0;
   min-height: 44px;
   padding: 0 14px;
   border-radius: 8px;
@@ -491,6 +535,7 @@ export const DetailReportSelect = styled.select`
 
 export const DetailReportTextarea = styled.textarea`
   width: 100%;
+  min-width: 0;
   min-height: 132px;
   padding: 14px;
   border-radius: 8px;
@@ -504,6 +549,7 @@ export const DetailReportTextarea = styled.textarea`
 `
 
 export const DetailReasonGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -514,6 +560,7 @@ export const DetailReasonGrid = styled.div`
 `
 
 export const DetailReasonButton = styled.button<{ $active: boolean }>`
+  max-width: 100%;
   min-height: 50px;
   padding: 12px 14px;
   border-radius: 12px;
@@ -529,6 +576,8 @@ export const DetailReasonButton = styled.button<{ $active: boolean }>`
   font-size: 0.92rem;
   font-weight: 700;
   text-align: left;
+  line-height: 1.25;
+  white-space: normal;
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -604,6 +653,7 @@ export const DetailStateBox = styled.section`
 `
 
 export const DetailRelatedGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;

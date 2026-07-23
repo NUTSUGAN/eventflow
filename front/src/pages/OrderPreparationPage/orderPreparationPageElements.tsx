@@ -2,10 +2,17 @@ import styled from 'styled-components'
 
 export const OrderPreparationSection = styled.main`
   width: min(980px, calc(100% - 40px));
+  min-width: 0;
   margin: 72px auto 96px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+  }
 `
 
 export const OrderPreparationHero = styled.section`
+  min-width: 0;
   display: grid;
   gap: 22px;
   padding: 30px;
@@ -13,6 +20,12 @@ export const OrderPreparationHero = styled.section`
   background: linear-gradient(180deg, rgba(40, 31, 25, 0.96), rgba(28, 24, 21, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+
+  @media (max-width: 560px) {
+    gap: 18px;
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const OrderPreparationEyebrow = styled.span`
@@ -27,6 +40,10 @@ export const OrderPreparationTitle = styled.h1`
   margin: 0;
   color: #fffaf4;
   font-size: clamp(2rem, 3vw, 3rem);
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const OrderPreparationText = styled.p`
@@ -36,6 +53,7 @@ export const OrderPreparationText = styled.p`
 `
 
 export const OrderPreparationState = styled.div`
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
@@ -56,6 +74,7 @@ export const OrderPreparationSuccess = styled(OrderPreparationState)`
 `
 
 export const OrderPreparationGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
   gap: 18px;
@@ -66,12 +85,18 @@ export const OrderPreparationGrid = styled.div`
 `
 
 export const OrderPreparationCard = styled.section`
+  min-width: 0;
   display: grid;
   gap: 14px;
   padding: 20px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+    border-radius: 14px;
+  }
 `
 
 export const OrderPreparationCardTitle = styled.h2`
@@ -87,10 +112,16 @@ export const OrderPreparationList = styled.dl`
 `
 
 export const OrderPreparationListRow = styled.div`
+  min-width: 0;
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 16px;
+
+  @media (max-width: 420px) {
+    display: grid;
+    gap: 4px;
+  }
 `
 
 export const OrderPreparationLabel = styled.dt`
@@ -103,6 +134,11 @@ export const OrderPreparationValue = styled.dd`
   color: #fffaf4;
   font-weight: 600;
   text-align: right;
+  overflow-wrap: anywhere;
+
+  @media (max-width: 420px) {
+    text-align: left;
+  }
 `
 
 export const OrderPreparationField = styled.label`
@@ -118,6 +154,7 @@ export const OrderPreparationFieldLabel = styled.span`
 
 export const OrderPreparationInput = styled.input`
   width: 100%;
+  min-width: 0;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 14px;
@@ -140,12 +177,14 @@ export const OrderPreparationHint = styled.span`
 `
 
 export const OrderPreparationActions = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 `
 
 export const OrderPreparationPrimaryButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border: none;
@@ -154,15 +193,22 @@ export const OrderPreparationPrimaryButton = styled.button`
   color: #fffaf4;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.72;
   }
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const OrderPreparationSecondaryButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border-radius: 14px;
@@ -171,7 +217,13 @@ export const OrderPreparationSecondaryButton = styled.button`
   color: #fff3e5;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const OrderPreparationCheckoutButton = styled(OrderPreparationPrimaryButton)`

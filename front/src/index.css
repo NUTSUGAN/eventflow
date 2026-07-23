@@ -36,10 +36,26 @@
   box-sizing: border-box;
 }
 
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+div,
+form,
+label {
+  min-width: 0;
+}
+
 html,
 body,
 #root {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -49,6 +65,22 @@ body {
     radial-gradient(circle at top left, rgba(248, 143, 82, 0.22), transparent 24%),
     radial-gradient(circle at left top, rgba(143, 77, 255, 0.18), transparent 26%),
     linear-gradient(180deg, #11100f 0%, #171413 18%, #1c1917 100%);
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+  min-width: 0;
 }
 
 a {
@@ -69,10 +101,12 @@ h5,
 h6 {
   font-family: var(--font-heading);
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 p {
   color: var(--color-text-muted);
+  overflow-wrap: anywhere;
 }
 
 ::selection {

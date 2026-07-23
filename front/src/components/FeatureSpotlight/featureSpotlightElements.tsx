@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components'
 
 export const FeatureSection = styled.section`
+  min-width: 0;
   margin-top: 72px;
   padding: 40px 44px;
   display: grid;
@@ -17,9 +18,16 @@ export const FeatureSection = styled.section`
     grid-template-columns: 1fr;
     padding: 32px 24px;
   }
+
+  @media (max-width: 560px) {
+    margin-top: 48px;
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
 `
 
 export const FeatureContent = styled.div`
+  min-width: 0;
   display: grid;
   align-content: center;
   gap: 18px;
@@ -40,6 +48,10 @@ export const FeatureTitle = styled.h2`
   font-size: clamp(2.2rem, 4vw, 4rem);
   line-height: 0.98;
   max-width: 12ch;
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.8rem, 10vw, 2.7rem);
+  }
 `
 
 export const FeatureDescription = styled.p`
@@ -51,6 +63,7 @@ export const FeatureDescription = styled.p`
 `
 
 export const FeatureActions = styled.div`
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -58,12 +71,15 @@ export const FeatureActions = styled.div`
 `
 
 export const FeatureAction = styled.button<{ $secondary?: boolean }>`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 20px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--color-text);
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   ${({ $secondary }) =>
     $secondary
@@ -79,6 +95,10 @@ export const FeatureAction = styled.button<{ $secondary?: boolean }>`
           color: #1b1512;
           border-color: transparent;
         `}
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const FeatureMedia = styled.div`
@@ -89,6 +109,7 @@ export const FeatureMedia = styled.div`
 
 export const FeatureMediaCard = styled.div`
   width: min(100%, 520px);
+  min-width: 0;
   min-height: 360px;
   padding: 24px;
   display: grid;
@@ -101,6 +122,12 @@ export const FeatureMediaCard = styled.div`
     rgba(22, 19, 18, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.06);
   overflow: hidden;
+
+  @media (max-width: 560px) {
+    min-height: 260px;
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const FeatureMediaImage = styled.img`

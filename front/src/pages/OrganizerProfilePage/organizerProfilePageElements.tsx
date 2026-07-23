@@ -2,11 +2,12 @@ import styled from 'styled-components'
 
 export const ProfileSection = styled.main`
   width: min(1480px, calc(100% - 96px));
+  min-width: 0;
   margin: 0 auto;
   padding: 28px 0 64px;
 
   @media (max-width: 640px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     padding: 24px 0 48px;
   }
 `
@@ -22,6 +23,7 @@ export const ProfileStateBox = styled.div`
 `
 
 export const ProfileHero = styled.section`
+  min-width: 0;
   display: grid;
   gap: 22px;
   padding: 28px;
@@ -35,9 +37,15 @@ export const ProfileHero = styled.section`
   @media (max-width: 900px) {
     padding: 22px;
   }
+
+  @media (max-width: 560px) {
+    padding: 18px;
+    border-radius: 18px;
+  }
 `
 
 export const ProfileHeroTop = styled.div`
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -46,9 +54,14 @@ export const ProfileHeroTop = styled.div`
 `
 
 export const ProfileIdentity = styled.div`
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 18px;
+
+  @media (max-width: 420px) {
+    align-items: flex-start;
+  }
 `
 
 export const ProfileAvatar = styled.div<{ $imageUrl?: string }>`
@@ -72,6 +85,7 @@ export const ProfileAvatar = styled.div<{ $imageUrl?: string }>`
 `
 
 export const ProfileTitleGroup = styled.div`
+  min-width: 0;
   display: grid;
   gap: 8px;
 `
@@ -90,6 +104,10 @@ export const ProfileTitle = styled.h1`
   font-family: var(--font-heading);
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.05;
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const ProfileLead = styled.p`
@@ -106,6 +124,7 @@ export const ProfileMetaRow = styled.div`
 `
 
 export const ProfileMetaBadge = styled.div`
+  max-width: 100%;
   min-height: 42px;
   padding: 0 16px;
   display: inline-flex;
@@ -116,15 +135,20 @@ export const ProfileMetaBadge = styled.div`
   color: var(--color-text);
   font-size: 0.92rem;
   font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const ProfileActionGroup = styled.div`
+  min-width: 0;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 `
 
 export const ProfileActionButton = styled.button<{ $active?: boolean }>`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 20px;
   display: inline-flex;
@@ -142,7 +166,13 @@ export const ProfileActionButton = styled.button<{ $active?: boolean }>`
         : 'rgba(255, 255, 255, 0.04)'};
   color: var(--color-text);
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const ProfileActionNote = styled.p`
@@ -152,6 +182,7 @@ export const ProfileActionNote = styled.p`
 `
 
 export const ProfileBlock = styled.section`
+  min-width: 0;
   display: grid;
   gap: 18px;
 `
@@ -178,6 +209,7 @@ export const ProfileBlockCaption = styled.p`
 `
 
 export const ProfileCardsGrid = styled.section`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;

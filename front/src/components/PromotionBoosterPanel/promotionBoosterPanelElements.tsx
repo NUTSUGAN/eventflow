@@ -1,11 +1,13 @@
 import styled from 'styled-components'
 
 export const BoosterPanel = styled.section`
+  min-width: 0;
   display: grid;
   gap: 22px;
 `
 
 export const BoosterHeader = styled.header`
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   gap: 20px;
@@ -27,12 +29,14 @@ export const BoosterText = styled.p`
 `
 
 export const BoosterDuration = styled.div`
+  min-width: 0;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 `
 
 export const BoosterDurationButton = styled.button<{ $active: boolean }>`
+  max-width: 100%;
   min-height: 40px;
   padding: 0 14px;
   border: 1px solid ${({ $active }) => ($active ? 'var(--color-primary)' : 'rgba(255,255,255,.14)')};
@@ -40,10 +44,13 @@ export const BoosterDurationButton = styled.button<{ $active: boolean }>`
   background: ${({ $active }) => ($active ? 'rgba(238, 137, 78, .16)' : 'rgba(255,255,255,.03)')};
   color: var(--color-text);
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 `
 
 export const BoosterChannels = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
@@ -54,6 +61,7 @@ export const BoosterChannels = styled.div`
 `
 
 export const BoosterChannel = styled.label<{ $disabled: boolean; $selected: boolean }>`
+  min-width: 0;
   min-height: 156px;
   padding: 18px;
   display: grid;
@@ -67,11 +75,13 @@ export const BoosterChannel = styled.label<{ $disabled: boolean; $selected: bool
 `
 
 export const BoosterChannelHead = styled.span`
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
   color: var(--color-text);
   font-weight: 800;
+  overflow-wrap: anywhere;
 `
 
 export const BoosterChannelCopy = styled.span`
@@ -87,6 +97,7 @@ export const BoosterPrice = styled.strong`
 `
 
 export const BoosterSummary = styled.footer`
+  min-width: 0;
   padding: 18px;
   display: flex;
   align-items: center;
@@ -102,6 +113,7 @@ export const BoosterTotal = styled.strong`
 `
 
 export const BoosterButton = styled.button`
+  max-width: 100%;
   min-height: 44px;
   padding: 0 18px;
   border: 0;
@@ -109,7 +121,13 @@ export const BoosterButton = styled.button`
   background: var(--color-primary);
   color: #1c130f;
   font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 
   &:disabled { opacity: .5; cursor: not-allowed; }
 `

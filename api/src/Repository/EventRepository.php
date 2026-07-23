@@ -33,8 +33,74 @@ class EventRepository extends ServiceEntityRepository
         string $scope = 'upcoming',
         ?array $organizerIds = null
     ): array {
-        $queryBuilder = $this->createQueryBuilder('event')
-            ->distinct()
+        $idQueryBuilder = $this->createQueryBuilder('event')
+            ->select('event.id AS id')
+            ->leftJoin('event.category', 'category')
+            ->leftJoin('event.location', 'location')
+            ->leftJoin(
+                'event.promotionCampaigns',
+                'activePromotion',
+                'WITH',
+                'activePromotion.status = :activePromotionStatus AND activePromotion.startsAt <= :promotionNow AND activePromotion.endsAt >= :promotionNow'
+            )
+            ->leftJoin(
+                'activePromotion.channels',
+                'launchPromotionChannel',
+                'WITH',
+                'launchPromotionChannel.channelCode = :launchPackChannel AND launchPromotionChannel.isFeatured = true',
+            )
+            ->andWhere('LOWER(event.status) = :publishedStatus')
+            ->setParameter('publishedStatus', 'published')
+            ->setParameter('activePromotionStatus', PromotionCampaign::STATUS_ACTIVE)
+            ->setParameter('promotionNow', new \DateTimeImmutable())
+            ->setParameter('launchPackChannel', PromotionCampaignChannel::CHANNEL_LAUNCH_PACK)
+        ;
+
+        $this->applyPublicVisibilityScope($idQueryBuilder, $scope);
+        $this->applyPublicListFilters($idQueryBuilder, $search, $type, $city, $date);
+        $this->applyFollowedOrganizerFilter($idQueryBuilder, $organizerIds);
+
+        if ($this->isArchiveScope($scope)) {
+            $idQueryBuilder
+                ->addSelect('event.endDatetime AS HIDDEN sortEndDatetime')
+                ->addSelect('event.startDatetime AS HIDDEN sortStartDatetime')
+                ->groupBy('event.id')
+                ->addGroupBy('event.endDatetime')
+                ->addGroupBy('event.startDatetime')
+                ->orderBy('sortEndDatetime', 'DESC')
+                ->addOrderBy('sortStartDatetime', 'DESC')
+                ->addOrderBy('event.id', 'ASC')
+            ;
+        } else {
+            $idQueryBuilder
+                ->addSelect('MIN(CASE WHEN launchPromotionChannel.id IS NOT NULL THEN 0 ELSE 1 END) AS HIDDEN sponsoredPriority')
+                ->addSelect('event.startDatetime AS HIDDEN sortStartDatetime')
+                ->groupBy('event.id')
+                ->addGroupBy('event.startDatetime')
+                ->orderBy('sponsoredPriority', 'ASC')
+                ->addOrderBy('sortStartDatetime', 'ASC')
+                ->addOrderBy('event.id', 'ASC')
+            ;
+        }
+
+        if ($limit > 0) {
+            $idQueryBuilder->setMaxResults($limit);
+        }
+
+        if ($offset > 0) {
+            $idQueryBuilder->setFirstResult($offset);
+        }
+
+        $eventIds = array_values(array_map(
+            static fn (array $row): int => (int) $row['id'],
+            $idQueryBuilder->getQuery()->getScalarResult()
+        ));
+
+        if ([] === $eventIds) {
+            return [];
+        }
+
+        $events = $this->createQueryBuilder('event')
             ->leftJoin('event.category', 'category')->addSelect('category')
             ->leftJoin('event.location', 'location')->addSelect('location')
             ->leftJoin('event.ticketTypes', 'ticketType', 'WITH', 'ticketType.isActive = true')->addSelect('ticketType')
@@ -45,53 +111,23 @@ class EventRepository extends ServiceEntityRepository
                 'activePromotion.status = :activePromotionStatus AND activePromotion.startsAt <= :promotionNow AND activePromotion.endsAt >= :promotionNow'
             )->addSelect('activePromotion')
             ->leftJoin('activePromotion.channels', 'activePromotionChannel')->addSelect('activePromotionChannel')
-            ->leftJoin(
-                'activePromotion.channels',
-                'launchPromotionChannel',
-                'WITH',
-                'launchPromotionChannel.channelCode = :launchPackChannel AND launchPromotionChannel.isFeatured = true'
-            )->addSelect('launchPromotionChannel')
-            ->andWhere('LOWER(event.status) = :publishedStatus')
-            ->setParameter('publishedStatus', 'published')
+            ->andWhere('event.id IN (:eventIds)')
+            ->setParameter('eventIds', $eventIds)
             ->setParameter('activePromotionStatus', PromotionCampaign::STATUS_ACTIVE)
             ->setParameter('promotionNow', new \DateTimeImmutable())
-            ->setParameter('launchPackChannel', PromotionCampaignChannel::CHANNEL_LAUNCH_PACK)
-        ;
-
-        $this->applyPublicVisibilityScope($queryBuilder, $scope);
-        $this->applyPublicListFilters($queryBuilder, $search, $type, $city, $date);
-        $this->applyFollowedOrganizerFilter($queryBuilder, $organizerIds);
-
-        if ($this->isArchiveScope($scope)) {
-            $queryBuilder
-                ->orderBy('event.endDatetime', 'DESC')
-                ->addOrderBy('event.startDatetime', 'DESC')
-            ;
-        } else {
-            $queryBuilder
-                ->addSelect('CASE WHEN launchPromotionChannel.id IS NOT NULL THEN 0 ELSE 1 END AS HIDDEN sponsoredPriority')
-                ->orderBy('sponsoredPriority', 'ASC')
-                ->addOrderBy('event.startDatetime', 'ASC')
-            ;
-        }
-
-        $queryBuilder
             ->addOrderBy('ticketType.price', 'ASC')
             ->addOrderBy('ticketType.id', 'ASC')
-        ;
-
-        if ($limit > 0) {
-            $queryBuilder->setMaxResults($limit);
-        }
-
-        if ($offset > 0) {
-            $queryBuilder->setFirstResult($offset);
-        }
-
-        return $queryBuilder
             ->getQuery()
             ->getResult()
         ;
+
+        $eventPositions = array_flip($eventIds);
+        usort(
+            $events,
+            static fn (Event $left, Event $right): int => ($eventPositions[$left->getId()] ?? 0) <=> ($eventPositions[$right->getId()] ?? 0)
+        );
+
+        return array_values($events);
     }
 
     public function countPublicList(

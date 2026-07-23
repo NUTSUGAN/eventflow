@@ -2,8 +2,14 @@ import styled from 'styled-components'
 
 export const LegalPageShell = styled.main`
   width: min(900px, calc(100% - 32px));
+  min-width: 0;
   margin: 0 auto;
   padding: 72px 0 44px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    padding: 44px 0 40px;
+  }
 `
 
 export const LegalBackLink = styled.a`
@@ -35,10 +41,15 @@ export const LegalContent = styled.div`
 `
 
 export const LegalSection = styled.section`
+  min-width: 0;
   padding: 22px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+  }
 
   h2 {
     margin: 0 0 10px;

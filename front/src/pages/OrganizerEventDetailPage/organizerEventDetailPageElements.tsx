@@ -2,10 +2,17 @@ import styled from 'styled-components'
 
 export const OrganizerEventDetailSection = styled.main`
   width: min(1240px, calc(100% - 40px));
+  min-width: 0;
   margin: 72px auto 96px;
+
+  @media (max-width: 560px) {
+    width: min(100%, calc(100% - 24px));
+    margin: 34px auto 64px;
+  }
 `
 
 export const OrganizerEventDetailShell = styled.section`
+  min-width: 0;
   display: grid;
   gap: 24px;
   padding: 30px;
@@ -13,9 +20,16 @@ export const OrganizerEventDetailShell = styled.section`
   background: linear-gradient(180deg, rgba(35, 29, 25, 0.98), rgba(22, 19, 17, 0.99));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+
+  @media (max-width: 560px) {
+    gap: 18px;
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const OrganizerEventDetailBackButton = styled.button`
+  max-width: 100%;
   justify-self: start;
   min-height: 44px;
   padding: 0 16px;
@@ -25,10 +39,13 @@ export const OrganizerEventDetailBackButton = styled.button`
   color: #fff3e5;
   font-size: 0.92rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 `
 
 export const OrganizerEventDetailHero = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
   gap: 22px;
@@ -47,9 +64,15 @@ export const OrganizerEventDetailCover = styled.div<{ $imageUrl?: string }>`
       $imageUrl
         ? `url("${$imageUrl}") center/cover no-repeat`
         : 'linear-gradient(135deg, rgba(235, 148, 81, 0.26), rgba(110, 78, 58, 0.12))'};
+
+  @media (max-width: 560px) {
+    min-height: 220px;
+    border-radius: 16px;
+  }
 `
 
 export const OrganizerEventDetailHeroContent = styled.div`
+  min-width: 0;
   display: grid;
   gap: 16px;
   align-content: start;
@@ -67,6 +90,10 @@ export const OrganizerEventDetailTitle = styled.h1`
   margin: 0;
   color: #fffaf4;
   font-size: clamp(2rem, 3vw, 3rem);
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const OrganizerEventDetailText = styled.p`
@@ -76,6 +103,7 @@ export const OrganizerEventDetailText = styled.p`
 `
 
 export const OrganizerEventDetailStatusBadge = styled.span<{ $published: boolean }>`
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   min-height: 34px;
@@ -90,9 +118,13 @@ export const OrganizerEventDetailStatusBadge = styled.span<{ $published: boolean
   color: ${({ $published }) => ($published ? '#d9ffe3' : '#fff3e5')};
   font-size: 0.86rem;
   font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const OrganizerEventDetailTabs = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -100,9 +132,15 @@ export const OrganizerEventDetailTabs = styled.div`
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 560px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
 `
 
 export const OrganizerEventDetailTabButton = styled.button<{ $active: boolean }>`
+  flex: 0 0 auto;
   min-height: 44px;
   padding: 0 18px;
   border-radius: 13px;
@@ -116,10 +154,12 @@ export const OrganizerEventDetailTabButton = styled.button<{ $active: boolean }>
   color: ${({ $active }) => ($active ? '#fff7ef' : 'rgba(255, 243, 229, 0.82)')};
   font-size: 0.94rem;
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
 `
 
 export const OrganizerEventDetailOverviewGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
@@ -134,6 +174,7 @@ export const OrganizerEventDetailOverviewGrid = styled.div`
 `
 
 export const OrganizerEventDetailOverviewStat = styled.article`
+  min-width: 0;
   display: grid;
   gap: 8px;
   min-height: 124px;
@@ -184,6 +225,7 @@ export const OrganizerEventDetailInfoText = styled.p`
 `
 
 export const OrganizerEventDetailScanSummaryGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
@@ -198,6 +240,7 @@ export const OrganizerEventDetailScanSummaryGrid = styled.div`
 `
 
 export const OrganizerEventDetailScanStat = styled.div`
+  min-width: 0;
   display: grid;
   gap: 6px;
   min-height: 92px;
@@ -268,6 +311,7 @@ export const OrganizerEventDetailScanStaffTotal = styled.span`
 `
 
 export const OrganizerEventDetailMediaGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -278,6 +322,7 @@ export const OrganizerEventDetailMediaGrid = styled.div`
 `
 
 export const OrganizerEventDetailMediaCard = styled.div`
+  min-width: 0;
   display: grid;
   gap: 12px;
   padding: 18px;
@@ -314,6 +359,7 @@ export const OrganizerEventDetailVideoPreview = styled.video`
 `
 
 export const OrganizerEventDetailState = styled.div`
+  min-width: 0;
   padding: 14px 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
@@ -334,11 +380,13 @@ export const OrganizerEventDetailSuccess = styled(OrganizerEventDetailState)`
 `
 
 export const OrganizerEventDetailForm = styled.form`
+  min-width: 0;
   display: grid;
   gap: 18px;
 `
 
 export const OrganizerEventDetailGrid = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -349,6 +397,7 @@ export const OrganizerEventDetailGrid = styled.div`
 `
 
 export const OrganizerEventDetailField = styled.label`
+  min-width: 0;
   display: grid;
   gap: 10px;
 `
@@ -361,6 +410,7 @@ export const OrganizerEventDetailLabel = styled.span`
 
 const fieldStyles = `
   width: 100%;
+  min-width: 0;
   min-height: 52px;
   padding: 0 16px;
   border-radius: 14px;
@@ -403,18 +453,25 @@ export const OrganizerEventDetailHint = styled.span`
 `
 
 export const OrganizerEventDetailActions = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 `
 
 export const OrganizerEventDetailSplitSection = styled.section`
+  min-width: 0;
   display: grid;
   gap: 18px;
   padding: 24px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+    border-radius: 16px;
+  }
 `
 
 export const OrganizerEventDetailSplitHeader = styled.div`
@@ -478,8 +535,9 @@ export const OrganizerEventDetailTicketText = styled.p`
 `
 
 export const OrganizerEventDetailTicketGrid = styled.div`
+  min-width: 0;
   display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 18px;
   align-items: start;
 
@@ -500,6 +558,7 @@ export const OrganizerEventDetailTicketCreateCard = styled.div`
 `
 
 export const OrganizerEventDetailTicketList = styled.div`
+  min-width: 0;
   display: grid;
   gap: 16px;
 `
@@ -515,6 +574,7 @@ export const OrganizerEventDetailTicketCard = styled.article`
 `
 
 export const OrganizerEventDetailTicketCardHeader = styled.div`
+  min-width: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -523,6 +583,7 @@ export const OrganizerEventDetailTicketCardHeader = styled.div`
 `
 
 export const OrganizerEventDetailTicketBadge = styled.span<{ $active: boolean }>`
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   min-height: 32px;
@@ -536,6 +597,9 @@ export const OrganizerEventDetailTicketBadge = styled.span<{ $active: boolean }>
   color: ${({ $active }) => ($active ? '#d9ffe3' : '#fff3e5')};
   font-size: 0.84rem;
   font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const OrganizerEventDetailTicketCardTitle = styled.h3`
@@ -595,8 +659,9 @@ export const OrganizerEventDetailGuestSection = styled.section`
 `
 
 export const OrganizerEventDetailGuestGrid = styled.div`
+  min-width: 0;
   display: grid;
-  grid-template-columns: minmax(360px, 0.85fr) minmax(420px, 1.15fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: 18px;
   align-items: start;
 
@@ -606,6 +671,7 @@ export const OrganizerEventDetailGuestGrid = styled.div`
 `
 
 export const OrganizerEventDetailGuestList = styled.div`
+  min-width: 0;
   display: grid;
   gap: 12px;
 `
@@ -646,6 +712,7 @@ export const OrganizerEventDetailGuestText = styled.p`
 `
 
 export const OrganizerEventDetailGuestBadge = styled.span<{ $checkedIn: boolean }>`
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -661,10 +728,13 @@ export const OrganizerEventDetailGuestBadge = styled.span<{ $checkedIn: boolean 
   color: ${({ $checkedIn }) => ($checkedIn ? '#d9ffe3' : '#ffe2cb')};
   font-size: 0.82rem;
   font-weight: 800;
-  white-space: nowrap;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const OrganizerEventDetailLinkButton = styled.button`
+  max-width: 100%;
   min-height: 42px;
   padding: 0 14px;
   border-radius: 12px;
@@ -673,16 +743,20 @@ export const OrganizerEventDetailLinkButton = styled.button`
   color: #ffe2cb;
   font-size: 0.9rem;
   font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 `
 
 export const OrganizerEventDetailTicketCardActions = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 `
 
 export const OrganizerEventDetailPrimaryButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border: none;
@@ -691,15 +765,22 @@ export const OrganizerEventDetailPrimaryButton = styled.button`
   color: #fffaf4;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
 
   &:disabled {
     cursor: wait;
     opacity: 0.72;
   }
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const OrganizerEventDetailSecondaryButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border-radius: 14px;
@@ -708,10 +789,17 @@ export const OrganizerEventDetailSecondaryButton = styled.button`
   color: #fff3e5;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `
 
 export const OrganizerEventDetailDangerButton = styled.button`
+  max-width: 100%;
   min-height: 50px;
   padding: 0 18px;
   border-radius: 14px;
@@ -720,5 +808,11 @@ export const OrganizerEventDetailDangerButton = styled.button`
   color: #ffd5ca;
   font-size: 0.96rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
+
+  @media (max-width: 560px) {
+    width: 100%;
+  }
 `

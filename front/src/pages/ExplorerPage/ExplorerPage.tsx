@@ -47,7 +47,7 @@ const emptyFilterOptions: EventFiltersResponse = {
 const emptyPublicEventsResponse: PublicEventsResponse = {
   items: [],
   page: 1,
-  pageSize: 18,
+  pageSize: 9,
   total: 0,
   totalPages: 1,
   hasPreviousPage: false,
@@ -186,7 +186,7 @@ export function ExplorerPage() {
 
       try {
         const data = await getPublicEvents({
-          limit: 18,
+          limit: 9,
           page: currentPage,
           search: searchQuery || undefined,
           type: typeFilter || undefined,

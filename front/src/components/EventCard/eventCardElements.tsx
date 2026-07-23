@@ -4,11 +4,13 @@ import styled from 'styled-components'
 type CardVariant = 'default' | 'explorer'
 
 export const EventLink = styled(Link)`
+  min-width: 0;
   text-decoration: none;
   color: inherit;
 `
 
 export const Card = styled.article<{ $variant: CardVariant }>`
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: ${({ $variant }) => ($variant === 'explorer' ? '0' : '8px')};
@@ -89,13 +91,14 @@ export const SponsoredBadge = styled.img`
   pointer-events: none;
 
   @media (max-width: 600px) {
-    right: -8px;
+    right: 8px;
     bottom: -42px;
     width: 112px;
   }
 `
 
 export const CardContent = styled.div<{ $variant: CardVariant }>`
+  min-width: 0;
   position: relative;
   z-index: 1;
   padding: ${({ $variant }) => ($variant === 'explorer' ? '16px 16px 18px' : '0')};
@@ -104,6 +107,7 @@ export const CardContent = styled.div<{ $variant: CardVariant }>`
 `
 
 export const CardCategory = styled.span`
+  max-width: 100%;
   width: fit-content;
   min-height: 28px;
   padding: 0 12px;
@@ -116,6 +120,9 @@ export const CardCategory = styled.span`
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const CardTitle = styled.h2`

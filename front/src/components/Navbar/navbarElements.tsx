@@ -12,6 +12,7 @@ export const NavbarContainer = styled.header`
 
 export const NavbarInner = styled.div`
   width: min(1480px, calc(100% - 96px));
+  min-width: 0;
   margin: 0 auto;
   display: grid;
   grid-template-columns: auto minmax(320px, 1fr) auto auto auto;
@@ -20,7 +21,7 @@ export const NavbarInner = styled.div`
   padding: 20px 0;
 
   @media (max-width: 840px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 12px;
     padding: 10px 0 14px;
@@ -31,6 +32,9 @@ export const Brand = styled(NavLink)`
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
 
   picture {
     display: block;
@@ -46,7 +50,7 @@ export const BrandImage = styled.img`
   filter: brightness(1.1) contrast(1.05);
 
   @media (max-width: 840px) {
-    width: 58px;
+    width: 52px;
     max-height: 52px;
     object-fit: contain;
   }
@@ -54,13 +58,16 @@ export const BrandImage = styled.img`
 
 export const SearchBox = styled.div`
   position: relative;
+  min-width: 0;
 `
 
 export const SearchForm = styled.form`
   margin: 0;
+  min-width: 0;
 `
 
 export const SearchField = styled.div`
+  min-width: 0;
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -79,6 +86,7 @@ export const SearchIcon = styled.svg`
 `
 
 export const SearchInput = styled.input`
+  min-width: 0;
   width: 100%;
   border: 0;
   outline: 0;
@@ -105,6 +113,14 @@ export const SearchSuggestionsPanel = styled.div`
   background: rgba(30, 27, 26, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 28px 44px rgba(0, 0, 0, 0.32);
+
+  @media (max-width: 520px) {
+    position: fixed;
+    top: 78px;
+    left: 12px;
+    right: 12px;
+    max-height: min(420px, calc(100vh - 96px));
+  }
 `
 
 export const SearchSuggestionSection = styled.section`
@@ -405,6 +421,7 @@ export const MobileMenuButton = styled.button`
   justify-content: center;
   gap: 4px;
   flex-direction: column;
+  flex: 0 0 40px;
   cursor: pointer;
 
   span {
@@ -423,7 +440,7 @@ export const MobileMenuPanel = styled.div`
   display: none;
 
   @media (max-width: 840px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     margin: 0 auto 16px;
     padding: 14px;
     display: grid;

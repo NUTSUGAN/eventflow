@@ -2,11 +2,12 @@ import styled, { css } from 'styled-components'
 
 export const ExplorerSection = styled.main`
   width: min(1480px, calc(100% - 96px));
+  min-width: 0;
   margin: 0 auto;
   padding: 28px 0 64px;
 
   @media (max-width: 640px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     padding: 24px 0 48px;
   }
 `
@@ -55,6 +56,7 @@ export const SearchBadge = styled.span`
 `
 
 export const FilterToolbar = styled.section`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
@@ -73,6 +75,7 @@ export const FilterToolbar = styled.section`
 `
 
 export const FilterGroup = styled.label`
+  min-width: 0;
   display: grid;
   gap: 10px;
 `
@@ -87,6 +90,7 @@ export const FilterLabel = styled.span`
 
 const filterFieldStyles = css`
   width: 100%;
+  min-width: 0;
   min-height: 50px;
   padding: 0 16px;
   border-radius: 14px;
@@ -139,6 +143,7 @@ export const FilterDateInput = styled.input`
 `
 
 export const FilterMetaRow = styled.div`
+  min-width: 0;
   margin-bottom: 26px;
   display: flex;
   align-items: center;
@@ -148,6 +153,7 @@ export const FilterMetaRow = styled.div`
 `
 
 export const FilterMetaActions = styled.div`
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -161,6 +167,7 @@ export const FilterSummary = styled.p`
 `
 
 export const FilterToggleButton = styled.button<{ $active?: boolean }>`
+  max-width: 100%;
   min-height: 42px;
   padding: 0 16px;
   border-radius: 999px;
@@ -172,6 +179,8 @@ export const FilterToggleButton = styled.button<{ $active?: boolean }>`
       $active ? 'rgba(248, 143, 82, 0.14)' : 'rgba(255, 255, 255, 0.04)'};
   color: ${({ $active }) => ($active ? '#fff1e7' : 'var(--color-text)')};
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -186,6 +195,7 @@ export const FilterToggleButton = styled.button<{ $active?: boolean }>`
 `
 
 export const FilterResetButton = styled.button`
+  max-width: 100%;
   min-height: 44px;
   padding: 0 18px;
   border-radius: 999px;
@@ -193,6 +203,8 @@ export const FilterResetButton = styled.button`
   background: rgba(248, 143, 82, 0.08);
   color: var(--color-text);
   font-weight: 600;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -205,6 +217,7 @@ export const FilterResetButton = styled.button`
 `
 
 export const ExplorerCardsGrid = styled.section`
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
@@ -220,18 +233,28 @@ export const ExplorerCardsGrid = styled.section`
 `
 
 export const PaginationRow = styled.div`
+  min-width: 0;
   margin-top: 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+
+  @media (max-width: 560px) {
+    justify-content: center;
+  }
 `
 
 export const PaginationSummary = styled.p`
   margin: 0;
   color: var(--color-text-muted);
   font-size: 0.94rem;
+
+  @media (max-width: 560px) {
+    width: 100%;
+    text-align: center;
+  }
 `
 
 export const PaginationControls = styled.div`

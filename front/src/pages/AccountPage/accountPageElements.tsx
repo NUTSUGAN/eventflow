@@ -4,15 +4,17 @@ type BadgeTone = 'neutral' | 'accent' | 'success' | 'danger'
 
 export const AccountSection = styled.section`
   width: min(1180px, calc(100% - 56px));
+  min-width: 0;
   margin: 40px auto 96px;
 
   @media (max-width: 720px) {
-    width: min(100%, calc(100% - 28px));
+    width: min(100%, calc(100% - 24px));
     margin: 24px auto 56px;
   }
 `
 
 export const AccountShell = styled.div`
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
   align-items: start;
@@ -24,6 +26,7 @@ export const AccountShell = styled.div`
 `
 
 const panelStyles = css`
+  min-width: 0;
   display: grid;
   gap: 22px;
   padding: 28px;
@@ -34,6 +37,12 @@ const panelStyles = css`
   box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+  @media (max-width: 560px) {
+    gap: 18px;
+    padding: 18px;
+    border-radius: 16px;
+  }
 `
 
 export const AccountOverviewCard = styled.div`
@@ -95,6 +104,10 @@ export const AccountTitle = styled.h1`
   color: var(--color-text);
   font-size: clamp(2rem, 4vw, 3.1rem);
   line-height: 1.02;
+
+  @media (max-width: 560px) {
+    font-size: clamp(1.55rem, 8vw, 2.1rem);
+  }
 `
 
 export const AccountSubtitle = styled.p`
@@ -112,6 +125,7 @@ export const AccountBadgeRow = styled.div`
 `
 
 export const AccountStatusBadge = styled.span<{ $tone?: BadgeTone }>`
+  max-width: 100%;
   width: fit-content;
   min-height: 34px;
   padding: 0 14px;
@@ -159,6 +173,9 @@ export const AccountStatusBadge = styled.span<{ $tone?: BadgeTone }>`
     }};
   font-size: 0.84rem;
   font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
 `
 
 export const AccountGrid = styled.div`
@@ -245,6 +262,7 @@ export const AccountFieldLabel = styled.span`
 
 const inputStyles = css`
   min-height: 54px;
+  min-width: 0;
   width: 100%;
   padding: 0 16px;
   border-radius: 16px;
@@ -313,6 +331,7 @@ export const AccountUploadPreview = styled.div<{ $imageUrl?: string }>`
 `
 
 export const AccountUploadMeta = styled.div`
+  min-width: 0;
   display: grid;
   gap: 6px;
 `
@@ -337,10 +356,13 @@ export const AccountActions = styled.div`
 `
 
 const buttonStyles = css`
+  max-width: 100%;
   min-height: 48px;
   padding: 0 20px;
   border-radius: 14px;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -354,6 +376,10 @@ const buttonStyles = css`
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+
+  @media (max-width: 560px) {
+    width: 100%;
   }
 `
 
