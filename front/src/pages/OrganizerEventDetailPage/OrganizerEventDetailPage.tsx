@@ -282,9 +282,9 @@ export function OrganizerEventDetailPage() {
   )
   const [currentDateTime] = useState(() => formatDateTimeLocal(new Date()))
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
-  const isAdminReadOnly = isAdminUser(currentUser)
-  const canEditOrganizerEvent = canEditOrganizerResource(currentUser)
   const [event, setEvent] = useState<OrganizerEventSummary | null>(null)
+  const canEditOrganizerEvent = canEditOrganizerResource(currentUser, event)
+  const isAdminReadOnly = isAdminUser(currentUser) && !canEditOrganizerEvent
   const [options, setOptions] = useState<OrganizerEventFormOptions>(emptyOptions)
   const [ticketTypes, setTicketTypes] = useState<OrganizerTicketType[]>([])
   const [guestTickets, setGuestTickets] = useState<OrganizerGuestTicket[]>([])
@@ -404,7 +404,7 @@ export function OrganizerEventDetailPage() {
   const ticketSectionMessage =
     ticketSuccessMessage ??
     (createdFromEventSetup
-      ? "?v?nement cr?? avec succ?s. Tu peux maintenant ajouter les billets de cet ?v?nement."
+      ? "Événement créé avec succès. Tu peux maintenant ajouter les billets de cet événement."
       : null)
   const scanStats = event?.scanStats ?? null
   const scanStaffMembers = scanStats?.staffMembers ?? []
@@ -925,7 +925,7 @@ export function OrganizerEventDetailPage() {
             <OrganizerEventDetailSplitEyebrow>évènement</OrganizerEventDetailSplitEyebrow>
             <OrganizerEventDetailSplitTitle>Fiche évènement</OrganizerEventDetailSplitTitle>
             <OrganizerEventDetailSplitText>
-              Mets à jour ici la fiche publique complété de ton évènement : contenu, lieu, dates, medias et statut.
+              Mets à jour ici la fiche publique complète de ton évènement : contenu, lieu, dates, médias et statut.
             </OrganizerEventDetailSplitText>
           </OrganizerEventDetailSplitHeader>
 
@@ -1327,7 +1327,7 @@ export function OrganizerEventDetailPage() {
             <OrganizerEventDetailSplitEyebrow>Billets</OrganizerEventDetailSplitEyebrow>
             <OrganizerEventDetailSplitTitle>Billets de cet évènement</OrganizerEventDetailSplitTitle>
             <OrganizerEventDetailSplitText>
-              Gère ici la billetterie liée à cet évènement, avec son stock, ses dates de vente et sa visibilite.
+              Gère ici la billetterie liée à cet évènement, avec son stock, ses dates de vente et sa visibilité.
             </OrganizerEventDetailSplitText>
           </OrganizerEventDetailSplitHeader>
 
@@ -1357,7 +1357,7 @@ export function OrganizerEventDetailPage() {
             <OrganizerEventDetailTicketCreateCard style={{ display: canEditOrganizerEvent ? undefined : 'none' }}>
               <OrganizerEventDetailInfoTitle>Créer un billet</OrganizerEventDetailInfoTitle>
               <OrganizerEventDetailInfoText>
-                Definis un type de billet, son prix, son stock et sa fenêtre de vente.
+                Définis un type de billet, son prix, son stock et sa fenêtre de vente.
               </OrganizerEventDetailInfoText>
               <OrganizerEventDetailHint>
                 Il reste actuellement {remainingTicketCapacity} place(s) à attribuer

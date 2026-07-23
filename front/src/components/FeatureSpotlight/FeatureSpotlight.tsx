@@ -21,7 +21,7 @@ export function FeatureSpotlight() {
     <FeatureSection>
       <FeatureContent>
         <FeatureEyebrow>EventFlow en avant-première</FeatureEyebrow>
-        <FeatureTitle>Chope ton billet, créé des souvenirs</FeatureTitle>
+        <FeatureTitle>Chope ton billet, crée des souvenirs</FeatureTitle>
         <FeatureDescription>
           Explore les prochains évènements, retrouve les expériences les plus
           attendues près de chez toi et prépare déjà ton parcours EventFlow.
@@ -42,8 +42,8 @@ export function FeatureSpotlight() {
 
       <FeatureMedia>
         <FeatureMediaCard>
-          <FeatureMediaImage src="/eventflow-logo.png" alt="Identite visuelle EventFlow" />
-          <FeatureMediaBadge>Selection en direct</FeatureMediaBadge>
+          <FeatureMediaImage src="/eventflow-logo.png" alt="Identité visuelle EventFlow" />
+          <FeatureMediaBadge>Sélection en direct</FeatureMediaBadge>
           <FeatureMediaSubtext>
             Concerts, festivals, expériences culturelles et sorties locales dans une
             interface plus claire et plus immersive.

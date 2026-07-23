@@ -113,7 +113,7 @@ final class StripePaymentService
                     'unit_amount' => $this->moneyStringToCents($campaign->getTotalPrice()),
                     'product_data' => [
                         'name' => 'Booster EventFlow',
-                        'description' => (string) ($event?->getTitle() ?? 'Promotion l’évènement'),
+                        'description' => (string) ($event?->getTitle() ?? 'Promotion de l’évènement'),
                         'metadata' => [
                             'promotion_campaign_id' => (string) $campaignId,
                             'event_id' => (string) ($event?->getId() ?? ''),

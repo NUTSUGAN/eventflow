@@ -201,7 +201,7 @@ export function OrganizerEventCreatePage() {
     }
 
     if (!form.thumbnailPhoto || !form.coverPhoto) {
-      setErrorMessage('Ajoute la miniature et la cover avant de publiér l’évènement.')
+      setErrorMessage('Ajoute la miniature et l’image de couverture avant de publier l’évènement.')
       return
     }
 
@@ -292,7 +292,7 @@ export function OrganizerEventCreatePage() {
         <OrganizerEventCreateText>
           {currentUser
             ? `${currentUser.firstName}, on construit ici la fiche événement avant les billets et la commande client.`
-            : 'Prepare la fiche publique de ton évènement.'}
+            : 'Prépare la fiche publique de ton évènement.'}
         </OrganizerEventCreateText>
 
         {errorMessage ? (
@@ -301,8 +301,8 @@ export function OrganizerEventCreatePage() {
 
         <OrganizerEventCreateState>
           {currentStep === 1
-            ? 'Etape 1 sur 2 - informations principales de l’évènement.'
-            : 'Etape 2 sur 2 - lieu, dates, statut et medias.'}
+            ? 'Étape 1 sur 2 - informations principales de l’évènement.'
+            : 'Étape 2 sur 2 - lieu, dates, statut et médias.'}
         </OrganizerEventCreateState>
 
         <OrganizerEventCreateForm onSubmit={handleSubmit}>
@@ -392,7 +392,7 @@ export function OrganizerEventCreatePage() {
             <>
               <OrganizerEventCreateSummary>
                 <OrganizerEventCreateSummaryTitle>
-                  {form.title || 'Nouvel’évènement'}
+                  {form.title || 'Nouvel évènement'}
                 </OrganizerEventCreateSummaryTitle>
                 <OrganizerEventCreateSummaryText>
                   {selectedCategory?.name ?? 'Catégorie à confirmer'} - capacité {form.capacity || '0'} personnes

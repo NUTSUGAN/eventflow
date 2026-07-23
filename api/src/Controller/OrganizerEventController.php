@@ -221,7 +221,7 @@ final class OrganizerEventController extends AbstractController
     ): JsonResponse {
         $user = $this->getUser();
 
-        if ($user instanceof User && null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+        if ($user instanceof User && null !== ($response = $this->denyAdminOrganizerMutation($user, $user))) {
             return $response;
         }
 
@@ -408,7 +408,7 @@ final class OrganizerEventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -451,11 +451,11 @@ final class OrganizerEventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $event->getOrganizer()))) {
             return $response;
         }
 
@@ -684,16 +684,16 @@ final class OrganizerEventController extends AbstractController
             ], Response::HTTP_FORBIDDEN);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
-            return $response;
-        }
-
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], Response::HTTP_NOT_FOUND);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $event->getOrganizer()))) {
+            return $response;
         }
 
         if (
@@ -961,6 +961,11 @@ final class OrganizerEventController extends AbstractController
             'createdAt' => $this->formatDateTimeForFrontend($event->getCreatedAt()),
             'withdrawalFeePercent' => $event->getWithdrawalFeePercent(),
             'ticketTypesCount' => $event->getTicketTypes()->count(),
+            'organizer' => [
+                'id' => $event->getOrganizer()?->getId(),
+                'displayName' => $event->getOrganizer()?->getDisplayName(),
+                'email' => $event->getOrganizer()?->getEmail(),
+            ],
             'category' => [
                 'id' => $event->getCategory()?->getId(),
                 'name' => $event->getCategory()?->getName(),

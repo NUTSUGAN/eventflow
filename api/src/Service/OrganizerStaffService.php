@@ -57,7 +57,7 @@ final class OrganizerStaffService
         }
 
         if ($staffUser->getId() === $organizer->getId()) {
-            throw new \DomainException('Tu ne peux pas t ajouter toi-meme dans ton propre staff.');
+            throw new \DomainException('Tu ne peux pas t’ajouter toi-même dans ton propre staff.');
         }
 
         $staffUserBaseRole = $staffUser->getBaseRole();

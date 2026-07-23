@@ -365,7 +365,7 @@ export function OrganizerEventsPage() {
               <OrganizerEventsPageState>
                 {events.length === 0
                   ? "Tu n’as pas encore créé d’évènement. Lance la première fiche pour enchaîner ensuite sur les billets."
-                  : "Aucun évènement ne correspond au filtre en cours. Essaie un’autre statut ou reviens sur l’onglet Tous."}
+                  : "Aucun évènement ne correspond au filtre en cours. Essaie un autre statut ou reviens sur l’onglet Tous."}
               </OrganizerEventsPageState>
             )}
           </OrganizerEventsPageGrid>

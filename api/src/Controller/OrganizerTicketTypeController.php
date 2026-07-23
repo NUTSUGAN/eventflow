@@ -45,16 +45,16 @@ class OrganizerTicketTypeController extends AbstractController
             ], 403);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
-            return $response;
-        }
-
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], 404);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $event->getOrganizer()))) {
+            return $response;
         }
 
         if (!$this->canManageEvent($user, $event)) {
@@ -192,7 +192,7 @@ class OrganizerTicketTypeController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], 404);
         }
 
@@ -240,16 +240,16 @@ class OrganizerTicketTypeController extends AbstractController
             ], 403);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
-            return $response;
-        }
-
         $ticketType = $ticketTypeRepository->find($id);
 
         if (!$ticketType instanceof TicketType) {
             return $this->json([
                 'message' => 'Billet introuvable.',
             ], 404);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $ticketType->getEvent()?->getOrganizer()))) {
+            return $response;
         }
 
         if (!$this->canManageTicketType($user, $ticketType)) {
@@ -415,16 +415,16 @@ class OrganizerTicketTypeController extends AbstractController
             ], 403);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
-            return $response;
-        }
-
         $ticketType = $ticketTypeRepository->find($id);
 
         if (!$ticketType instanceof TicketType) {
             return $this->json([
                 'message' => 'Billet introuvable.',
             ], 404);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $ticketType->getEvent()?->getOrganizer()))) {
+            return $response;
         }
 
         if (!$this->canManageTicketType($user, $ticketType)) {
@@ -437,7 +437,7 @@ class OrganizerTicketTypeController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'message' => 'Billet supprime avec succès.',
+            'message' => 'Billet supprimé avec succès.',
         ]);
     }
 

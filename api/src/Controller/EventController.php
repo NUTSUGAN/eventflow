@@ -116,7 +116,7 @@ class EventController extends AbstractController
 
         if (!$event instanceof Event) {
             return $this->json([
-                'message' => 'l’évènement introuvable.',
+                'message' => 'L’évènement est introuvable.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -316,7 +316,7 @@ class EventController extends AbstractController
         $text = trim(preg_replace('/\s+/', ' ', (string) $text) ?? '');
 
         if ('' === $text) {
-            return 'Informations à venir pour cet l’évènement.';
+            return 'Informations à venir pour cet évènement.';
         }
 
         if (mb_strlen($text) <= $maxLength) {

@@ -76,8 +76,25 @@ export function canUseOrganizerAdminTools(
   return hasRole(user, 'ROLE_ORGANIZER') || isAdminUser(user)
 }
 
+type OrganizerOwnedResource = {
+  organizer?: {
+    id: number | null
+  } | null
+}
+
 export function canEditOrganizerResource(
-  user: Pick<AuthUser, 'role' | 'baseRole' | 'roles'> | null | undefined,
+  user: Pick<AuthUser, 'id' | 'role' | 'baseRole' | 'roles'> | null | undefined,
+  resource?: OrganizerOwnedResource | null,
 ): boolean {
+  if (!user) {
+    return false
+  }
+
+  const organizerId = resource?.organizer?.id
+
+  if (organizerId !== undefined && organizerId !== null) {
+    return Number(organizerId) === Number(user.id)
+  }
+
   return hasRole(user, 'ROLE_ORGANIZER') && !isAdminUser(user)
 }

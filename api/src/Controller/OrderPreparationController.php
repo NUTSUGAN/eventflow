@@ -136,7 +136,7 @@ final class OrderPreparationController extends AbstractController
 
             if (null !== $event && $event?->getId() !== $ticketEvent->getId()) {
                 return $this->json([
-                    'message' => 'Une commande ne peut preparer que des billets du meme l’évènement.',
+                    'message' => 'Une commande ne peut préparer que des billets du même évènement.',
                 ], Response::HTTP_BAD_REQUEST);
             }
 

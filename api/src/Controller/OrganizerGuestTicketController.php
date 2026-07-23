@@ -47,7 +47,7 @@ final class OrganizerGuestTicketController extends AbstractController
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
-            return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'L’évènement est introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
         if (!$this->canManageEvent($user, $event)) {
@@ -81,14 +81,14 @@ final class OrganizerGuestTicketController extends AbstractController
             return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
-            return $response;
-        }
-
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
-            return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'L’évènement est introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $event->getOrganizer()))) {
+            return $response;
         }
 
         if (!$this->canManageEvent($user, $event)) {

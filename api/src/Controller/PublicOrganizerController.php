@@ -150,7 +150,7 @@ class PublicOrganizerController extends AbstractController
         $text = trim(preg_replace('/\s+/', ' ', (string) $text) ?? '');
 
         if ('' === $text) {
-            return 'Informations à venir pour cet l’évènement.';
+            return 'Informations à venir pour cet évènement.';
         }
 
         if (mb_strlen($text) <= $maxLength) {

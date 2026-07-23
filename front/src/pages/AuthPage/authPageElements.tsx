@@ -267,9 +267,19 @@ export const AuthSecondaryButton = styled.button`
 
 export const AuthGoogleButton = styled.button`
   ${buttonBase};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.06);
   color: #fff8f2;
+`
+
+export const AuthGoogleIcon = styled.svg`
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
 `
 
 export const PendingAccountCard = styled.div`

@@ -56,6 +56,11 @@ export type OrganizerEventSummary = {
   createdAt: string | null
   withdrawalFeePercent: string | null
   ticketTypesCount: number
+  organizer: {
+    id: number | null
+    displayName: string | null
+    email: string | null
+  }
   category: {
     id: number | null
     name: string | null

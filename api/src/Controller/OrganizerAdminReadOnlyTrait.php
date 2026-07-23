@@ -8,9 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait OrganizerAdminReadOnlyTrait
 {
-    private function denyAdminOrganizerMutation(User $user): ?JsonResponse
+    private function denyAdminOrganizerMutation(User $user, ?User $organizer = null): ?JsonResponse
     {
         if (!$user->isAdminAccount()) {
+            return null;
+        }
+
+        if ($organizer instanceof User && $organizer->getId() === $user->getId()) {
             return null;
         }
 

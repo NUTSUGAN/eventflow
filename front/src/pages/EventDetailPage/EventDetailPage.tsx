@@ -267,7 +267,7 @@ export function EventDetailPage() {
     async function loadEventDetail() {
       if (!eventId) {
         if (isMounted) {
-          setErrorMessage("Impossible de retrouver l’évènement demande.")
+          setErrorMessage("Impossible de retrouver l’évènement demandé.")
           setIsLoading(false)
         }
         return
@@ -855,7 +855,7 @@ export function EventDetailPage() {
 
       <DetailPanel>
         <DetailPanelHeader>
-          <DetailPanelTitle>Dans la meme catégorie</DetailPanelTitle>
+          <DetailPanelTitle>Dans la même catégorie</DetailPanelTitle>
           <DetailCaption>3 évènements publiés à afficher ensuite</DetailCaption>
         </DetailPanelHeader>
 

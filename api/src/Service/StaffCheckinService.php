@@ -53,7 +53,7 @@ final class StaffCheckinService
         $event = $this->eventRepository->findOneForStaffScanById($eventId);
 
         if (!$event instanceof Event) {
-            throw new \DomainException('l’évènement de scan introuvable.');
+            throw new \DomainException('L’évènement de scan est introuvable.');
         }
 
         if (!$this->organizerStaffService->canAccessEvent($staffUser, $event)) {

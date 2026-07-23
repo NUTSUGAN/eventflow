@@ -2,29 +2,38 @@ import { Link, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
 export const NavbarContainer = styled.header`
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 30;
-  background: rgba(25, 23, 22, 0.82);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  min-height: var(--site-header-height);
+  background: rgba(25, 23, 22, 0.98);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
 `
 
 export const NavbarInner = styled.div`
-  width: min(1480px, calc(100% - 96px));
+  width: min(1480px, calc(100% - 64px));
   min-width: 0;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: auto minmax(320px, 1fr) auto auto auto;
+  grid-template-columns: minmax(250px, max-content) minmax(240px, 1fr) auto auto auto;
   align-items: center;
-  gap: 20px;
-  padding: 20px 0;
+  gap: 24px;
+  height: var(--site-header-height);
+  padding: 0;
+
+  @media (max-width: 1180px) {
+    grid-template-columns: minmax(220px, max-content) minmax(220px, 1fr) auto auto auto;
+    gap: 18px;
+  }
 
   @media (max-width: 840px) {
     width: min(100%, calc(100% - 24px));
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 12px;
-    padding: 10px 0 14px;
   }
 `
 
@@ -32,7 +41,8 @@ export const Brand = styled(NavLink)`
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  min-width: 0;
+  width: 250px;
+  min-width: 250px;
   flex: 0 0 auto;
   overflow: hidden;
 
@@ -40,18 +50,35 @@ export const Brand = styled(NavLink)`
     display: block;
     line-height: 0;
   }
+
+  @media (max-width: 1180px) {
+    width: 220px;
+    min-width: 220px;
+  }
+
+  @media (max-width: 840px) {
+    width: 48px;
+    min-width: 48px;
+  }
 `
 
 export const BrandImage = styled.img`
-  width: 200px;
-  height: auto;
+  width: 250px;
+  height: 75px;
   display: block;
+  object-fit: cover;
+  object-position: center;
   mix-blend-mode: screen;
   filter: brightness(1.1) contrast(1.05);
 
+  @media (max-width: 1180px) {
+    width: 220px;
+    height: 66px;
+  }
+
   @media (max-width: 840px) {
-    width: 52px;
-    max-height: 52px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
   }
 `
@@ -116,10 +143,10 @@ export const SearchSuggestionsPanel = styled.div`
 
   @media (max-width: 520px) {
     position: fixed;
-    top: 78px;
+    top: calc(var(--site-header-height) + 8px);
     left: 12px;
     right: 12px;
-    max-height: min(420px, calc(100vh - 96px));
+    max-height: min(420px, calc(100vh - var(--site-header-height) - 24px));
   }
 `
 

@@ -8,12 +8,21 @@
   flex-direction: column;
 }
 
+:root {
+  --site-header-height: 104px;
+}
+
 .app-content {
   flex: 1 0 auto;
   min-width: 0;
+  padding-top: var(--site-header-height);
 }
 
 @media (max-width: 768px) {
+  :root {
+    --site-header-height: 72px;
+  }
+
   .app-shell {
     min-height: 100vh;
   }

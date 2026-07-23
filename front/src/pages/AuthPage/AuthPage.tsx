@@ -30,6 +30,7 @@ import {
   AuthFieldRow,
   AuthFieldset,
   AuthGoogleButton,
+  AuthGoogleIcon,
   AuthHelperText,
   AuthHero,
   AuthIntentBadge,
@@ -75,6 +76,29 @@ const initialRegisterForm: RegisterPayload = {
 
 const initialForgotPasswordForm: ForgotPasswordPayload = {
   email: '',
+}
+
+function GoogleIcon() {
+  return (
+    <AuthGoogleIcon viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+      <path
+        fill="#4285f4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"
+      />
+      <path
+        fill="#34a853"
+        d="M9 18c2.43 0 4.46-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A9 9 0 0 0 9 18Z"
+      />
+      <path
+        fill="#fbbc05"
+        d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.94H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.06l3.01-2.34Z"
+      />
+      <path
+        fill="#ea4335"
+        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.67 8.67 0 0 0 9 0 9 9 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58Z"
+      />
+    </AuthGoogleIcon>
+  )
 }
 
 function getIntentLabel(intent: AuthIntent): string | null {
@@ -559,7 +583,7 @@ export function AuthPage() {
 
               <AuthField>
                 <AuthFieldLabel htmlFor="auth-login-password">
-                  Mot de passeé
+                  Mot de passe
                 </AuthFieldLabel>
                 <AuthTextInput
                   id="auth-login-password"
@@ -591,7 +615,7 @@ export function AuthPage() {
                   Se souvenir de moi pendant 14 jours sur cet appareil.
                 </AuthCheckboxLabel>
                 <AuthHelperText>
-                  Sans cette option, la session reste liée au navigateur courant et se terminé plus vite.
+                  Sans cette option, la session reste liée au navigateur courant et se termine plus vite.
                 </AuthHelperText>
               </AuthField>
             </AuthFieldset>
@@ -605,6 +629,7 @@ export function AuthPage() {
                 disabled={isSubmitting}
                 onClick={() => startGoogleAuth('login')}
               >
+                <GoogleIcon />
                 Continuer avec Google
               </AuthGoogleButton>
             </AuthActionsRow>
@@ -676,7 +701,7 @@ export function AuthPage() {
 
               <AuthField>
                 <AuthFieldLabel htmlFor="auth-register-password">
-                  Mot de passeé
+                  Mot de passe
                 </AuthFieldLabel>
                 <AuthTextInput
                   id="auth-register-password"
@@ -743,10 +768,10 @@ export function AuthPage() {
                     }
                   />
                   Je souhaite recevoir la newsletter EventFlow, les promotions et
-                  les actualites.
+                  les actualités.
                 </AuthCheckboxLabel>
                 <AuthHelperText>
-                  Optionnel. Tu pourras te desabonner plus tard.
+                  Optionnel. Tu pourras te désabonner plus tard.
                 </AuthHelperText>
               </AuthField>
             </AuthFieldset>
@@ -760,6 +785,7 @@ export function AuthPage() {
                 disabled={isSubmitting}
                 onClick={() => startGoogleAuth('register')}
               >
+                <GoogleIcon />
                 Continuer avec Google
               </AuthGoogleButton>
             </AuthActionsRow>
@@ -906,7 +932,7 @@ export function AuthPage() {
                       }
                     />
                     Je souhaite recevoir la newsletter EventFlow, les promotions et
-                    les actualites.
+                    les actualités.
                   </AuthCheckboxLabel>
                 </AuthField>
               </AuthFieldset>

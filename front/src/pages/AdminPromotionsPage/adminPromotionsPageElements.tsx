@@ -4,11 +4,12 @@ export const AdminPromotionPage = styled.main`
   width: min(1240px, calc(100% - 32px));
   min-width: 0;
   margin: 0 auto;
-  padding: 42px 0 72px;
+  padding: 48px 0 72px;
+  scroll-margin-top: calc(var(--site-header-height) + 24px);
 
   @media (max-width: 560px) {
     width: min(100%, calc(100% - 24px));
-    padding: 34px 0 64px;
+    padding: 40px 0 64px;
   }
 `
 export const AdminPromotionHeader = styled.header`

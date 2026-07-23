@@ -395,7 +395,7 @@ export function OrganizerAccessPage() {
                 <OrganizerAccessFieldLabel>Présentation de l’activité</OrganizerAccessFieldLabel>
                 <OrganizerAccessTextarea
                   value={form.motivation}
-                  placeholder="Decris ton activité, le type d’évènements organises et ce que tu veux publiér sur EventFlow."
+                  placeholder="Décris ton activité, le type d’évènements organisés et ce que tu veux publier sur EventFlow."
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
@@ -407,7 +407,7 @@ export function OrganizerAccessPage() {
               </OrganizerAccessField>
 
               <OrganizerAccessHint>
-                Les liens publics restent optionnels, mais’ils peuvent aider l’équipe EventFlow à vérifier ton activité plus rapidement.
+                Les liens publics restent optionnels, mais ils peuvent aider l’équipe EventFlow à vérifier ton activité plus rapidement.
               </OrganizerAccessHint>
 
               <OrganizerAccessActions>

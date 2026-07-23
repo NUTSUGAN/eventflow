@@ -191,11 +191,11 @@ final class TicketFulfillmentService
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to($organizerEmail)
-                    ->subject('Nouvelle commande payée sur ton l’évènement EventFlow')
+                    ->subject('Nouvelle commande payée sur ton évènement EventFlow')
                     ->text(
                         sprintf(
                             "Bonjour %s,\n\n".
-                            "Une commande vient d etre payée sur ton l’évènement.\n\n".
+                            "Une commande vient d’être payée sur ton évènement.\n\n".
                             "Commande : %s\n".
                             "Client : %s\n".
                             "Email client : %s\n".

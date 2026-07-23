@@ -117,7 +117,7 @@ final class OrganizerStaffController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Le membre a été passe hors service.',
+            'message' => 'Le membre a été passé hors service.',
             'staffMember' => $organizerStaffService->serializeMembership($membership),
             'count' => $organizerStaffService->countMembers($user),
             'totalCount' => count($organizerStaffService->listMembers($user)),

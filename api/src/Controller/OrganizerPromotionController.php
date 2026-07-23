@@ -76,7 +76,7 @@ final class OrganizerPromotionController extends AbstractController
 
         [$event, $user] = $access;
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $event->getOrganizer()))) {
             return $response;
         }
 
@@ -127,7 +127,7 @@ final class OrganizerPromotionController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'La demande de promotion a été envoyée a EventFlow.',
+            'message' => 'La demande de promotion a été envoyée à EventFlow.',
             'campaign' => $campaignService->serialize($campaign),
         ], Response::HTTP_CREATED);
     }
@@ -193,7 +193,7 @@ final class OrganizerPromotionController extends AbstractController
             return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $campaign->getOrganizer()))) {
             return $response;
         }
 
@@ -232,7 +232,7 @@ final class OrganizerPromotionController extends AbstractController
             return $this->json(['message' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (null !== ($response = $this->denyAdminOrganizerMutation($user))) {
+        if (null !== ($response = $this->denyAdminOrganizerMutation($user, $campaign->getOrganizer()))) {
             return $response;
         }
 
@@ -248,7 +248,7 @@ final class OrganizerPromotionController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Paiement Stripe reçu par le navigateur. EventFlow attend le webhook Stripe signe pour confirmer la campagne.',
+            'message' => 'Paiement Stripe reçu par le navigateur. EventFlow attend le webhook Stripe signé pour confirmer la campagne.',
             'campaign' => $campaignService->serialize($campaign),
         ], Response::HTTP_ACCEPTED);
     }
@@ -271,7 +271,7 @@ final class OrganizerPromotionController extends AbstractController
         $event = $eventRepository->find($eventId);
 
         if (!$event instanceof Event) {
-            return $this->json(['message' => 'l’évènement introuvable.'], Response::HTTP_NOT_FOUND);
+            return $this->json(['message' => 'L’évènement est introuvable.'], Response::HTTP_NOT_FOUND);
         }
 
         if (!$user->isAdminAccount() && $event->getOrganizer()?->getId() !== $user->getId()) {

@@ -158,7 +158,7 @@ export function AdminPromotionsPage() {
       <AdminPromotionHeader>
         <div>
           <AdminPromotionTitle>Campagnes Booster</AdminPromotionTitle>
-          <AdminPromotionText>Valide les demandes, pilote chaque canal et partagé les informations de suivi.</AdminPromotionText>
+          <AdminPromotionText>Valide les demandes, pilote chaque canal et partage les informations de suivi.</AdminPromotionText>
         </div>
       </AdminPromotionHeader>
 
