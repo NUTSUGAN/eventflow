@@ -3,6 +3,7 @@ import type {
   AuthActionResponse,
   AuthUser,
   ConfirmEmailChangePayload,
+  DeleteAccountResponse,
   ForgotPasswordPayload,
   GoogleFinalizePayload,
   GooglePendingAccount,
@@ -148,6 +149,14 @@ export async function updateCurrentUser(
   currentUserRequest = null
 
   return normalizedResponse
+}
+
+export async function deleteCurrentUser(): Promise<DeleteAccountResponse> {
+  const response = await apiClient.delete<DeleteAccountResponse>('/api/me')
+  currentUserRequest = null
+  setCachedCurrentUser(null)
+
+  return response.data
 }
 
 export async function getPendingGoogleAccount(): Promise<GooglePendingAccount> {

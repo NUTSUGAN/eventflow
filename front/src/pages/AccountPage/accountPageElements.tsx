@@ -248,6 +248,8 @@ export const AccountFormGrid = styled.div`
 `
 
 export const AccountField = styled.label`
+  min-width: 0;
+  width: 100%;
   display: grid;
   gap: 8px;
 `
@@ -284,11 +286,14 @@ const inputStyles = css`
 
 export const AccountInput = styled.input`
   ${inputStyles}
+  box-sizing: border-box;
 `
 
 export const AccountReadonlyField = styled.div`
   min-height: 54px;
+  min-width: 0;
   width: 100%;
+  box-sizing: border-box;
   padding: 0 16px;
   display: flex;
   align-items: center;
@@ -411,8 +416,182 @@ export const AccountDangerButton = styled.button`
   color: #ffd9d9;
 `
 
+export const AccountDangerPrimaryButton = styled.button`
+  ${buttonStyles}
+  border: 1px solid rgba(255, 126, 126, 0.34);
+  background: linear-gradient(180deg, rgba(206, 75, 75, 0.95), rgba(139, 42, 42, 0.95));
+  color: #fff4f4;
+  box-shadow: 0 16px 30px rgba(89, 12, 12, 0.26);
+`
+
 export const AccountHiddenFileInput = styled.input`
   display: none;
+`
+
+export const AccountModalOverlay = styled.div`
+  position: fixed;
+  top: var(--site-header-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 900;
+  padding: 18px 16px;
+  display: grid;
+  place-items: start center;
+  background: rgba(8, 7, 6, 0.62);
+  backdrop-filter: blur(12px);
+
+  @media (max-width: 560px) {
+    padding: 12px;
+  }
+`
+
+export const AccountModalCard = styled.div`
+  width: min(640px, 100%);
+  box-sizing: border-box;
+  max-height: calc(100vh - var(--site-header-height) - 36px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at top left, rgba(226, 139, 82, 0.2), transparent 34%),
+    linear-gradient(180deg, rgba(44, 31, 26, 0.98), rgba(24, 18, 16, 0.98));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.46);
+
+  @media (max-width: 560px) {
+    max-height: calc(100vh - var(--site-header-height) - 24px);
+    border-radius: 16px;
+  }
+`
+
+export const AccountModalHeader = styled.div`
+  display: grid;
+  gap: 8px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+  @media (max-width: 560px) {
+    padding: 16px;
+  }
+`
+
+export const AccountModalEyebrow = styled.span`
+  color: #ffb18a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+`
+
+export const AccountModalTitle = styled.h2`
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(1.25rem, 4vw, 1.65rem);
+`
+
+export const AccountModalText = styled.p`
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.93rem;
+  line-height: 1.55;
+`
+
+export const AccountModalBody = styled.div`
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  padding: 18px 22px 22px;
+
+  @media (max-width: 560px) {
+    padding: 16px;
+  }
+`
+
+export const AccountDecisionGrid = styled.div`
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const AccountDecisionCard = styled.div<{ $tone?: 'danger' | 'warning' | 'neutral' }>`
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid
+    ${({ $tone }) => {
+      switch ($tone) {
+        case 'danger':
+          return 'rgba(223, 99, 99, 0.28)'
+        case 'warning':
+          return 'rgba(248, 143, 82, 0.24)'
+        default:
+          return 'rgba(255, 255, 255, 0.08)'
+      }
+    }};
+  background:
+    ${({ $tone }) => {
+      switch ($tone) {
+        case 'danger':
+          return 'rgba(182, 74, 74, 0.1)'
+        case 'warning':
+          return 'rgba(248, 143, 82, 0.08)'
+        default:
+          return 'rgba(255, 255, 255, 0.035)'
+      }
+    }};
+`
+
+export const AccountDecisionTitle = styled.h3`
+  margin: 0 0 10px;
+  color: var(--color-text);
+  font-size: 0.92rem;
+`
+
+export const AccountDecisionList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+`
+
+export const AccountModalWarning = styled.div`
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(248, 143, 82, 0.22);
+  background: rgba(248, 143, 82, 0.08);
+  color: #ffe1cf;
+  font-size: 0.9rem;
+  line-height: 1.5;
+`
+
+export const AccountModalActions = styled.div`
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  @media (max-width: 560px) {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+
+    > button {
+      width: 100%;
+    }
+  }
 `
 
 export const AccountCheckboxRow = styled.label`

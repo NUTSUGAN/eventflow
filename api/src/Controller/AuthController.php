@@ -10,6 +10,7 @@ use App\Repository\NewsletterSubscriptionRepository;
 use App\Repository\PasswordResetRequestRepository;
 use App\Repository\UserOauthAccountRepository;
 use App\Repository\UserRepository;
+use App\Service\AccountErasureService;
 use App\Service\UploadedImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -731,6 +732,31 @@ class AuthController extends AbstractController
         }
 
         return $this->json($this->serializeUser($user));
+    }
+
+    #[Route('/api/me', name: 'api_me_delete', methods: ['DELETE'])]
+    public function deleteMe(
+        Request $request,
+        AccountErasureService $accountErasureService,
+    ): JsonResponse {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->json([
+                'message' => 'Non authentifie.',
+            ], 401);
+        }
+
+        $result = $accountErasureService->anonymize($user);
+
+        if ($request->hasSession()) {
+            $request->getSession()->invalidate();
+        }
+
+        return $this->json([
+            'message' => 'Ton compte a été supprimé. Les données personnelles ont été anonymisées lorsque leur conservation reste nécessaire.',
+            'mode' => $result['mode'],
+        ], 200);
     }
 
     private function upsertNewsletterSubscription(

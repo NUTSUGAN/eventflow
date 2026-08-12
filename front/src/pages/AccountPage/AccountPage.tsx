@@ -2,6 +2,7 @@ import type { ChangeEvent, FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  deleteCurrentUser,
   getCurrentUser,
   logoutUser,
   requestEmailChange,
@@ -16,6 +17,11 @@ import {
   AccountCheckbox,
   AccountCheckboxRow,
   AccountDangerButton,
+  AccountDangerPrimaryButton,
+  AccountDecisionCard,
+  AccountDecisionGrid,
+  AccountDecisionList,
+  AccountDecisionTitle,
   AccountErrorMessage,
   AccountEyebrow,
   AccountField,
@@ -31,6 +37,15 @@ import {
   AccountInfoCard,
   AccountInput,
   AccountLabel,
+  AccountModalActions,
+  AccountModalBody,
+  AccountModalCard,
+  AccountModalEyebrow,
+  AccountModalHeader,
+  AccountModalOverlay,
+  AccountModalText,
+  AccountModalTitle,
+  AccountModalWarning,
   AccountMutedValue,
   AccountOverviewCard,
   AccountPrimaryButton,
@@ -130,6 +145,23 @@ function getAccountStatusTone(accountStatus: string): 'success' | 'danger' | 'ne
   }
 }
 
+function maskEmailAddress(email: string): string {
+  const [localPart, domain] = email.split('@')
+
+  if (!localPart || !domain) {
+    return email
+  }
+
+  if (localPart.length <= 4) {
+    return `${localPart[0] ?? ''}${'•'.repeat(Math.max(localPart.length - 1, 1))}@${domain}`
+  }
+
+  const visibleStart = localPart.slice(0, 5)
+  const visibleEnd = localPart.length > 8 ? localPart.slice(-4) : localPart.slice(-2)
+
+  return `${visibleStart}${'•'.repeat(6)}${visibleEnd}@${domain}`
+}
+
 export function AccountPage() {
   const navigate = useNavigate()
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null)
@@ -143,10 +175,13 @@ export function AccountPage() {
   const [selectedProfilePhotoDataUrl, setSelectedProfilePhotoDataUrl] = useState<string | null>(null)
   const [selectedProfilePhotoName, setSelectedProfilePhotoName] = useState<string | null>(null)
   const [emailChangeValue, setEmailChangeValue] = useState('')
+  const [deleteConfirmationValue, setDeleteConfirmationValue] = useState('')
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isPreparingPhoto, setIsPreparingPhoto] = useState(false)
   const [isEmailChangeSubmitting, setIsEmailChangeSubmitting] = useState(false)
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [emailChangeErrorMessage, setEmailChangeErrorMessage] = useState<string | null>(null)
@@ -326,6 +361,44 @@ export function AccountPage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (isDeletingAccount) {
+      return
+    }
+
+    if (deleteConfirmationValue.trim().toUpperCase() !== 'SUPPRIMER') {
+      return
+    }
+
+    setIsDeletingAccount(true)
+    setErrorMessage(null)
+    setStatusMessage(null)
+
+    try {
+      await deleteCurrentUser()
+      window.location.assign('/auth?mode=login&account=deleted')
+    } catch {
+      setErrorMessage('Impossible de supprimer ton compte pour le moment.')
+      setIsDeletingAccount(false)
+    }
+  }
+
+  function openDeleteAccountModal() {
+    setDeleteConfirmationValue('')
+    setIsDeleteModalOpen(true)
+    setErrorMessage(null)
+    setStatusMessage(null)
+  }
+
+  function closeDeleteAccountModal() {
+    if (isDeletingAccount) {
+      return
+    }
+
+    setDeleteConfirmationValue('')
+    setIsDeleteModalOpen(false)
+  }
+
   if (isLoading) {
     return (
       <AccountSection>
@@ -485,7 +558,7 @@ export function AccountPage() {
 
             <AccountField>
               <AccountFieldLabel>Email</AccountFieldLabel>
-              <AccountReadonlyField>{user.email}</AccountReadonlyField>
+              <AccountReadonlyField>{maskEmailAddress(user.email)}</AccountReadonlyField>
             </AccountField>
 
             <AccountUploadCard>
@@ -598,8 +671,121 @@ export function AccountPage() {
               compte resteront centralisées ici.
             </AccountMutedValue>
           </AccountInfoCard>
+
+          <AccountUploadCard>
+            <AccountUploadMeta>
+              <AccountUploadTitle>Supprimer mon compte</AccountUploadTitle>
+              <AccountHelperText>
+                Cette action désactive ton accès, retire tes données personnelles du profil
+                et anonymise ton compte. Les commandes, paiements, billets et traces
+                nécessaires aux obligations légales peuvent rester conservés.
+              </AccountHelperText>
+            </AccountUploadMeta>
+
+            <AccountActions>
+              <AccountDangerButton
+                type="button"
+                onClick={openDeleteAccountModal}
+                disabled={isDeletingAccount}
+              >
+                Supprimer mon compte
+              </AccountDangerButton>
+            </AccountActions>
+          </AccountUploadCard>
         </AccountFormCard>
       </AccountShell>
+
+      {isDeleteModalOpen ? (
+        <AccountModalOverlay>
+          <AccountModalCard
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
+          >
+            <AccountModalHeader>
+              <AccountModalEyebrow>Action irréversible</AccountModalEyebrow>
+              <AccountModalTitle id="delete-account-title">
+                Confirmer la suppression du compte
+              </AccountModalTitle>
+              <AccountModalText>
+                Tu t'apprêtes à supprimer le compte lié à{' '}
+                <strong>{maskEmailAddress(user.email)}</strong>. Cette action ferme l'accès
+                au compte et applique l'anonymisation RGPD sur les données personnelles.
+              </AccountModalText>
+            </AccountModalHeader>
+
+            <AccountModalBody>
+              <AccountDecisionGrid>
+                <AccountDecisionCard $tone="danger">
+                  <AccountDecisionTitle>Supprimé</AccountDecisionTitle>
+                  <AccountDecisionList>
+                    <li>Photo de profil</li>
+                    <li>Connexion Google/OAuth</li>
+                    <li>Abonnements organisateur</li>
+                    <li>Accès au compte</li>
+                  </AccountDecisionList>
+                </AccountDecisionCard>
+
+                <AccountDecisionCard $tone="warning">
+                  <AccountDecisionTitle>Anonymisé</AccountDecisionTitle>
+                  <AccountDecisionList>
+                    <li>Nom et prénom</li>
+                    <li>Email de connexion</li>
+                    <li>Mot de passe</li>
+                    <li>Destinataire des billets liés</li>
+                  </AccountDecisionList>
+                </AccountDecisionCard>
+
+                <AccountDecisionCard>
+                  <AccountDecisionTitle>Conservé</AccountDecisionTitle>
+                  <AccountDecisionList>
+                    <li>Commandes payées</li>
+                    <li>Paiements et références Stripe</li>
+                    <li>Billets déjà émis</li>
+                    <li>Traces utiles aux obligations légales</li>
+                  </AccountDecisionList>
+                </AccountDecisionCard>
+              </AccountDecisionGrid>
+
+              <AccountModalWarning>
+                Il restera donc une trace comptable et technique, mais elle ne doit plus
+                permettre d'identifier directement la personne depuis son profil EventFlow.
+              </AccountModalWarning>
+
+              <AccountField>
+                <AccountFieldLabel>Tape SUPPRIMER pour confirmer</AccountFieldLabel>
+                <AccountInput
+                  type="text"
+                  value={deleteConfirmationValue}
+                  onChange={(event) => setDeleteConfirmationValue(event.target.value)}
+                  placeholder="SUPPRIMER"
+                  autoComplete="off"
+                />
+              </AccountField>
+
+              <AccountModalActions>
+                <AccountSecondaryButton
+                  type="button"
+                  onClick={closeDeleteAccountModal}
+                  disabled={isDeletingAccount}
+                >
+                  Annuler
+                </AccountSecondaryButton>
+                <AccountDangerPrimaryButton
+                  type="button"
+                  onClick={() => void handleDeleteAccount()}
+                  disabled={
+                    isDeletingAccount ||
+                    deleteConfirmationValue.trim().toUpperCase() !== 'SUPPRIMER'
+                  }
+                >
+                  {isDeletingAccount ? 'Suppression en cours...' : 'Confirmer la suppression'}
+                </AccountDangerPrimaryButton>
+              </AccountModalActions>
+            </AccountModalBody>
+          </AccountModalCard>
+        </AccountModalOverlay>
+      ) : null}
     </AccountSection>
   )
 }

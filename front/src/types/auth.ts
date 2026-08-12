@@ -81,3 +81,8 @@ export type AuthActionResponse = {
   newsletterSubscribed?: boolean
   user?: AuthUser
 }
+
+export type DeleteAccountResponse = {
+  message: string
+  mode: 'anonymized' | 'deleted'
+}
