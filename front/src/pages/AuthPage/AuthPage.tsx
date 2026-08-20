@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   buildGoogleAuthUrl,
   finalizeGoogleAuth,
@@ -35,6 +35,7 @@ import {
   AuthHero,
   AuthIntentBadge,
   AuthLayout,
+  AuthLegalLink,
   AuthPanel,
   AuthPrimaryButton,
   AuthSecondaryButton,
@@ -732,7 +733,17 @@ export function AuthPage() {
                     }
                     required
                   />
-                  J’accepte les conditions d’utilisation EventFlow.
+                  <span>
+                    J’accepte les{' '}
+                    <AuthLegalLink
+                      as={Link}
+                      to="/documents-legaux#conditions-generales-utilisation"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      conditions d’utilisation EventFlow
+                    </AuthLegalLink>
+                    .
+                  </span>
                 </AuthCheckboxLabel>
               </AuthField>
 
@@ -750,7 +761,17 @@ export function AuthPage() {
                     }
                     required
                   />
-                  J’accepte la politique de confidentialité EventFlow.
+                  <span>
+                    J’accepte la{' '}
+                    <AuthLegalLink
+                      as={Link}
+                      to="/documents-legaux#politique-confidentialite"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      politique de confidentialité EventFlow
+                    </AuthLegalLink>
+                    .
+                  </span>
                 </AuthCheckboxLabel>
               </AuthField>
 
@@ -896,7 +917,17 @@ export function AuthPage() {
                       }
                       required
                     />
-                    J’accepte les conditions d’utilisation EventFlow.
+                    <span>
+                      J’accepte les{' '}
+                      <AuthLegalLink
+                        as={Link}
+                        to="/documents-legaux#conditions-generales-utilisation"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        conditions d’utilisation EventFlow
+                      </AuthLegalLink>
+                      .
+                    </span>
                   </AuthCheckboxLabel>
                 </AuthField>
 
@@ -914,7 +945,17 @@ export function AuthPage() {
                       }
                       required
                     />
-                    J’accepte la politique de confidentialité EventFlow.
+                    <span>
+                      J’accepte la{' '}
+                      <AuthLegalLink
+                        as={Link}
+                        to="/documents-legaux#politique-confidentialite"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        politique de confidentialité EventFlow
+                      </AuthLegalLink>
+                      .
+                    </span>
                   </AuthCheckboxLabel>
                 </AuthField>
 

@@ -109,6 +109,7 @@ import {
 } from './OrganizerEventDetailSections'
 
 const emptyOptions: OrganizerEventFormOptions = {
+  withdrawalFeePercent: '0.00',
   categories: [],
 }
 

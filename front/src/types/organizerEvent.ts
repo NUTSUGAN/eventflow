@@ -5,6 +5,7 @@ export type OrganizerEventOptionCategory = {
 }
 
 export type OrganizerEventFormOptions = {
+  withdrawalFeePercent: string
   categories: OrganizerEventOptionCategory[]
 }
 

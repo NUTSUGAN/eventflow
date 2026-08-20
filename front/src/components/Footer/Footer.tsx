@@ -59,6 +59,9 @@ export function SiteFooter() {
             <FooterLink type="button" onClick={() => navigate('/explorer')}>
               Billetterie EventFlow
             </FooterLink>
+            <FooterLink type="button" onClick={() => navigate('/tarifs')}>
+              Tarifs
+            </FooterLink>
             <FooterLink type="button" onClick={() => navigate('/aide')}>
               Aide
             </FooterLink>
@@ -104,8 +107,8 @@ export function SiteFooter() {
             <FooterLink type="button" onClick={() => navigate('/confidentialite')}>
               Politique de confidentialité
             </FooterLink>
-            <FooterLink type="button" onClick={() => navigate('/aide')}>
-              Aide
+            <FooterLink type="button" onClick={() => navigate('/documents-legaux')}>
+              Documents légaux
             </FooterLink>
             <FooterLink type="button" onClick={() => navigate('/contact')}>
               Contact EventFlow

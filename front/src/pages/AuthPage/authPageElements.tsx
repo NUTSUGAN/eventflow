@@ -203,6 +203,19 @@ export const AuthCheckbox = styled.input`
   flex-shrink: 0;
 `
 
+export const AuthLegalLink = styled.a`
+  color: #f3b183;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+
+  &:hover,
+  &:focus-visible {
+    color: #ffd0ad;
+  }
+`
+
 export const AuthHelperText = styled.span`
   color: rgba(255, 228, 206, 0.56);
   font-size: 0.84rem;

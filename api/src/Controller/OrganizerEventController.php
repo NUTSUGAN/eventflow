@@ -70,7 +70,8 @@ final class OrganizerEventController extends AbstractController
     #[Route('/options', name: 'api_organizer_event_options', methods: ['GET'])]
     public function options(
         CategoryRepository $categoryRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        WithdrawalSettingRepository $withdrawalSettingRepository,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -89,6 +90,9 @@ final class OrganizerEventController extends AbstractController
         $categories = $this->ensureDefaultCategories($categoryRepository, $entityManager);
 
         return $this->json([
+            'withdrawalFeePercent' => $withdrawalSettingRepository
+                ->getCurrent($entityManager)
+                ->getDefaultFeePercent(),
             'categories' => array_map(
                 static fn (Category $category): array => [
                     'id' => $category->getId(),

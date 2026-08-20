@@ -67,6 +67,34 @@ export const OrganizerEventCreateError = styled(OrganizerEventCreateState)`
   color: #ffd5ca;
 `
 
+export const OrganizerEventCreateCommissionNotice = styled(OrganizerEventCreateState)`
+  display: grid;
+  gap: 8px;
+  background: rgba(248, 143, 82, 0.1);
+  border-color: rgba(248, 143, 82, 0.24);
+`
+
+export const OrganizerEventCreateCommissionLabel = styled.span`
+  color: rgba(255, 237, 222, 0.72);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+`
+
+export const OrganizerEventCreateCommissionValue = styled.strong`
+  color: #fffaf4;
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1;
+`
+
+export const OrganizerEventCreateCommissionText = styled.span`
+  color: rgba(255, 237, 222, 0.76);
+  font-size: 0.9rem;
+  line-height: 1.55;
+`
+
 export const OrganizerEventCreateSuccess = styled(OrganizerEventCreateState)`
   background: rgba(56, 119, 71, 0.18);
   border-color: rgba(135, 255, 173, 0.2);

@@ -128,6 +128,8 @@ function App() {
           />
           <Route path="/mentions-legales" element={<LegalPage {...legalPages.mentions} />} />
           <Route path="/confidentialite" element={<LegalPage {...legalPages.privacy} />} />
+          <Route path="/documents-legaux" element={<LegalPage {...legalPages.legalHub} />} />
+          <Route path="/tarifs" element={<LegalPage {...legalPages.pricing} />} />
           <Route path="/qui-sommes-nous" element={<LegalPage {...legalPages.about} />} />
           <Route path="/aide" element={<LegalPage {...legalPages.help} />} />
           <Route path="/contact" element={<ContactPage />} />

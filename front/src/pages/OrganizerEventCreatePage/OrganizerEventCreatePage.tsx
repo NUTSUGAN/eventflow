@@ -12,6 +12,10 @@ import type {
 } from '../../types/organizerEvent'
 import {
   OrganizerEventCreateActions,
+  OrganizerEventCreateCommissionLabel,
+  OrganizerEventCreateCommissionNotice,
+  OrganizerEventCreateCommissionText,
+  OrganizerEventCreateCommissionValue,
   OrganizerEventCreateError,
   OrganizerEventCreateEyebrow,
   OrganizerEventCreateField,
@@ -35,6 +39,7 @@ import {
 } from './organizerEventCreatePageElements'
 
 const emptyOptions: OrganizerEventFormOptions = {
+  withdrawalFeePercent: '0.00',
   categories: [],
 }
 
@@ -96,6 +101,19 @@ function scrollToFlowTop(node: HTMLElement | null) {
   window.requestAnimationFrame(() => {
     node?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
+}
+
+function formatPercent(value: string): string {
+  const normalizedValue = Number(value.replace(',', '.'))
+
+  if (!Number.isFinite(normalizedValue)) {
+    return '0 %'
+  }
+
+  return `${normalizedValue.toLocaleString('fr-FR', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: Number.isInteger(normalizedValue) ? 0 : 2,
+  })} %`
 }
 
 export function OrganizerEventCreatePage() {
@@ -304,6 +322,19 @@ export function OrganizerEventCreatePage() {
             ? 'Étape 1 sur 2 - informations principales de l’évènement.'
             : 'Étape 2 sur 2 - lieu, dates, statut et médias.'}
         </OrganizerEventCreateState>
+
+        <OrganizerEventCreateCommissionNotice>
+          <OrganizerEventCreateCommissionLabel>
+            Commission EventFlow
+          </OrganizerEventCreateCommissionLabel>
+          <OrganizerEventCreateCommissionValue>
+            {formatPercent(options.withdrawalFeePercent)}
+          </OrganizerEventCreateCommissionValue>
+          <OrganizerEventCreateCommissionText>
+            Ce pourcentage sera appliqué aux ventes payées de cet évènement lors
+            du retrait organisateur. Il est figé au moment de la création.
+          </OrganizerEventCreateCommissionText>
+        </OrganizerEventCreateCommissionNotice>
 
         <OrganizerEventCreateForm onSubmit={handleSubmit}>
           {currentStep === 1 ? (
