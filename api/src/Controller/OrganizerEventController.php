@@ -64,6 +64,7 @@ final class OrganizerEventController extends AbstractController
 
     public function __construct(
         private readonly UploadedImageStorage $imageStorage,
+        private readonly WithdrawalSettingRepository $withdrawalSettingRepository,
     ) {
     }
 
@@ -71,7 +72,6 @@ final class OrganizerEventController extends AbstractController
     public function options(
         CategoryRepository $categoryRepository,
         EntityManagerInterface $entityManager,
-        WithdrawalSettingRepository $withdrawalSettingRepository,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -90,7 +90,7 @@ final class OrganizerEventController extends AbstractController
         $categories = $this->ensureDefaultCategories($categoryRepository, $entityManager);
 
         return $this->json([
-            'withdrawalFeePercent' => $withdrawalSettingRepository
+            'withdrawalFeePercent' => $this->withdrawalSettingRepository
                 ->getCurrent($entityManager)
                 ->getDefaultFeePercent(),
             'categories' => array_map(
