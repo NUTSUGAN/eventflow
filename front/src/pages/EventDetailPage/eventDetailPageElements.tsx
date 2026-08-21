@@ -1,5 +1,42 @@
 import styled from 'styled-components'
 
+type DetailShareNetwork = 'whatsapp' | 'instagram' | 'snapchat' | 'copy'
+
+const detailShareNetworkTheme: Record<
+  DetailShareNetwork,
+  {
+    background: string
+    border: string
+    color: string
+    shadow: string
+  }
+> = {
+  whatsapp: {
+    background: 'linear-gradient(135deg, #25d366 0%, #128c7e 100%)',
+    border: 'rgba(37, 211, 102, 0.72)',
+    color: '#ffffff',
+    shadow: 'rgba(37, 211, 102, 0.28)',
+  },
+  instagram: {
+    background: 'linear-gradient(135deg, #f58529 0%, #dd2a7b 42%, #8134af 72%, #515bd4 100%)',
+    border: 'rgba(221, 42, 123, 0.72)',
+    color: '#ffffff',
+    shadow: 'rgba(221, 42, 123, 0.3)',
+  },
+  snapchat: {
+    background: '#fffc00',
+    border: 'rgba(255, 252, 0, 0.86)',
+    color: '#111111',
+    shadow: 'rgba(255, 252, 0, 0.26)',
+  },
+  copy: {
+    background: 'linear-gradient(135deg, rgba(248, 143, 82, 0.95), rgba(161, 75, 43, 0.95))',
+    border: 'rgba(248, 143, 82, 0.58)',
+    color: '#fff9f2',
+    shadow: 'rgba(203, 101, 51, 0.28)',
+  },
+}
+
 export const DetailSection = styled.main`
   width: min(1480px, calc(100% - 96px));
   min-width: 0;
@@ -139,6 +176,157 @@ export const DetailHeroTop = styled.div`
   gap: 12px;
 `
 
+export const DetailShareArea = styled.div`
+  position: relative;
+  width: 100%;
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 86px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(248, 143, 82, 0.95), rgba(255, 210, 168, 0.35));
+  }
+`
+
+export const DetailShareHeading = styled.div`
+  display: grid;
+  gap: 4px;
+`
+
+export const DetailShareTitle = styled.h3`
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+`
+
+export const DetailShareDescription = styled.p`
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+`
+
+export const DetailShareToggle = styled.button`
+  min-height: 46px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 143, 82, 0.52);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 214, 160, 0.3), transparent 34%),
+    linear-gradient(135deg, rgba(248, 143, 82, 0.98), rgba(161, 75, 43, 0.94));
+  color: #fff9f2;
+  font-family: var(--font-heading);
+  font-size: 0.96rem;
+  line-height: 1.2;
+  white-space: normal;
+  cursor: pointer;
+  box-shadow: 0 16px 36px rgba(203, 101, 51, 0.2);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+  }
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(255, 196, 144, 0.76);
+    box-shadow: 0 20px 44px rgba(203, 101, 51, 0.28);
+  }
+`
+
+export const DetailShareMenu = styled.div`
+  width: min(100%, 460px);
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(40, 34, 30, 0.98), rgba(26, 22, 20, 0.98));
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`
+
+export const DetailShareOption = styled.button<{ $network?: DetailShareNetwork }>`
+  ${({ $network = 'copy' }) => {
+    const theme = detailShareNetworkTheme[$network]
+
+    return `
+      --share-background: ${theme.background};
+      --share-border: ${theme.border};
+      --share-color: ${theme.color};
+      --share-shadow: ${theme.shadow};
+    `
+  }}
+
+  min-width: 0;
+  min-height: 70px;
+  padding: 10px 8px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  border: 1px solid var(--share-border);
+  background: var(--share-background);
+  color: var(--share-color);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+  transition:
+    transform 160ms ease,
+    filter 160ms ease,
+    box-shadow 160ms ease;
+
+  svg {
+    width: 21px;
+    height: 21px;
+    color: currentColor;
+  }
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+    box-shadow: 0 18px 38px var(--share-shadow);
+  }
+`
+
+export const DetailShareFeedback = styled.span`
+  max-width: 56ch;
+  color: rgba(255, 232, 211, 0.74);
+  font-size: 0.88rem;
+  line-height: 1.45;
+`
+
 export const DetailHeroMeta = styled.div`
   margin-top: 8px;
 `
@@ -161,6 +349,16 @@ export const DetailInfoItem = styled.div`
   border: 1px solid var(--color-border);
   background: rgba(34, 31, 29, 0.92);
   box-shadow: var(--shadow-soft);
+
+  &:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 720px) {
+    &:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+  }
 `
 
 export const DetailInfoLabel = styled.span`
@@ -175,25 +373,6 @@ export const DetailInfoValue = styled.strong`
   color: var(--color-text);
   font-weight: 600;
   line-height: 1.4;
-`
-
-export const DetailInfoSelect = styled.select`
-  width: 100%;
-  min-width: 0;
-  min-height: 42px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: 0.98rem;
-  appearance: none;
-
-  &:disabled {
-    opacity: 1;
-    cursor: default;
-  }
 `
 
 export const DetailGrid = styled.section`

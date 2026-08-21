@@ -1,4 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import {
+  FaCopy,
+  FaInstagram,
+  FaLink,
+  FaShareNodes,
+  FaSnapchat,
+  FaWhatsapp,
+} from 'react-icons/fa6'
 import { trackPromotionMetric } from '../../api/promotions'
 import { EventCard } from '../../components/EventCard/EventCard'
 import {
@@ -29,7 +37,6 @@ import {
   DetailInfoGrid,
   DetailInfoItem,
   DetailInfoLabel,
-  DetailInfoSelect,
   DetailInfoValue,
   DetailMapCard,
   DetailMapFrame,
@@ -52,6 +59,14 @@ import {
   DetailReasonGrid,
   DetailReportTextarea,
   DetailSection,
+  DetailShareArea,
+  DetailShareDescription,
+  DetailShareFeedback,
+  DetailShareHeading,
+  DetailShareMenu,
+  DetailShareOption,
+  DetailShareTitle,
+  DetailShareToggle,
   DetailStateBox,
   DetailText,
   DetailTitle,
@@ -220,20 +235,35 @@ function isEventFinished(value: string | null): boolean {
   return !Number.isNaN(endDatetime.getTime()) && endDatetime < new Date()
 }
 
-const eventStatusOptions = [
-  { value: 'draft', label: 'Brouillon' },
-  { value: 'pending', label: 'En attente' },
-  { value: 'published', label: 'Public' },
-  { value: 'cancelled', label: 'Annulé' },
-  { value: 'complétéd', label: 'Termine' },
-]
+function buildEventShareUrl(eventId: number): string {
+  return `${window.location.origin}/events/${eventId}`
+}
 
-function normalizeStatusValue(status: string): string {
-  const normalizedStatus = status.trim().toLowerCase()
+function buildEventShareText(event: EventDetail, shareUrl: string): string {
+  return `Découvre "${event.title}" sur EventFlow : ${shareUrl}`
+}
 
-  return eventStatusOptions.some((option) => option.value === normalizedStatus)
-    ? normalizedStatus
-    : 'draft'
+async function copyTextToClipboard(value: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(value)
+
+    return true
+  } catch {
+    const textarea = document.createElement('textarea')
+    textarea.value = value
+    textarea.setAttribute('readonly', 'true')
+    textarea.style.position = 'fixed'
+    textarea.style.left = '-9999px'
+    textarea.style.top = '0'
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+
+    const didCopy = document.execCommand('copy')
+    document.body.removeChild(textarea)
+
+    return didCopy
+  }
 }
 
 const eventReportReasonOptions = [
@@ -259,6 +289,8 @@ export function EventDetailPage() {
   const [reportMessage, setReportMessage] = useState<string | null>(null)
   const [reportErrorMessage, setReportErrorMessage] = useState<string | null>(null)
   const [followErrorMessage, setFollowErrorMessage] = useState<string | null>(null)
+  const [isShareOpen, setIsShareOpen] = useState(false)
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -281,6 +313,8 @@ export function EventDetailPage() {
 
         if (isMounted) {
           setEvent(data)
+          setIsShareOpen(false)
+          setShareFeedback(null)
         }
       } catch {
         if (isMounted) {
@@ -450,6 +484,60 @@ export function EventDetailPage() {
     )
   }
 
+  function flashShareFeedback(message: string) {
+    setShareFeedback(message)
+    window.setTimeout(() => {
+      setShareFeedback((currentMessage) =>
+        currentMessage === message ? null : currentMessage,
+      )
+    }, 3200)
+  }
+
+  async function handleCopyEventLink() {
+    if (!event) {
+      return
+    }
+
+    const didCopy = await copyTextToClipboard(buildEventShareUrl(event.id))
+
+    flashShareFeedback(
+      didCopy
+        ? "Lien de l'évènement copié."
+        : "Impossible de copier automatiquement le lien.",
+    )
+  }
+
+  async function handleSocialShare(target: 'whatsapp' | 'instagram' | 'snapchat') {
+    if (!event) {
+      return
+    }
+
+    const shareUrl = buildEventShareUrl(event.id)
+    const shareText = buildEventShareText(event, shareUrl)
+
+    if (target === 'whatsapp') {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+        '_blank',
+        'noopener,noreferrer',
+      )
+      flashShareFeedback('Ouverture du partage WhatsApp.')
+      return
+    }
+
+    const didCopy = await copyTextToClipboard(shareText)
+    const networkLabel = target === 'instagram' ? 'Instagram' : 'Snapchat'
+    const networkUrl =
+      target === 'instagram' ? 'https://www.instagram.com/' : 'https://www.snapchat.com/'
+
+    window.open(networkUrl, '_blank', 'noopener,noreferrer')
+    flashShareFeedback(
+      didCopy
+        ? `Lien copié. Colle-le dans ton partage ${networkLabel}.`
+        : `${networkLabel} ouvert. Copie le lien depuis la barre d'adresse si besoin.`,
+    )
+  }
+
   async function handleReportSubmit() {
     if (!event || isReportSubmitting) {
       return
@@ -519,7 +607,6 @@ export function EventDetailPage() {
   const organizerInitials = event.organizer
     ? getOrganizerInitials(event.organizer.fullName)
     : 'EV'
-  const statusValue = normalizeStatusValue(event.status)
 
   return (
     <DetailSection>
@@ -562,16 +649,6 @@ export function EventDetailPage() {
                 </DetailInfoValue>
               </DetailInfoItem>
 
-              <DetailInfoItem>
-                <DetailInfoLabel>Statut</DetailInfoLabel>
-                <DetailInfoSelect defaultValue={statusValue} disabled aria-label="Statut de l’évènement">
-                  {eventStatusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </DetailInfoSelect>
-              </DetailInfoItem>
             </DetailInfoGrid>
           </DetailHeroMeta>
         </DetailHeroContent>
@@ -689,6 +766,72 @@ export function EventDetailPage() {
                 </DetailEmptyText>
               )}
             </DetailMapCard>
+
+            <DetailShareArea>
+              <DetailShareHeading>
+                <DetailShareTitle>Partager cet évènement</DetailShareTitle>
+                <DetailShareDescription>
+                  Envoie la fiche complète de l’évènement.
+                </DetailShareDescription>
+              </DetailShareHeading>
+
+              <DetailShareToggle
+                type="button"
+                aria-expanded={isShareOpen}
+                aria-controls="event-share-menu"
+                onClick={() => setIsShareOpen((current) => !current)}
+              >
+                <FaShareNodes aria-hidden="true" />
+                Partager
+              </DetailShareToggle>
+
+              {isShareOpen ? (
+                <DetailShareMenu id="event-share-menu" aria-label="Partager cet évènement">
+                  <DetailShareOption
+                    $network="whatsapp"
+                    type="button"
+                    title="Partager sur WhatsApp"
+                    onClick={() => void handleSocialShare('whatsapp')}
+                  >
+                    <FaWhatsapp aria-hidden="true" />
+                    WhatsApp
+                  </DetailShareOption>
+                  <DetailShareOption
+                    $network="instagram"
+                    type="button"
+                    title="Copier le lien puis ouvrir Instagram"
+                    onClick={() => void handleSocialShare('instagram')}
+                  >
+                    <FaInstagram aria-hidden="true" />
+                    Instagram
+                  </DetailShareOption>
+                  <DetailShareOption
+                    $network="snapchat"
+                    type="button"
+                    title="Copier le lien puis ouvrir Snapchat"
+                    onClick={() => void handleSocialShare('snapchat')}
+                  >
+                    <FaSnapchat aria-hidden="true" />
+                    Snapchat
+                  </DetailShareOption>
+                  <DetailShareOption
+                    $network="copy"
+                    type="button"
+                    title="Copier le lien de l'évènement"
+                    onClick={() => void handleCopyEventLink()}
+                  >
+                    <FaLink aria-hidden="true" />
+                    Copier
+                  </DetailShareOption>
+                </DetailShareMenu>
+              ) : null}
+
+              {shareFeedback ? (
+                <DetailShareFeedback>
+                  <FaCopy aria-hidden="true" /> {shareFeedback}
+                </DetailShareFeedback>
+              ) : null}
+            </DetailShareArea>
           </DetailPanel>
         </DetailBody>
 
