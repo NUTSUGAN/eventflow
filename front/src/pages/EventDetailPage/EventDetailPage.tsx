@@ -660,7 +660,7 @@ export function EventDetailPage() {
             <div>
               <DetailPanelTitle>Vidéo souvenir</DetailPanelTitle>
               <DetailCaption>
-                Un’aperçu de cet évènement passé, partagé par l’organisateur.
+                Un aperçu de cet évènement passé, partagé par l’organisateur.
               </DetailCaption>
             </div>
           </DetailPanelHeader>
