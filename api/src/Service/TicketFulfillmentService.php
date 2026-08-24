@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\Payment;
 use App\Entity\Ticket;
 use App\Entity\User;
 use App\Repository\OrderRepository;
@@ -101,6 +102,8 @@ final class TicketFulfillmentService
 
     private function sendTicketConfirmationEmail(Order $order): void
     {
+        $isFreeOrder = Payment::PROVIDER_FREE === $order->getPayment()?->getProvider()
+            || (float) ($order->getTotalAmount() ?? '0.00') <= 0.0;
         $customerEmail = trim((string) $order->getClient()?->getEmail());
 
         $customerName = trim(sprintf(
@@ -141,13 +144,15 @@ final class TicketFulfillmentService
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".
-                                "Le paiement de ta commande %s a bien été confirmé.\n\n".
+                                "%s\n\n".
                                 "%s".
                                 "Billets generes :\n%s\n\n".
                                 "Retrouve tes billets et leurs QR codes ici :\n%s\n\n".
                                 "A tres vite sur EventFlow.\n",
                                 '' !== $customerName ? $customerName : 'EventFlow',
-                                (string) $order->getReference(),
+                                $isFreeOrder
+                                    ? sprintf('Ta commande gratuite %s est confirmée.', (string) $order->getReference())
+                                    : sprintf('Le paiement de ta commande %s a bien été confirmé.', (string) $order->getReference()),
                                 $eventLine,
                                 $linesBlock,
                                 $ticketListUrl,
@@ -191,23 +196,37 @@ final class TicketFulfillmentService
                 (new Email())
                     ->from('no-reply@eventflow.local')
                     ->to($organizerEmail)
-                    ->subject('Nouvelle commande payée sur ton évènement EventFlow')
+                    ->subject(
+                        $isFreeOrder
+                            ? 'Nouvelle commande gratuite sur ton évènement EventFlow'
+                            : 'Nouvelle commande payée sur ton évènement EventFlow'
+                    )
                     ->text(
                         sprintf(
                             "Bonjour %s,\n\n".
-                            "Une commande vient d’être payée sur ton évènement.\n\n".
+                            "%s\n\n".
+                            "%s\n".
                             "Commande : %s\n".
                             "Client : %s\n".
                             "Email client : %s\n".
                             "%s".
                             "Billets vendus :\n%s\n\n".
-                            "Paiement confirmé sur EventFlow.\n",
+                            "%s\n",
                             '' !== $organizerName ? $organizerName : 'Organisateur',
+                            $isFreeOrder
+                                ? 'Une commande gratuite vient d’être confirmée sur ton évènement.'
+                                : 'Une commande vient d’être payée sur ton évènement.',
+                            $isFreeOrder
+                                ? 'Commande gratuite confirmée.'
+                                : 'Paiement confirmé.',
                             (string) $order->getReference(),
                             '' !== $customerName ? $customerName : 'Client EventFlow',
                             trim((string) $order->getClient()?->getEmail()),
                             $eventLine,
                             $linesBlock,
+                            $isFreeOrder
+                                ? 'Billets gratuits confirmés sur EventFlow.'
+                                : 'Paiement confirmé sur EventFlow.',
                         )
                     )
             );

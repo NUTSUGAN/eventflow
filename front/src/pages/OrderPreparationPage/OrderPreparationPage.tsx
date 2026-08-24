@@ -66,6 +66,18 @@ function formatOrderStatusLabel(status: string): string {
   }
 }
 
+function formatPaymentLabel(order: PreparedOrder): string {
+  if (order.payment?.provider === 'free') {
+    return 'Gratuit - confirmé'
+  }
+
+  if (order.payment?.provider && order.payment?.status) {
+    return `${order.payment.provider} - ${order.payment.status}`
+  }
+
+  return order.payment?.status ?? 'À confirmer'
+}
+
 function resolveAvailableStock(ticketType: EventTicketType | null): number {
   if (!ticketType) {
     return 0
@@ -235,6 +247,11 @@ export function OrderPreparationPage() {
       return
     }
 
+    if (preparedOrder.status === 'paid') {
+      navigate('/mes-billets')
+      return
+    }
+
     const checkoutUrl = new URL('/checkout', window.location.origin)
     checkoutUrl.searchParams.set('orderId', String(preparedOrder.id))
 
@@ -283,7 +300,7 @@ export function OrderPreparationPage() {
         <OrderPreparationEyebrow>Commande</OrderPreparationEyebrow>
         <OrderPreparationTitle>Préparation de commande</OrderPreparationTitle>
         <OrderPreparationText>
-          On prépare ici la commande avant paiement pour <strong>{event.title}</strong>.
+          On prépare ici la réservation pour <strong>{event.title}</strong>.
         </OrderPreparationText>
 
         {errorMessage ? <OrderPreparationError>{errorMessage}</OrderPreparationError> : null}
@@ -404,21 +421,29 @@ export function OrderPreparationPage() {
                       {formatCurrency(preparedOrder.total)}
                     </OrderPreparationValue>
                   </OrderPreparationListRow>
+                  {preparedOrder.payment ? (
+                    <OrderPreparationListRow>
+                      <OrderPreparationLabel>Validation</OrderPreparationLabel>
+                      <OrderPreparationValue>{formatPaymentLabel(preparedOrder)}</OrderPreparationValue>
+                    </OrderPreparationListRow>
+                  ) : null}
                 </OrderPreparationList>
                 <OrderPreparationHint>
-                  Cette commande est prête. On peut maintenant ouvrir Stripe pour finaliser le paiement.
+                  {preparedOrder.status === 'paid'
+                    ? 'Ta place est réservée. Le billet est déjà disponible dans Mes billets.'
+                    : 'Cette commande est prête. On peut maintenant ouvrir Stripe pour finaliser le paiement.'}
                 </OrderPreparationHint>
                 <OrderPreparationCheckoutButton
                   type="button"
                   onClick={handleContinueToPayment}
                 >
-                  Continuer vers le paiement
+                  {preparedOrder.status === 'paid' ? 'Voir mes billets' : 'Continuer vers le paiement'}
                 </OrderPreparationCheckoutButton>
               </>
             ) : (
               <OrderPreparationHint>
-                Le backend calculera le total final, vérifiera le stock disponible et créera
-                la commande avant paiement.
+                Le backend calculera le total final, vérifiera le stock disponible et confirmera
+                directement les billets gratuits.
               </OrderPreparationHint>
             )}
           </OrderPreparationCard>

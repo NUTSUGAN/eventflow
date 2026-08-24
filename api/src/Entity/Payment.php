@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Payment
 {
     public const PROVIDER_STRIPE = 'stripe';
+    public const PROVIDER_FREE = 'free';
     public const STATUS_PAID = 'paid';
 
     #[ORM\Id]

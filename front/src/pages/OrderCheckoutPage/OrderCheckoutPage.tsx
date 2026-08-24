@@ -51,6 +51,18 @@ function formatOrderStatusLabel(status: string): string {
   }
 }
 
+function formatPaymentLabel(order: PreparedOrder): string {
+  if (order.payment?.provider === 'free') {
+    return 'Gratuit - confirmé'
+  }
+
+  if (order.payment?.provider && order.payment?.status) {
+    return `${order.payment.provider} - ${order.payment.status}`
+  }
+
+  return order.payment?.status ?? 'inconnu'
+}
+
 function extractApiErrorMessage(error: unknown, fallback: string): string {
   if (
     typeof error === 'object' &&
@@ -252,35 +264,40 @@ export function OrderCheckoutPage() {
   }
 
   const paymentAlreadyCompleted = order.status === 'paid'
+  const isFreeOrder = order.payment?.provider === 'free' || order.total <= 0
+  const checkoutTitle = paymentAlreadyCompleted
+    ? isFreeOrder
+      ? 'Réservation confirmée'
+      : 'Paiement confirmé'
+    : isSuccessReturn
+      ? 'Confirmation en cours'
+      : isCancelReturn
+        ? 'Paiement interrompu'
+        : 'Finaliser le paiement'
+  const checkoutIntro = paymentAlreadyCompleted
+    ? isFreeOrder
+      ? `La commande gratuite ${order.reference} est confirmée. Ta place est réservée.`
+      : `Le paiement Stripe de la commande ${order.reference} a bien été confirmé.`
+    : isSuccessReturn
+      ? `Stripe a bien renvoyé le navigateur, mais la commande ${order.reference} attend encore sa confirmation finale.`
+      : isCancelReturn
+        ? `Tu peux relancer le paiement Stripe pour la commande ${order.reference} quand tu veux.`
+        : `La commande ${order.reference} est prête. On peut maintenant la rediriger vers Stripe pour payer les billets.`
 
   return (
     <OrderPreparationSection>
       <OrderPreparationHero>
         <OrderPreparationEyebrow>Paiement</OrderPreparationEyebrow>
-        <OrderPreparationTitle>
-          {isSuccessReturn
-            ? paymentAlreadyCompleted
-              ? 'Paiement confirmé'
-              : 'Confirmation en cours'
-            : isCancelReturn
-              ? 'Paiement interrompu'
-              : 'Finaliser le paiement'}
-        </OrderPreparationTitle>
-        <OrderPreparationText>
-          {isSuccessReturn
-            ? paymentAlreadyCompleted
-              ? `Le paiement Stripe de la commande ${order.reference} a bien été confirmé.`
-              : `Stripe a bien renvoyé le navigateur, mais la commande ${order.reference} attend encore sa confirmation finale.`
-            : isCancelReturn
-              ? `Tu peux relancer le paiement Stripe pour la commande ${order.reference} quand tu veux.`
-              : `La commande ${order.reference} est prête. On peut maintenant la rediriger vers Stripe pour payer les billets.`}
-        </OrderPreparationText>
+        <OrderPreparationTitle>{checkoutTitle}</OrderPreparationTitle>
+        <OrderPreparationText>{checkoutIntro}</OrderPreparationText>
 
         {errorMessage ? <OrderPreparationError>{errorMessage}</OrderPreparationError> : null}
 
-        {isSuccessReturn && paymentAlreadyCompleted ? (
+        {paymentAlreadyCompleted ? (
           <OrderPreparationSuccess>
-            Paiement reçu. Le statut de la commande est maintenant à jour.
+            {isFreeOrder
+              ? 'Billet confirmé. Aucun paiement Stripe n’est nécessaire.'
+              : 'Paiement reçu. Le statut de la commande est maintenant à jour.'}
           </OrderPreparationSuccess>
         ) : null}
 
@@ -290,7 +307,7 @@ export function OrderCheckoutPage() {
           </OrderPreparationHint>
         ) : null}
 
-        {!isSuccessReturn && !isCancelReturn ? (
+        {!paymentAlreadyCompleted && !isSuccessReturn && !isCancelReturn ? (
           <OrderPreparationSuccess>
             Le stock reste non deduit tant que Stripe na pas confirmé le paiement.
           </OrderPreparationSuccess>
@@ -322,11 +339,7 @@ export function OrderCheckoutPage() {
             {order.payment ? (
               <OrderPreparationListRow>
                 <OrderPreparationLabel>Paiement</OrderPreparationLabel>
-                <OrderPreparationValue>
-                  {order.payment.provider
-                    ? `${order.payment.provider} - ${order.payment.status ?? 'inconnu'}`
-                    : order.payment.status ?? 'inconnu'}
-                </OrderPreparationValue>
+                <OrderPreparationValue>{formatPaymentLabel(order)}</OrderPreparationValue>
               </OrderPreparationListRow>
             ) : null}
           </OrderPreparationList>
@@ -340,7 +353,9 @@ export function OrderCheckoutPage() {
 
           {paymentAlreadyCompleted ? (
             <OrderPreparationHint>
-              Tu peux maintenant revenir à l’évènement ou poursuivre ailleurs dans EventFlow.
+              {isFreeOrder
+                ? 'Tu peux maintenant retrouver ton billet et son QR code.'
+                : 'Tu peux maintenant revenir à l’évènement ou poursuivre ailleurs dans EventFlow.'}
             </OrderPreparationHint>
           ) : order.canStartCheckout ? (
             <OrderPreparationHint>

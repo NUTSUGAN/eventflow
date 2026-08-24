@@ -12,6 +12,7 @@ use App\Repository\OrderItemRepository;
 use App\Repository\OrderRepository;
 use App\Repository\TicketTypeRepository;
 use App\Service\StripePaymentService;
+use App\Service\TicketFulfillmentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Exception\ApiErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +33,7 @@ final class OrderPreparationController extends AbstractController
         OrderItemRepository $orderItemRepository,
         EntityManagerInterface $entityManager,
         StripePaymentService $stripePaymentService,
+        TicketFulfillmentService $ticketFulfillmentService,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -193,13 +195,36 @@ final class OrderPreparationController extends AbstractController
             $orderItem->setQuantity($lineItem['quantity']);
             $orderItem->setUnitPriceAtPurchase($lineItem['unitPrice']);
 
+            $order->addOrderItem($orderItem);
             $entityManager->persist($orderItem);
+        }
+
+        if (0 === $totalAmountInCents) {
+            $order->setStatus(Order::STATUS_PAID);
+            $payment = (new Payment())
+                ->setCustomerOrder($order)
+                ->setProvider(Payment::PROVIDER_FREE)
+                ->setProviderPaymentId(sprintf('free-%s', strtolower((string) $order->getReference())))
+                ->setAmount('0.00')
+                ->setCurrency(Order::DEFAULT_CURRENCY)
+                ->setStatus(Payment::STATUS_PAID)
+                ->setPaidAt($now)
+            ;
+
+            $order->setPayment($payment);
+            $entityManager->persist($payment);
         }
 
         $entityManager->flush();
 
+        if (Order::STATUS_PAID === $order->getStatus()) {
+            $ticketFulfillmentService->fulfillPaidOrder($order);
+        }
+
         return $this->json([
-            'message' => 'Commande preparee avec succès.',
+            'message' => Order::STATUS_PAID === $order->getStatus()
+                ? 'Commande gratuite confirmée. Tes billets sont disponibles.'
+                : 'Commande preparee avec succès.',
             'order' => $this->serializeOrder($order, $stripePaymentService),
         ], Response::HTTP_CREATED);
     }

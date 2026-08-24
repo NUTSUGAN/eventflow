@@ -83,6 +83,10 @@ function getPaymentLabel(ticket: TicketRecord): string {
   const provider = ticket.order.payment?.provider
   const status = ticket.order.payment?.status
 
+  if (provider === 'free') {
+    return 'Gratuit - confirmé'
+  }
+
   if (!provider && !status) {
     return 'Paiement confirmé'
   }
