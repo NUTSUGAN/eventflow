@@ -39,7 +39,15 @@ export function formatCurrencyAmount(value: string | number | undefined): string
 }
 
 export function formatStatusLabel(status: string): string {
-  return status === 'published' ? 'Public' : 'Brouillon'
+  if (status === 'published') {
+    return 'Public'
+  }
+
+  if (status === 'suspended') {
+    return 'Suspendu'
+  }
+
+  return 'Brouillon'
 }
 
 export function resolveMediaUrl(path: string | null): string | undefined {

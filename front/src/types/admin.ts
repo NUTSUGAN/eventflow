@@ -1,4 +1,4 @@
-export type AdminEventStatus = 'draft' | 'published' | 'cancelled'
+export type AdminEventStatus = 'draft' | 'published' | 'cancelled' | 'suspended'
 
 export type AdminEventSummary = {
   id: number

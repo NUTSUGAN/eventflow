@@ -284,7 +284,9 @@ export function OrganizerEventDetailPage() {
   const [currentDateTime] = useState(() => formatDateTimeLocal(new Date()))
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [event, setEvent] = useState<OrganizerEventSummary | null>(null)
-  const canEditOrganizerEvent = canEditOrganizerResource(currentUser, event)
+  const isSuspendedEvent = event?.status === 'suspended'
+  const canEditOrganizerEvent =
+    canEditOrganizerResource(currentUser, event) && !isSuspendedEvent
   const isAdminReadOnly = isAdminUser(currentUser) && !canEditOrganizerEvent
   const [options, setOptions] = useState<OrganizerEventFormOptions>(emptyOptions)
   const [ticketTypes, setTicketTypes] = useState<OrganizerTicketType[]>([])
@@ -941,6 +943,11 @@ export function OrganizerEventDetailPage() {
               {ADMIN_ORGANIZER_READ_ONLY_MESSAGE}
             </OrganizerEventDetailState>
           ) : null}
+          {isSuspendedEvent ? (
+            <OrganizerEventDetailState>
+              Cet évènement est suspendu par l’administration EventFlow. Il ne peut pas être remis en ligne depuis l’espace organisateur.
+            </OrganizerEventDetailState>
+          ) : null}
 
           <OrganizerEventDetailForm onSubmit={handleEventSubmit}>
             <fieldset
@@ -1288,11 +1295,16 @@ export function OrganizerEventDetailPage() {
                   }))
                 }
               >
+                {eventForm.status === 'suspended' ? (
+                  <option value="suspended">Suspendu</option>
+                ) : null}
                 <option value="draft">Brouillon</option>
                 <option value="published">Public</option>
               </OrganizerEventDetailSelect>
               <OrganizerEventDetailHint>
-                Garde le statut en brouillon tant que la fiche ou la billetterie ne sont pas prêtes.
+                {isSuspendedEvent
+                  ? 'Seule l’administration EventFlow peut réactiver cet évènement.'
+                  : 'Garde le statut en brouillon tant que la fiche ou la billetterie ne sont pas prêtes.'}
               </OrganizerEventDetailHint>
             </OrganizerEventDetailField>
 

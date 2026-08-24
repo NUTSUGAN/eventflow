@@ -23,7 +23,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN_SUPPORT')]
 final class AdminEventController extends AbstractController
 {
-    private const ALLOWED_STATUSES = ['draft', 'published', 'cancelled'];
+    private const ALLOWED_STATUSES = ['draft', 'published', 'cancelled', 'suspended'];
 
     public function __construct(
         private readonly UploadedImageStorage $imageStorage,
@@ -96,7 +96,7 @@ final class AdminEventController extends AbstractController
 
         if (!in_array($status, self::ALLOWED_STATUSES, true)) {
             return $this->json([
-                'message' => 'Le statut doit être draft, published ou cancelled.'
+                'message' => 'Le statut doit être draft, published, cancelled ou suspended.'
             ], 400);
         }
 
@@ -217,7 +217,7 @@ final class AdminEventController extends AbstractController
         if (array_key_exists('status', $data)) {
             $status = strtolower(trim((string) $data['status']));
             if (!in_array($status, self::ALLOWED_STATUSES, true)) {
-                return $this->json(['message' => 'Le statut doit être draft, published ou cancelled.'], 400);
+                return $this->json(['message' => 'Le statut doit être draft, published, cancelled ou suspended.'], 400);
             }
             $event->setStatus($status);
         }

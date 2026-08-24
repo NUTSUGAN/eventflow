@@ -194,11 +194,15 @@ final class OrganizerEventController extends AbstractController
                         $events,
                         static fn (Event $event): bool => 'cancelled' === $event->getStatus(),
                     )),
+                    'suspended' => count(array_filter(
+                        $events,
+                        static fn (Event $event): bool => 'suspended' === $event->getStatus(),
+                    )),
                     'upcoming' => count(array_filter(
                         $events,
                         static fn (Event $event): bool => $event->getStartDatetime() instanceof \DateTimeImmutable
                             && $event->getStartDatetime() >= $now
-                            && 'cancelled' !== $event->getStatus(),
+                            && !in_array($event->getStatus(), ['cancelled', 'suspended'], true),
                     )),
                 ],
                 'staff' => [
@@ -463,6 +467,12 @@ final class OrganizerEventController extends AbstractController
             return $response;
         }
 
+        if ('suspended' === $event->getStatus()) {
+            return $this->json([
+                'message' => 'Cet évènement est suspendu par l’administration. Contacte EventFlow pour le réactiver.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         $data = $this->getRequestData($request);
 
         $categoryId = $data['categoryId'] ?? null;
@@ -706,6 +716,12 @@ final class OrganizerEventController extends AbstractController
         ) {
             return $this->json([
                 'message' => 'Tu ne peux modifier que le statut de tes propres évènements.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        if ('suspended' === $event->getStatus()) {
+            return $this->json([
+                'message' => 'Cet évènement est suspendu par l’administration. Contacte EventFlow pour le réactiver.',
             ], Response::HTTP_FORBIDDEN);
         }
 

@@ -105,6 +105,7 @@ export type OrganizerDashboardStats = {
     published: number
     draft: number
     cancelled: number
+    suspended: number
     upcoming: number
   }
   staff: {

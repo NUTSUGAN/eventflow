@@ -266,6 +266,7 @@ export const OrganizerEventsPageSelect = styled.select`
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   color: #fff3e5;
+  color-scheme: dark;
   font-size: 0.94rem;
   font-weight: 600;
 
@@ -275,7 +276,8 @@ export const OrganizerEventsPageSelect = styled.select`
   }
 
   option {
-    color: #1a1512;
+    background: #2b211b;
+    color: #fffaf4;
   }
 `
 

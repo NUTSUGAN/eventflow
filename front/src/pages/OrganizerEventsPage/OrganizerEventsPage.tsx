@@ -46,7 +46,7 @@ import {
   OrganizerEventsPageToolbarTop,
 } from './organizerEventsPageElements'
 
-type OrganizerEventsFilter = 'all' | 'published' | 'draft' | 'past'
+type OrganizerEventsFilter = 'all' | 'published' | 'draft' | 'suspended' | 'past'
 
 function formatOrganizerEventDate(date: string | null): string {
   if (!date) {
@@ -60,7 +60,15 @@ function formatOrganizerEventDate(date: string | null): string {
 }
 
 function formatStatusLabel(status: OrganizerEventStatus | string): string {
-  return status === 'published' ? 'Public' : 'Brouillon'
+  if (status === 'published') {
+    return 'Public'
+  }
+
+  if (status === 'suspended') {
+    return 'Suspendu'
+  }
+
+  return 'Brouillon'
 }
 
 function isPastEvent(event: OrganizerEventSummary): boolean {
@@ -280,6 +288,13 @@ export function OrganizerEventsPage() {
             </OrganizerEventsPageFilter>
             <OrganizerEventsPageFilter
               type="button"
+              $active={activeFilter === 'suspended'}
+              onClick={() => setActiveFilter('suspended')}
+            >
+              Suspendu
+            </OrganizerEventsPageFilter>
+            <OrganizerEventsPageFilter
+              type="button"
               $active={activeFilter === 'past'}
               onClick={() => setActiveFilter('past')}
             >
@@ -318,8 +333,11 @@ export function OrganizerEventsPage() {
                               changeEvent.target.value as OrganizerEventStatus,
                             )
                           }
-                          disabled={updatingEventId === event.id}
+                          disabled={updatingEventId === event.id || event.status === 'suspended'}
                         >
+                          {event.status === 'suspended' ? (
+                            <option value="suspended">Suspendu</option>
+                          ) : null}
                           <option value="draft">Brouillon</option>
                           <option value="published">Public</option>
                         </OrganizerEventsPageSelect>
@@ -347,6 +365,8 @@ export function OrganizerEventsPage() {
                       <OrganizerEventsPageMeta>
                         {isPastEvent(event)
                           ? 'évènement déjà passé'
+                          : event.status === 'suspended'
+                            ? 'Suspendu par l’administration'
                           : event.status === 'published'
                             ? 'Visible dans l’espace public'
                             : 'Encore en brouillon'}

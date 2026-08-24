@@ -3,10 +3,12 @@ import { FaChevronDown } from 'react-icons/fa6'
 import { useNavigate } from 'react-router-dom'
 import {
   createAdminCategory,
+  deleteAdminCategory,
   getAdminCategories,
   getAdminEvents,
   getAdminStats,
   getAdminUsers,
+  updateAdminCategory,
   updateAdminEventStatus,
 } from '../../api/admin'
 import { getCurrentUser } from '../../api/auth'
@@ -30,6 +32,23 @@ import type {
   AdminUserSummary,
 } from '../../types/admin'
 import type { AdminOrganizerApplication } from '../../types/organizerApplication'
+import {
+  AccountDangerPrimaryButton,
+  AccountDecisionCard,
+  AccountDecisionGrid,
+  AccountDecisionList,
+  AccountDecisionTitle,
+  AccountModalActions,
+  AccountModalBody,
+  AccountModalCard,
+  AccountModalEyebrow,
+  AccountModalHeader,
+  AccountModalOverlay,
+  AccountModalText,
+  AccountModalTitle,
+  AccountModalWarning,
+  AccountSecondaryButton,
+} from '../AccountPage/accountPageElements'
 import {
   AdminDashboardActions,
   AdminDashboardBadge,
@@ -73,6 +92,17 @@ type CategoryFormState = {
   name: string
   description: string
 }
+
+type AdminConfirmationRequest =
+  | {
+      kind: 'event-status'
+      event: AdminEventSummary
+      status: Extract<AdminEventStatus, 'cancelled' | 'suspended'>
+    }
+  | {
+      kind: 'category-delete'
+      category: AdminCategory
+    }
 
 type DashboardAction = {
   label: string
@@ -120,6 +150,8 @@ function getEventStatusLabel(status: string | null): string {
       return 'Public'
     case 'cancelled':
       return 'Annulé'
+    case 'suspended':
+      return 'Suspendu'
     default:
       return 'Brouillon'
   }
@@ -133,6 +165,8 @@ function getEventStatusTone(
       return 'success'
     case 'cancelled':
       return 'danger'
+    case 'suspended':
+      return 'warning'
     case 'draft':
       return 'warning'
     default:
@@ -177,9 +211,15 @@ export function AdminDashboardPage() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [categoryForm, setCategoryForm] =
     useState<CategoryFormState>(emptyCategoryForm)
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
+  const [categoryEditForm, setCategoryEditForm] =
+    useState<CategoryFormState>(emptyCategoryForm)
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingCategory, setIsSavingCategory] = useState(false)
+  const [savingCategoryId, setSavingCategoryId] = useState<number | null>(null)
   const [updatingEventId, setUpdatingEventId] = useState<number | null>(null)
+  const [pendingConfirmation, setPendingConfirmation] =
+    useState<AdminConfirmationRequest | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -355,6 +395,10 @@ export function AdminDashboardPage() {
             return false
           }
 
+          if (event.status === 'suspended') {
+            return false
+          }
+
           return new Date(event.startDatetime).getTime() >= nowTimestamp
         })
         .slice(0, 6),
@@ -369,7 +413,7 @@ export function AdminDashboardPage() {
     resetKey: String(categories.length),
   })
 
-  async function handleEventStatusUpdate(
+  function handleEventStatusUpdate(
     event: AdminEventSummary,
     status: AdminEventStatus,
   ) {
@@ -377,6 +421,22 @@ export function AdminDashboardPage() {
       return
     }
 
+    if (status === 'cancelled' || status === 'suspended') {
+      setPendingConfirmation({
+        kind: 'event-status',
+        event,
+        status,
+      })
+      return
+    }
+
+    void applyEventStatusUpdate(event, status)
+  }
+
+  async function applyEventStatusUpdate(
+    event: AdminEventSummary,
+    status: AdminEventStatus,
+  ) {
     setUpdatingEventId(event.id)
     setStatusMessage(null)
     setErrorMessage(null)
@@ -431,6 +491,113 @@ export function AdminDashboardPage() {
     } finally {
       setIsSavingCategory(false)
     }
+  }
+
+  function handleCategoryEditStart(category: AdminCategory) {
+    setEditingCategoryId(category.id)
+    setCategoryEditForm({
+      name: category.name,
+      description: category.description ?? '',
+    })
+    setStatusMessage(null)
+    setErrorMessage(null)
+  }
+
+  async function handleCategoryUpdate(categoryId: number) {
+    if (savingCategoryId !== null) {
+      return
+    }
+
+    if (categoryEditForm.name.trim() === '' || categoryEditForm.description.trim() === '') {
+      setErrorMessage('Renseigne le nom et la description de la catégorie.')
+      return
+    }
+
+    setSavingCategoryId(categoryId)
+    setStatusMessage(null)
+    setErrorMessage(null)
+
+    try {
+      const response = await updateAdminCategory(categoryId, {
+        name: categoryEditForm.name.trim(),
+        description: categoryEditForm.description.trim(),
+      })
+
+      setCategories((current) =>
+        current.map((category) =>
+          category.id === categoryId ? response.category : category,
+        ),
+      )
+      setEditingCategoryId(null)
+      setCategoryEditForm(emptyCategoryForm)
+      setStatusMessage(response.message)
+    } catch (error) {
+      setErrorMessage(
+        readApiMessage(error, 'Impossible de modifier cette catégorie.'),
+      )
+    } finally {
+      setSavingCategoryId(null)
+    }
+  }
+
+  function handleCategoryDelete(category: AdminCategory) {
+    if (savingCategoryId !== null) {
+      return
+    }
+
+    setPendingConfirmation({
+      kind: 'category-delete',
+      category,
+    })
+  }
+
+  async function applyCategoryDelete(category: AdminCategory) {
+    setSavingCategoryId(category.id)
+    setStatusMessage(null)
+    setErrorMessage(null)
+
+    try {
+      const response = await deleteAdminCategory(category.id)
+
+      setCategories((current) =>
+        current.filter((currentCategory) => currentCategory.id !== category.id),
+      )
+      if (editingCategoryId === category.id) {
+        setEditingCategoryId(null)
+        setCategoryEditForm(emptyCategoryForm)
+      }
+      setStatusMessage(response.message)
+    } catch (error) {
+      setErrorMessage(
+        readApiMessage(error, 'Impossible de supprimer cette catégorie.'),
+      )
+    } finally {
+      setSavingCategoryId(null)
+    }
+  }
+
+  function closeAdminConfirmation() {
+    if (updatingEventId !== null || savingCategoryId !== null) {
+      return
+    }
+
+    setPendingConfirmation(null)
+  }
+
+  function confirmAdminAction() {
+    if (!pendingConfirmation) {
+      return
+    }
+
+    const confirmation = pendingConfirmation
+    setPendingConfirmation(null)
+
+    if (confirmation.kind === 'event-status') {
+      void applyEventStatusUpdate(confirmation.event, confirmation.status)
+      return
+    }
+
+    void applyCategoryDelete(confirmation.category)
   }
 
   return (
@@ -738,18 +905,91 @@ export function AdminDashboardPage() {
             </AdminDashboardPrimaryButton>
           </AdminDashboardForm>
           <AdminDashboardList>
-            {categoryPagination.paginatedItems.map((category) => (
-              <AdminDashboardRow key={category.id}>
-                <AdminDashboardRowMain>
-                  <AdminDashboardRowTitle>{category.name}</AdminDashboardRowTitle>
-                  <AdminDashboardRowText>
-                    {category.description ?? 'Aucune description.'}
-                  </AdminDashboardRowText>
-                </AdminDashboardRowMain>
-                <AdminDashboardBadge>#{category.id}</AdminDashboardBadge>
-                <span />
-              </AdminDashboardRow>
-            ))}
+            {categoryPagination.paginatedItems.map((category) => {
+              const isEditing = editingCategoryId === category.id
+
+              return (
+                <AdminDashboardRow key={category.id}>
+                  <AdminDashboardRowMain>
+                    {isEditing ? (
+                      <>
+                        <AdminDashboardField>
+                          <AdminDashboardLabel>Nom</AdminDashboardLabel>
+                          <AdminDashboardInput
+                            value={categoryEditForm.name}
+                            onChange={(event) =>
+                              setCategoryEditForm((current) => ({
+                                ...current,
+                                name: event.target.value,
+                              }))
+                            }
+                          />
+                        </AdminDashboardField>
+                        <AdminDashboardField>
+                          <AdminDashboardLabel>Description</AdminDashboardLabel>
+                          <AdminDashboardInput
+                            value={categoryEditForm.description}
+                            onChange={(event) =>
+                              setCategoryEditForm((current) => ({
+                                ...current,
+                                description: event.target.value,
+                              }))
+                            }
+                          />
+                        </AdminDashboardField>
+                      </>
+                    ) : (
+                      <>
+                        <AdminDashboardRowTitle>{category.name}</AdminDashboardRowTitle>
+                        <AdminDashboardRowText>
+                          {category.description ?? 'Aucune description.'}
+                        </AdminDashboardRowText>
+                      </>
+                    )}
+                  </AdminDashboardRowMain>
+                  <AdminDashboardBadge>#{category.id}</AdminDashboardBadge>
+                  <AdminDashboardActions>
+                    {isEditing ? (
+                      <>
+                        <AdminDashboardPrimaryButton
+                          type="button"
+                          disabled={savingCategoryId === category.id}
+                          onClick={() => void handleCategoryUpdate(category.id)}
+                        >
+                          {savingCategoryId === category.id ? 'Enregistrement...' : 'Enregistrer'}
+                        </AdminDashboardPrimaryButton>
+                        <AdminDashboardSecondaryButton
+                          type="button"
+                          disabled={savingCategoryId === category.id}
+                          onClick={() => {
+                            setEditingCategoryId(null)
+                            setCategoryEditForm(emptyCategoryForm)
+                          }}
+                        >
+                          Annuler
+                        </AdminDashboardSecondaryButton>
+                      </>
+                    ) : (
+                      <>
+                        <AdminDashboardSecondaryButton
+                          type="button"
+                          onClick={() => handleCategoryEditStart(category)}
+                        >
+                          Modifier
+                        </AdminDashboardSecondaryButton>
+                        <AdminDashboardSecondaryButton
+                          type="button"
+                          disabled={savingCategoryId === category.id}
+                          onClick={() => void handleCategoryDelete(category)}
+                        >
+                          {savingCategoryId === category.id ? 'Suppression...' : 'Supprimer'}
+                        </AdminDashboardSecondaryButton>
+                      </>
+                    )}
+                  </AdminDashboardActions>
+                </AdminDashboardRow>
+              )
+            })}
           </AdminDashboardList>
           <AdminPagination
             page={categoryPagination.page}
@@ -761,8 +1001,148 @@ export function AdminDashboardPage() {
           />
         </AdminDashboardPanel>
       ) : null}
+      {renderAdminConfirmationModal()}
     </AdminDashboardSection>
   )
+
+  function renderAdminConfirmationModal() {
+    if (!pendingConfirmation) {
+      return null
+    }
+
+    const isEventStatusConfirmation = pendingConfirmation.kind === 'event-status'
+    const isSuspension =
+      isEventStatusConfirmation && pendingConfirmation.status === 'suspended'
+    const isCancellation =
+      isEventStatusConfirmation && pendingConfirmation.status === 'cancelled'
+    const title = isSuspension
+      ? 'Confirmer la suspension'
+      : isCancellation
+        ? 'Confirmer l’annulation'
+        : 'Confirmer la suppression'
+    const targetName = isEventStatusConfirmation
+      ? pendingConfirmation.event.title
+      : pendingConfirmation.category.name
+    const description = isSuspension
+      ? `Tu t’apprêtes à suspendre "${targetName}". L’organisateur ne pourra plus remettre cet évènement en ligne sans action admin.`
+      : isCancellation
+        ? `Tu t’apprêtes à annuler "${targetName}". L’évènement ne sera plus affiché comme actif.`
+        : `Tu t’apprêtes à supprimer la catégorie "${targetName}". La suppression sera refusée si elle est déjà liée à des évènements.`
+    const warning = isSuspension
+      ? 'La suspension sert à bloquer une fiche problématique sans supprimer son historique.'
+      : isCancellation
+        ? 'L’annulation retire l’évènement des parcours actifs, mais conserve sa fiche admin et son historique.'
+        : 'Une catégorie utilisée par des évènements ne sera pas supprimée : EventFlow protège les fiches déjà créées.'
+    const confirmLabel = isSuspension
+      ? 'Confirmer la suspension'
+      : isCancellation
+        ? 'Confirmer l’annulation'
+        : 'Confirmer la suppression'
+
+    return (
+      <AccountModalOverlay>
+        <AccountModalCard
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-confirmation-title"
+        >
+          <AccountModalHeader>
+            <AccountModalEyebrow>
+              {isSuspension ? 'Modération admin' : 'Action sensible'}
+            </AccountModalEyebrow>
+            <AccountModalTitle id="admin-confirmation-title">{title}</AccountModalTitle>
+            <AccountModalText>{description}</AccountModalText>
+          </AccountModalHeader>
+
+          <AccountModalBody>
+            <AccountDecisionGrid>
+              <AccountDecisionCard $tone={isSuspension ? 'warning' : 'danger'}>
+                <AccountDecisionTitle>
+                  {isSuspension ? 'Bloqué' : isCancellation ? 'Annulé' : 'Supprimé'}
+                </AccountDecisionTitle>
+                <AccountDecisionList>
+                  {isSuspension ? (
+                    <>
+                      <li>Publication organisateur</li>
+                      <li>Remise en ligne autonome</li>
+                      <li>Affichage public</li>
+                    </>
+                  ) : isCancellation ? (
+                    <>
+                      <li>Statut actif</li>
+                      <li>Affichage prochains évènements</li>
+                      <li>Réservations publiques</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>Nom de catégorie</li>
+                      <li>Description de catégorie</li>
+                      <li>Entrée dans la liste admin</li>
+                    </>
+                  )}
+                </AccountDecisionList>
+              </AccountDecisionCard>
+
+              <AccountDecisionCard $tone="warning">
+                <AccountDecisionTitle>Contrôlé</AccountDecisionTitle>
+                <AccountDecisionList>
+                  {isSuspension ? (
+                    <>
+                      <li>Réactivation admin uniquement</li>
+                      <li>Historique conservé</li>
+                      <li>Fiche visible en console</li>
+                    </>
+                  ) : isCancellation ? (
+                    <>
+                      <li>Historique conservé</li>
+                      <li>Fiche visible en console</li>
+                      <li>Réouverture possible par admin</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>Blocage si déjà utilisée</li>
+                      <li>Protection des évènements liés</li>
+                      <li>Retour d’erreur explicite</li>
+                    </>
+                  )}
+                </AccountDecisionList>
+              </AccountDecisionCard>
+
+              <AccountDecisionCard>
+                <AccountDecisionTitle>Conservé</AccountDecisionTitle>
+                <AccountDecisionList>
+                  {isEventStatusConfirmation ? (
+                    <>
+                      <li>Organisateur</li>
+                      <li>Billets et commandes</li>
+                      <li>Logs admin</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>Autres catégories</li>
+                      <li>Evènements existants</li>
+                      <li>Console admin</li>
+                    </>
+                  )}
+                </AccountDecisionList>
+              </AccountDecisionCard>
+            </AccountDecisionGrid>
+
+            <AccountModalWarning>{warning}</AccountModalWarning>
+
+            <AccountModalActions>
+              <AccountSecondaryButton type="button" onClick={closeAdminConfirmation}>
+                Retour
+              </AccountSecondaryButton>
+              <AccountDangerPrimaryButton type="button" onClick={confirmAdminAction}>
+                {confirmLabel}
+              </AccountDangerPrimaryButton>
+            </AccountModalActions>
+          </AccountModalBody>
+        </AccountModalCard>
+      </AccountModalOverlay>
+    )
+  }
 
   function renderEventList(
     renderedEvents: AdminEventSummary[],
@@ -806,6 +1186,15 @@ export function AdminDashboardPage() {
                   onClick={() => void handleEventStatusUpdate(event, 'published')}
                 >
                   Publier
+                </AdminDashboardSecondaryButton>
+              ) : null}
+              {event.status !== 'suspended' && event.status !== 'cancelled' ? (
+                <AdminDashboardSecondaryButton
+                  type="button"
+                  disabled={updatingEventId === event.id}
+                  onClick={() => void handleEventStatusUpdate(event, 'suspended')}
+                >
+                  Suspendre
                 </AdminDashboardSecondaryButton>
               ) : null}
               {event.status !== 'cancelled' ? (

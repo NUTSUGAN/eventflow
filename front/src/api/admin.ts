@@ -56,6 +56,26 @@ export async function createAdminCategory(
   return response.data
 }
 
+export async function updateAdminCategory(
+  categoryId: number,
+  payload: AdminCategoryPayload,
+): Promise<AdminCategoryResponse> {
+  const response = await apiClient.patch<AdminCategoryResponse>(
+    `/api/admin/categories/${categoryId}`,
+    payload,
+  )
+
+  return response.data
+}
+
+export async function deleteAdminCategory(categoryId: number): Promise<{ message: string }> {
+  const response = await apiClient.delete<{ message: string }>(
+    `/api/admin/categories/${categoryId}`,
+  )
+
+  return response.data
+}
+
 export async function getAdminStats(): Promise<AdminPlatformStats> {
   const response = await apiClient.get<AdminPlatformStats>('/api/admin/stats')
   return response.data
