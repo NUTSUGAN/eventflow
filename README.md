@@ -205,6 +205,52 @@ OK
 Les tests couvrent notamment des comportements lies aux utilisateurs, aux roles,
 au staff organisateur et a la gestion des mots de passe.
 
+## CI/CD GitHub Actions
+
+Deux workflows GitHub Actions sont fournis dans `.github/workflows`.
+
+### CI
+
+Le workflow `CI` se lance automatiquement sur :
+
+- push vers `develop` ou `main`
+- pull request vers `develop` ou `main`
+- lancement manuel depuis GitHub Actions
+
+Il verifie :
+
+- installation, lint et build du frontend React
+- installation Composer du backend Symfony
+- syntaxe PHP
+- fichiers YAML Symfony
+- container Symfony
+- tests PHPUnit
+- build Docker des images `api` et `front`
+
+### CD
+
+Le workflow `CD` se lance automatiquement quand un tag `v*` est pousse, par
+exemple `v1.0.0`. Il peut aussi etre lance manuellement depuis GitHub Actions.
+
+Il construit et publie les images Docker suivantes dans GitHub Container
+Registry :
+
+```text
+ghcr.io/<owner>/eventflow-api
+ghcr.io/<owner>/eventflow-front
+```
+
+Les tags publies sont :
+
+- le tag Git, par exemple `v1.0.0`
+- `latest` quand le workflow part d'un tag `v*`
+- un tag court base sur le commit
+- `manual-<numero>` pour un lancement manuel
+
+Ce CD correspond a une livraison Docker. Un deploiement automatique vers un VPS
+pourra etre ajoute ensuite avec des secrets GitHub comme `DEPLOY_HOST`,
+`DEPLOY_USER` et `DEPLOY_SSH_KEY`.
+
 ## Fonctionnalites principales realisees
 
 - Inscription, connexion, deconnexion et profil utilisateur.
