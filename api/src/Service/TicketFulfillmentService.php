@@ -11,6 +11,7 @@ use App\Repository\OrderRepository;
 use App\Repository\TicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
@@ -22,6 +23,8 @@ final class TicketFulfillmentService
         private readonly TicketRepository $ticketRepository,
         private readonly MailerInterface $mailer,
         private readonly LoggerInterface $logger,
+        #[Autowire('%env(string:MAILER_FROM_EMAIL)%')]
+        private readonly string $mailerFromEmail,
     ) {
     }
 
@@ -138,7 +141,7 @@ final class TicketFulfillmentService
             try {
                 $this->mailer->send(
                     (new Email())
-                        ->from('no-reply@eventflow.local')
+                        ->from($this->mailerFromEmail)
                         ->to($customerEmail)
                         ->subject('Tes billets EventFlow sont prêts')
                         ->text(
@@ -194,7 +197,7 @@ final class TicketFulfillmentService
         try {
             $this->mailer->send(
                 (new Email())
-                    ->from('no-reply@eventflow.local')
+                    ->from($this->mailerFromEmail)
                     ->to($organizerEmail)
                     ->subject(
                         $isFreeOrder

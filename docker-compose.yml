@@ -15,7 +15,6 @@ services:
       APP_ENV: dev
       APP_DEBUG: 0
       DATABASE_URL: "mysql://root:@host.docker.internal:3306/eventflow?serverVersion=10.4.32-MariaDB&charset=utf8mb4"
-      MAILER_DSN: "smtp://mailpit:1025"
 
 
   scheduler:
@@ -54,13 +53,6 @@ services:
       VITE_BACKEND_PUBLIC_URL: "http://localhost:8080"
     depends_on:
       - nginx
-
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: eventflow_mailpit
-    restart: unless-stopped
-    ports:
-      - "8025:8025"
 
 volumes:
   eventflow_vendor:

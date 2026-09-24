@@ -29,12 +29,12 @@ L'application se compose de plusieurs espaces :
 - Base de donnees : MySQL / MariaDB
 - ORM : Doctrine
 - Paiement : Stripe
-- Email local : Mailpit
+- Email : SMTP reel via Symfony Mailer
 - Scan QR : html5-qrcode et douchette clavier
 - Tests backend : PHPUnit
 - Qualite frontend : TypeScript, ESLint
 - Environnement local : Docker Compose pour le backend, Nginx, PHP-FPM,
-  Mailpit et le frontend React
+  scheduler et le frontend React
 
 ## Structure du projet
 
@@ -42,7 +42,7 @@ L'application se compose de plusieurs espaces :
 api/                 Application Symfony
 front/               Application React / Vite
 docker/              Configuration PHP-FPM et Nginx
-docker-compose.yml   Services locaux backend, nginx, frontend, scheduler et mailpit
+docker-compose.yml   Services locaux backend, nginx, frontend et scheduler
 ```
 
 ## Lancement local
@@ -71,12 +71,6 @@ Route de verification technique :
 
 ```text
 http://localhost:8080/api/health
-```
-
-Mailpit est accessible sur :
-
-```text
-http://localhost:8025
 ```
 
 La configuration Docker actuelle utilise une base MySQL / MariaDB locale
@@ -114,6 +108,8 @@ Variables importantes cote backend :
 ```text
 DATABASE_URL
 MAILER_DSN
+MAILER_FROM_EMAIL
+ORGANIZER_REVIEW_EMAIL
 FRONTEND_APP_URL
 GOOGLE_OAUTH_CLIENT_ID
 GOOGLE_OAUTH_CLIENT_SECRET
@@ -126,6 +122,35 @@ SUPABASE_URL
 SUPABASE_STORAGE_KEY
 SUPABASE_STORAGE_BUCKET
 ```
+
+Exemple SMTP reel a placer dans `api/.env.local` ou dans l'environnement du
+serveur :
+
+```dotenv
+MAILER_DSN=smtp://USER:PASSWORD@smtp.example.com:587?encryption=tls
+MAILER_FROM_EMAIL=no-reply@ton-domaine.fr
+ORGANIZER_REVIEW_EMAIL=contact@ton-domaine.fr
+```
+
+Pour Gmail, utiliser `smtp.gmail.com` et un mot de passe d'application Google.
+L'adresse email doit etre encodee dans l'URL (`@` devient `%40`) :
+
+```dotenv
+MAILER_DSN=smtp://ton.email%40gmail.com:MOT_DE_PASSE_APPLICATION@smtp.gmail.com:587?encryption=tls
+MAILER_FROM_EMAIL=ton.email@gmail.com
+ORGANIZER_REVIEW_EMAIL=ton.email@gmail.com
+```
+
+Pour Google Auth, remplacer les valeurs locales par le nouveau compte OAuth :
+
+```dotenv
+GOOGLE_OAUTH_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=xxx
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8080/api/auth/google/callback
+```
+
+Dans Google Cloud Console, l'URI de redirection autorisee doit correspondre
+exactement a `GOOGLE_OAUTH_REDIRECT_URI`.
 
 ## Commandes utiles backend
 
@@ -164,7 +189,6 @@ Services exposes :
 ```text
 Frontend React : http://localhost:5173
 Backend API    : http://localhost:8080
-Mailpit        : http://localhost:8025
 ```
 
 ## Cron et traitements automatiques

@@ -35,6 +35,7 @@ class OrganizerStaffServiceTest extends TestCase
             $this->entityManager,
             $this->mailer,
             $this->logger,
+            'no-reply@eventflow.test',
         );
     }
 

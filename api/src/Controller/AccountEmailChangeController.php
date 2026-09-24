@@ -6,6 +6,7 @@ use App\Entity\EmailChangeRequest;
 use App\Entity\User;
 use App\Repository\EmailChangeRequestRepository;
 use App\Repository\UserRepository;
+use App\Service\MailerConfiguration;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -27,6 +28,7 @@ final class AccountEmailChangeController extends AbstractController
         EmailChangeRequestRepository $emailChangeRequestRepository,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
         #[Autowire('%env(string:FRONTEND_APP_URL)%')]
         string $frontendAppUrl,
     ): JsonResponse {
@@ -88,7 +90,7 @@ final class AccountEmailChangeController extends AbstractController
         try {
             $mailer->send(
                 (new Email())
-                    ->from('no-reply@eventflow.local')
+                    ->from($mailerConfiguration->fromEmail())
                     ->to($currentEmail)
                     ->subject('Validation du changement d’email EventFlow')
                     ->text(

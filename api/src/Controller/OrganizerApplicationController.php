@@ -5,9 +5,9 @@ namespace App\Controller;
 use App\Entity\OrganizerApplication;
 use App\Entity\User;
 use App\Repository\OrganizerApplicationRepository;
+use App\Service\MailerConfiguration;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
@@ -45,8 +45,7 @@ final class OrganizerApplicationController extends AbstractController
         OrganizerApplicationRepository $organizerApplicationRepository,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
-        #[Autowire('%env(string:ORGANIZER_REVIEW_EMAIL)%')]
-        string $reviewEmail,
+        MailerConfiguration $mailerConfiguration,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -114,7 +113,7 @@ final class OrganizerApplicationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        $this->sendSubmissionEmails($mailer, $reviewEmail, $user, $application);
+        $this->sendSubmissionEmails($mailer, $mailerConfiguration, $user, $application);
 
         return $this->json([
             'message' => $isNewApplication
@@ -126,7 +125,7 @@ final class OrganizerApplicationController extends AbstractController
 
     private function sendSubmissionEmails(
         MailerInterface $mailer,
-        string $reviewEmail,
+        MailerConfiguration $mailerConfiguration,
         User $user,
         OrganizerApplication $application,
     ): void {
@@ -135,8 +134,8 @@ final class OrganizerApplicationController extends AbstractController
         try {
             $mailer->send(
                 (new Email())
-                    ->from('no-reply@eventflow.local')
-                    ->to($reviewEmail)
+                    ->from($mailerConfiguration->fromEmail())
+                    ->to($mailerConfiguration->reviewEmail())
                     ->subject('Nouvelle demande organisateur EventFlow')
                     ->text(
                         "Nouvelle demande organisateur reçue.\n\n".
@@ -156,7 +155,7 @@ final class OrganizerApplicationController extends AbstractController
             if (null !== $user->getEmail()) {
                 $mailer->send(
                     (new Email())
-                        ->from('no-reply@eventflow.local')
+                        ->from($mailerConfiguration->fromEmail())
                         ->to((string) $user->getEmail())
                         ->subject('Ta demande organisateur EventFlow a été reçue')
                         ->text(

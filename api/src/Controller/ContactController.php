@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\MailerConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +18,7 @@ final class ContactController extends AbstractController
     public function create(
         Request $request,
         MailerInterface $mailer,
-        #[Autowire('%env(string:ORGANIZER_REVIEW_EMAIL)%')]
-        string $reviewEmail,
-        #[Autowire('%env(string:MAILER_FROM_EMAIL)%')]
-        string $fromEmail,
+        MailerConfiguration $mailerConfiguration,
     ): JsonResponse {
         $data = $request->toArray();
         $name = trim((string) ($data['name'] ?? ''));
@@ -62,9 +59,9 @@ final class ContactController extends AbstractController
         try {
             $mailer->send(
                 (new Email())
-                    ->from($fromEmail)
+                    ->from($mailerConfiguration->fromEmail())
                     ->replyTo($email)
-                    ->to($reviewEmail)
+                    ->to($mailerConfiguration->reviewEmail())
                     ->subject('[Contact EventFlow] '.$subject)
                     ->text(implode("\n", [
                         'Nouvelle demande reçue depuis le formulaire Contact EventFlow.',

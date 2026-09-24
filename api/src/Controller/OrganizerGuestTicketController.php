@@ -14,6 +14,7 @@ use App\Repository\EventRepository;
 use App\Repository\OrderItemRepository;
 use App\Repository\TicketRepository;
 use App\Repository\TicketTypeRepository;
+use App\Service\MailerConfiguration;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -74,6 +75,7 @@ final class OrganizerGuestTicketController extends AbstractController
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
         LoggerInterface $logger,
+        MailerConfiguration $mailerConfiguration,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -169,7 +171,7 @@ final class OrganizerGuestTicketController extends AbstractController
         $entityManager->flush();
 
         try {
-            $this->sendGuestTicketEmail($request, $mailer, $ticket);
+            $this->sendGuestTicketEmail($request, $mailer, $mailerConfiguration, $ticket);
             $ticket->setSentAt(new \DateTimeImmutable());
             $entityManager->flush();
         } catch (\Throwable $exception) {
@@ -205,7 +207,12 @@ final class OrganizerGuestTicketController extends AbstractController
         ]);
     }
 
-    private function sendGuestTicketEmail(Request $request, MailerInterface $mailer, Ticket $ticket): void
+    private function sendGuestTicketEmail(
+        Request $request,
+        MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
+        Ticket $ticket,
+    ): void
     {
         $recipientEmail = trim((string) $ticket->getRecipientEmail());
 
@@ -220,7 +227,7 @@ final class OrganizerGuestTicketController extends AbstractController
 
         $mailer->send(
             (new Email())
-                ->from('no-reply@eventflow.local')
+                ->from($mailerConfiguration->fromEmail())
                 ->to($recipientEmail)
                 ->subject('Ton invitation EventFlow')
                 ->text(sprintf(

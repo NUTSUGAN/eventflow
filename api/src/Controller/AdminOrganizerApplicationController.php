@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\OrganizerApplication;
 use App\Entity\User;
 use App\Repository\OrganizerApplicationRepository;
+use App\Service\MailerConfiguration;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,6 +42,7 @@ final class AdminOrganizerApplicationController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
     ): JsonResponse {
         $data = $request->toArray();
         $reviewNote = $this->normalizeNullableString($data['reviewNote'] ?? null);
@@ -67,7 +69,7 @@ final class AdminOrganizerApplicationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        $this->sendDecisionEmail($mailer, $user, $application, true);
+        $this->sendDecisionEmail($mailer, $mailerConfiguration, $user, $application, true);
 
         return $this->json([
             'message' => 'La demande organisateur a été approuvée.',
@@ -81,6 +83,7 @@ final class AdminOrganizerApplicationController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
     ): JsonResponse {
         $user = $application->getUser();
 
@@ -115,7 +118,7 @@ final class AdminOrganizerApplicationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        $this->sendDecisionEmail($mailer, $user, $application, false);
+        $this->sendDecisionEmail($mailer, $mailerConfiguration, $user, $application, false);
 
         return $this->json([
             'message' => $wasApproved
@@ -127,6 +130,7 @@ final class AdminOrganizerApplicationController extends AbstractController
 
     private function sendDecisionEmail(
         MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
         User $user,
         OrganizerApplication $application,
         bool $approved,
@@ -154,7 +158,7 @@ final class AdminOrganizerApplicationController extends AbstractController
         try {
             $mailer->send(
                 (new Email())
-                    ->from('no-reply@eventflow.local')
+                    ->from($mailerConfiguration->fromEmail())
                     ->to($email)
                     ->subject($subject)
                     ->text($body)

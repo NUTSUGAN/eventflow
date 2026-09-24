@@ -7,6 +7,7 @@ use App\Entity\EventReport;
 use App\Entity\User;
 use App\Repository\EventRepository;
 use App\Repository\EventReportRepository;
+use App\Service\MailerConfiguration;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -27,6 +28,7 @@ final class EventReportController extends AbstractController
         EventReportRepository $eventReportRepository,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
         #[Autowire('%env(string:FRONTEND_APP_URL)%')]
         string $frontendAppUrl,
     ): JsonResponse {
@@ -96,8 +98,8 @@ final class EventReportController extends AbstractController
         try {
             $mailer->send(
                 (new Email())
-                    ->from('no-reply@eventflow.local')
-                    ->to('admin@eventflow.local')
+                    ->from($mailerConfiguration->fromEmail())
+                    ->to($mailerConfiguration->reviewEmail())
                     ->subject('Nouveau signalement d’évènement EventFlow')
                     ->text($this->buildAdminNotificationBody($event, $reporter, $eventReport, $frontendAppUrl))
             );

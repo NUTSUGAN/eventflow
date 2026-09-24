@@ -11,6 +11,7 @@ use App\Repository\PasswordResetRequestRepository;
 use App\Repository\UserOauthAccountRepository;
 use App\Repository\UserRepository;
 use App\Service\AccountErasureService;
+use App\Service\MailerConfiguration;
 use App\Service\UploadedImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -509,6 +510,7 @@ class AuthController extends AbstractController
         PasswordResetRequestRepository $passwordResetRequestRepository,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer,
+        MailerConfiguration $mailerConfiguration,
         #[Autowire('%env(string:FRONTEND_APP_URL)%')]
         string $frontendAppUrl,
     ): JsonResponse {
@@ -553,7 +555,7 @@ class AuthController extends AbstractController
         try {
             $mailer->send(
                 (new Email())
-                    ->from('no-reply@eventflow.local')
+                    ->from($mailerConfiguration->fromEmail())
                     ->to($email)
                     ->subject('Réinitialisation de ton mot de passe EventFlow')
                     ->text(
