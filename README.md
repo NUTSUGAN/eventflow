@@ -42,7 +42,7 @@ L'application se compose de plusieurs espaces :
 api/                 Application Symfony
 front/               Application React / Vite
 docker/              Configuration PHP-FPM et Nginx
-docker-compose.yml   Services locaux backend, nginx, frontend et mailpit
+docker-compose.yml   Services locaux backend, nginx, frontend, scheduler et mailpit
 ```
 
 ## Lancement local
@@ -167,6 +167,30 @@ Backend API    : http://localhost:8080
 Mailpit        : http://localhost:8025
 ```
 
+## Cron et traitements automatiques
+
+Le service Docker `scheduler` lance les traitements planifies du backend. Il
+reutilise l'image PHP de l'API et execute cron en premier plan.
+
+Traitements planifies :
+
+```text
+* * * * *     app:promotions:expire
+*/5 * * * *   app:promotions:reconcile-payments
+```
+
+Ces commandes expirent les campagnes Booster terminees et reconcilient les
+paiements Stripe des campagnes approuvees si le webhook n'a pas ete recu.
+
+Commandes utiles :
+
+```bash
+docker compose ps
+docker compose logs scheduler
+docker compose exec scheduler php bin/console app:promotions:expire
+docker compose exec scheduler php bin/console app:promotions:reconcile-payments
+```
+
 ## Commandes utiles frontend
 
 Depuis le dossier `front` :
@@ -259,6 +283,8 @@ pourra etre ajoute ensuite avec des secrets GitHub comme `DEPLOY_HOST`,
 - Exploration des evenements publics avec filtres.
 - Abonnement aux organisateurs favoris.
 - Achat de billets et paiement Stripe.
+- Vente de billets possible pendant l'evenement, tant que la date de fin de
+  l'evenement n'est pas depassee.
 - Commandes en attente visibles dans "Mes billets".
 - Generation de billets avec QR Code.
 - Scan des billets avec detection des billets invalides, valides ou deja utilises.
@@ -280,6 +306,8 @@ Mesures deja en place :
 
 - Hachage des mots de passe avec Symfony Security.
 - Authentification via Symfony Security.
+- Protection CSRF des requetes API mutantes via un jeton de session transmis
+  dans l'en-tete `X-CSRF-Token`.
 - Gestion Symfony des erreurs d'authentification en JSON.
 - Verification du statut de compte via `UserAccountStatusChecker` avant
   authentification effective.

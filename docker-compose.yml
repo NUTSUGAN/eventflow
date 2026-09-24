@@ -18,6 +18,14 @@ services:
       MAILER_DSN: "smtp://mailpit:1025"
 
 
+  scheduler:
+    extends:
+      service: app
+    container_name: eventflow_scheduler
+    command: ["cron", "-f"]
+    depends_on:
+      - app
+
   nginx:
     image: nginx:alpine
     container_name: eventflow_nginx

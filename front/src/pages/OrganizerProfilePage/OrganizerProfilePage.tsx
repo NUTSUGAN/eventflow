@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
+import { FaClockRotateLeft } from 'react-icons/fa6'
 import {
   followOrganizer,
   getOrganizerProfile,
@@ -18,6 +19,7 @@ import {
   ProfileBlockTitle,
   ProfileCardsGrid,
   ProfileEyebrow,
+  ProfileEventItem,
   ProfileHero,
   ProfileHeroTop,
   ProfileIdentity,
@@ -52,6 +54,8 @@ function formatJoinDate(date: string | null): string {
 
 export function OrganizerProfilePage() {
   const { organizerId } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isArchive = searchParams.get('scope') === 'archive'
   const [profile, setProfile] = useState<OrganizerProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
@@ -74,7 +78,7 @@ export function OrganizerProfilePage() {
       setErrorMessage(null)
 
       try {
-        const data = await getOrganizerProfile(organizerId)
+        const data = await getOrganizerProfile(organizerId, isArchive ? 'archive' : 'upcoming')
 
         if (isMounted) {
           setProfile(data)
@@ -97,7 +101,7 @@ export function OrganizerProfilePage() {
     return () => {
       isMounted = false
     }
-  }, [organizerId])
+  }, [organizerId, isArchive])
 
   async function handleFollowToggle() {
     if (
@@ -217,21 +221,43 @@ export function OrganizerProfilePage() {
 
       <ProfileBlock>
         <ProfileBlockHeader>
-          <ProfileBlockTitle>Ses évènements publiés</ProfileBlockTitle>
-          <ProfileBlockCaption>
-            Clique sur un évènement pour ouvrir sa fiche détail.
-          </ProfileBlockCaption>
+          <ProfileBlockTitle>
+            {isArchive ? 'Événements passés et souvenirs' : 'Ses évènements publiés'}
+          </ProfileBlockTitle>
+          <ProfileActionButton
+            type="button"
+            onClick={() => setSearchParams(isArchive ? {} : { scope: 'archive' })}
+          >
+            <FaClockRotateLeft aria-hidden="true" />
+            {isArchive ? 'Voir les événements à venir' : 'Voir ses événements passés et souvenirs'}
+          </ProfileActionButton>
         </ProfileBlockHeader>
 
         {profile.events.length > 0 ? (
           <ProfileCardsGrid>
             {profile.events.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <ProfileEventItem key={event.id}>
+                <EventCard event={event} />
+                {isArchive && event.souvenirVideoUrl ? (
+                  <video
+                    controls
+                    preload="none"
+                    playsInline
+                    src={event.souvenirVideoUrl}
+                    poster={event.coverImageUrl ?? undefined}
+                    aria-label={`Vidéo souvenir : ${event.title}`}
+                  />
+                ) : isArchive ? (
+                  <ProfileBlockCaption>Aucun souvenir vidéo publié.</ProfileBlockCaption>
+                ) : null}
+              </ProfileEventItem>
             ))}
           </ProfileCardsGrid>
         ) : (
           <ProfileStateBox>
-            Aucun évènement publié n&apos;est disponible pour cet organisateur.
+            {isArchive
+              ? 'Aucun événement passé public pour cet organisateur.'
+              : 'Aucun événement publié disponible pour cet organisateur.'}
           </ProfileStateBox>
         )}
       </ProfileBlock>

@@ -1,0 +1,4 @@
+csrf_controller:
+    resource: ../../src/Controller/CsrfController.php
+    type: attribute
+

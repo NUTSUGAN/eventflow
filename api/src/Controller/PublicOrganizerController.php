@@ -48,7 +48,8 @@ class PublicOrganizerController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $events = $eventRepository->findPublishedByOrganizer($organizer->getId(), 12);
+        $scope = 'archive' === $request->query->get('scope') ? 'archive' : 'upcoming';
+        $events = $eventRepository->findPublishedByOrganizer($organizer->getId(), 12, $scope);
         $publishedEventCount = $eventRepository->countPublishedByOrganizer($organizer->getId());
         $currentUser = $this->getUser();
 
@@ -140,6 +141,9 @@ class PublicOrganizerController extends AbstractController
             'startsAt' => $event->getStartDatetime()?->format(DATE_ATOM),
             'category' => $event->getCategory()?->getName() ?? 'évènement',
             'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
+            'souvenirVideoUrl' => ($event->getEndDatetime() ?? $event->getStartDatetime()) < new \DateTimeImmutable()
+                ? $this->toPublicAssetUrl($request, $event->getEventVideo())
+                : null,
             'minPrice' => $minPrice,
             'currency' => 'EUR',
         ];

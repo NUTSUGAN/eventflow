@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     default-mysql-client \
+    cron \
+    util-linux \
     && docker-php-ext-install pdo pdo_mysql intl zip opcache
 
 # Installation de APCu (Indispensable pour la vitesse de Symfony)
@@ -16,6 +18,10 @@ RUN pecl install apcu && docker-php-ext-enable apcu
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/api
+
+COPY docker/cron/eventflow /etc/cron.d/eventflow
+COPY docker/cron/run.php /usr/local/bin/eventflow-cron.php
+RUN chmod 0644 /etc/cron.d/eventflow
 
 COPY api/composer.json api/composer.lock api/symfony.lock ./
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts

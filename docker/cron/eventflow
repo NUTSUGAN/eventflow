@@ -1,0 +1,5 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+* * * * * root flock -n /tmp/eventflow-expire.lock php /usr/local/bin/eventflow-cron.php app:promotions:expire >> /proc/1/fd/1 2>> /proc/1/fd/2
+*/5 * * * * root flock -n /tmp/eventflow-reconcile.lock php /usr/local/bin/eventflow-cron.php app:promotions:reconcile-payments >> /proc/1/fd/1 2>> /proc/1/fd/2
+

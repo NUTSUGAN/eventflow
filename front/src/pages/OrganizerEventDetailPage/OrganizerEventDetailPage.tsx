@@ -1491,6 +1491,7 @@ export function OrganizerEventDetailPage() {
                     <OrganizerEventDetailInput
                       type="datetime-local"
                       min={minimumTicketSalesEnd}
+                      max={event?.endDatetime ? formatApiDateToInput(event.endDatetime) : undefined}
                       value={ticketForm.salesEndAt}
                       onChange={(changeEvent) =>
                         setTicketForm((current) => ({
@@ -1501,7 +1502,7 @@ export function OrganizerEventDetailPage() {
                       required
                     />
                     <OrganizerEventDetailHint>
-                      La vente doit se terminer avant le début de l’évènement.
+                      La vente peut continuer pendant l’évènement, jusqu’à sa fin.
                     </OrganizerEventDetailHint>
                   </OrganizerEventDetailField>
                 </OrganizerEventDetailGrid>
@@ -1691,6 +1692,7 @@ export function OrganizerEventDetailPage() {
                             <OrganizerEventDetailInput
                               type="datetime-local"
                               value={editingTicketForm.salesEndAt}
+                              max={event?.endDatetime ? formatApiDateToInput(event.endDatetime) : undefined}
                               onChange={(changeEvent) =>
                                 setEditingTicketForm((current) => ({
                                   ...current,

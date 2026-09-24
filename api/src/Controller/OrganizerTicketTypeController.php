@@ -113,15 +113,15 @@ class OrganizerTicketTypeController extends AbstractController
             ], 400);
         }
 
-        if ($salesStartAt >= $event->getStartDatetime()) {
+        if ($salesStartAt >= ($event->getEndDatetime() ?? $event->getStartDatetime())) {
             return $this->json([
-                'message' => 'Le début de vente doit intervenir avant le début de l’évènement.',
+                'message' => 'Le début de vente doit intervenir avant la fin de l’évènement.',
             ], 400);
         }
 
-        if ($salesEndAt > $event->getStartDatetime()) {
+        if ($salesEndAt > ($event->getEndDatetime() ?? $event->getStartDatetime())) {
             return $this->json([
-                'message' => 'La fin de vente ne peut pas dépasser le début de l’évènement.',
+                'message' => 'La fin de vente ne peut pas dépasser la fin de l’évènement.',
             ], 400);
         }
 
@@ -353,15 +353,15 @@ class OrganizerTicketTypeController extends AbstractController
         $event = $ticketType->getEvent();
 
         if ($event instanceof Event) {
-            if ($salesStartAt >= $event->getStartDatetime()) {
+            if ($salesStartAt >= ($event->getEndDatetime() ?? $event->getStartDatetime())) {
                 return $this->json([
-                    'message' => 'Le début de vente doit intervenir avant le début de l’évènement.',
+                    'message' => 'Le début de vente doit intervenir avant la fin de l’évènement.',
                 ], 400);
             }
 
-            if ($salesEndAt > $event->getStartDatetime()) {
+            if ($salesEndAt > ($event->getEndDatetime() ?? $event->getStartDatetime())) {
                 return $this->json([
-                    'message' => 'La fin de vente ne peut pas dépasser le début de l’évènement.',
+                    'message' => 'La fin de vente ne peut pas dépasser la fin de l’évènement.',
                 ], 400);
             }
 

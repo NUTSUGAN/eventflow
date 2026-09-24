@@ -120,7 +120,7 @@ final class OrderPreparationController extends AbstractController
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            if ($ticketType->getSalesEndAt() < $now) {
+            if ($ticketType->getSalesEndAt() <= $now || ($ticketEvent->getEndDatetime() ?? $ticketEvent->getStartDatetime()) <= $now) {
                 return $this->json([
                     'message' => sprintf('La vente du billet "%s" est terminée.', $ticketType->getName()),
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);

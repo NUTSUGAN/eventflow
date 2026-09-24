@@ -128,8 +128,18 @@ final class StripeWebhookController extends AbstractController
             case 'checkout.session.completed':
             case 'checkout.session.async_payment_succeeded':
                 if ('paid' === (string) $session->payment_status) {
-                    $stripePaymentService->markOrderAsPaid($order, $session);
-                    $ticketFulfillmentService->fulfillPaidOrder($order);
+                    try {
+                        $stripePaymentService->markOrderAsPaid($order, $session);
+                        $ticketFulfillmentService->fulfillPaidOrder($order);
+                    } catch (\LogicException $exception) {
+                        $stripePaymentService->markOrderAsExpired($order);
+                        $logger->warning('Stripe payment received after ticket sale closure.', [
+                            'eventType' => $event->type,
+                            'orderId' => $orderId,
+                            'sessionId' => $session->id,
+                            'message' => $exception->getMessage(),
+                        ]);
+                    }
                 }
                 break;
 

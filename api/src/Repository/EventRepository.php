@@ -208,7 +208,7 @@ class EventRepository extends ServiceEntityRepository
     /**
      * @return list<Event>
      */
-    public function findPublishedByOrganizer(int $organizerId, int $limit = 12): array
+    public function findPublishedByOrganizer(int $organizerId, int $limit = 12, string $scope = 'upcoming'): array
     {
         $queryBuilder = $this->createQueryBuilder('event')
             ->leftJoin('event.category', 'category')->addSelect('category')
@@ -224,7 +224,11 @@ class EventRepository extends ServiceEntityRepository
             ->setMaxResults(max(1, min(24, $limit)))
         ;
 
-        $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
+        $this->applyPublicVisibilityScope($queryBuilder, $scope);
+
+        if ($this->isArchiveScope($scope)) {
+            $queryBuilder->setMaxResults(null)->orderBy('event.startDatetime', 'DESC');
+        }
 
         return $queryBuilder
             ->getQuery()

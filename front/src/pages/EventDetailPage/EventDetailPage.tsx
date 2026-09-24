@@ -142,10 +142,14 @@ function resolveAvailableStock(ticketType: EventDetail['ticketTypes'][number]): 
   return ticketType.stock ?? 0
 }
 
-function isTicketSaleOpen(ticketType: EventDetail['ticketTypes'][number]): boolean {
+function isTicketSaleOpen(
+  ticketType: EventDetail['ticketTypes'][number],
+  eventEndAt: string | null,
+): boolean {
   const now = Date.now()
   const saleStartAt = ticketType.saleStartAt ? new Date(ticketType.saleStartAt).getTime() : null
   const saleEndAt = ticketType.saleEndAt ? new Date(ticketType.saleEndAt).getTime() : null
+  const eventEndTime = eventEndAt ? new Date(eventEndAt).getTime() : null
 
   if (saleStartAt !== null && !Number.isNaN(saleStartAt) && now < saleStartAt) {
     return false
@@ -155,10 +159,17 @@ function isTicketSaleOpen(ticketType: EventDetail['ticketTypes'][number]): boole
     return false
   }
 
+  if (eventEndTime !== null && !Number.isNaN(eventEndTime) && now >= eventEndTime) {
+    return false
+  }
+
   return true
 }
 
-function getTicketAvailabilityState(ticketType: EventDetail['ticketTypes'][number]):
+function getTicketAvailabilityState(
+  ticketType: EventDetail['ticketTypes'][number],
+  eventEndAt: string | null,
+):
   | 'available'
   | 'sold_out'
   | 'upcoming'
@@ -172,20 +183,27 @@ function getTicketAvailabilityState(ticketType: EventDetail['ticketTypes'][numbe
   const now = Date.now()
   const saleStartAt = ticketType.saleStartAt ? new Date(ticketType.saleStartAt).getTime() : null
   const saleEndAt = ticketType.saleEndAt ? new Date(ticketType.saleEndAt).getTime() : null
+  const eventEndTime = eventEndAt ? new Date(eventEndAt).getTime() : null
 
   if (saleStartAt !== null && !Number.isNaN(saleStartAt) && now < saleStartAt) {
     return 'upcoming'
   }
 
-  if (saleEndAt !== null && !Number.isNaN(saleEndAt) && now > saleEndAt) {
+  if (
+    (saleEndAt !== null && !Number.isNaN(saleEndAt) && now >= saleEndAt) ||
+    (eventEndTime !== null && !Number.isNaN(eventEndTime) && now >= eventEndTime)
+  ) {
     return 'ended'
   }
 
   return 'available'
 }
 
-function getTicketButtonLabel(ticketType: EventDetail['ticketTypes'][number]): string {
-  const state = getTicketAvailabilityState(ticketType)
+function getTicketButtonLabel(
+  ticketType: EventDetail['ticketTypes'][number],
+  eventEndAt: string | null,
+): string {
+  const state = getTicketAvailabilityState(ticketType, eventEndAt)
 
   if (state === 'sold_out') {
     return 'Complet'
@@ -198,8 +216,11 @@ function getTicketButtonLabel(ticketType: EventDetail['ticketTypes'][number]): s
   return 'Reserver'
 }
 
-function getTicketReserveHintText(ticketType: EventDetail['ticketTypes'][number]): string {
-  const state = getTicketAvailabilityState(ticketType)
+function getTicketReserveHintText(
+  ticketType: EventDetail['ticketTypes'][number],
+  eventEndAt: string | null,
+): string {
+  const state = getTicketAvailabilityState(ticketType, eventEndAt)
 
   if (state === 'sold_out') {
     return 'Ce billet est complet pour le moment.'
@@ -433,7 +454,7 @@ export function EventDetailPage() {
     }
 
     return event.ticketTypes.filter(
-      (ticketType) => resolveAvailableStock(ticketType) > 0 && isTicketSaleOpen(ticketType),
+      (ticketType) => resolveAvailableStock(ticketType) > 0 && isTicketSaleOpen(ticketType, event.endsAt),
     ).length
   }, [event])
 
@@ -718,12 +739,12 @@ export function EventDetailPage() {
                       <TicketReserveButton
                         type="button"
                         onClick={() => handleReserveTicket(ticketType.id)}
-                        disabled={getTicketAvailabilityState(ticketType) !== 'available'}
+                        disabled={getTicketAvailabilityState(ticketType, event.endsAt) !== 'available'}
                       >
-                        {getTicketButtonLabel(ticketType)}
+                        {getTicketButtonLabel(ticketType, event.endsAt)}
                       </TicketReserveButton>
                       <TicketReserveHint>
-                        {getTicketReserveHintText(ticketType)}
+                        {getTicketReserveHintText(ticketType, event.endsAt)}
                       </TicketReserveHint>
                     </DetailTicketActions>
                   </DetailTicketListItem>
@@ -843,7 +864,10 @@ export function EventDetailPage() {
 
             {event.organizer ? (
               <DetailOrganizerCard>
-                <DetailOrganizerIdentity>
+                <DetailOrganizerIdentity
+                  to={`/organizers/${event.organizer.id}`}
+                  aria-label={`Voir le profil de ${event.organizer.fullName}`}
+                >
                   <DetailOrganizerAvatar
                     $imageUrl={event.organizer.profilePhoto ?? undefined}
                   >

@@ -68,9 +68,11 @@ export async function getSearchSuggestions(
 
 export async function getOrganizerProfile(
   organizerId: string,
+  scope: 'upcoming' | 'archive' = 'upcoming',
 ): Promise<OrganizerProfile> {
   const response = await apiClient.get<OrganizerProfile>(
     `/api/organizers/${organizerId}`,
+    { params: { scope } },
   )
 
   return response.data

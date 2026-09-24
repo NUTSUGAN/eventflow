@@ -40,6 +40,8 @@ final class StripePaymentService
             throw new \LogicException('Cette commande ne contient aucun billet à payer.');
         }
 
+        $this->assertOrderTicketSaleOpen($order);
+
         $this->assertWebhookConfigured();
         $frontendUrl = $this->getFrontendAppUrl();
 
@@ -272,6 +274,8 @@ final class StripePaymentService
             return;
         }
 
+        $this->assertOrderTicketSaleOpen($order);
+
         $payment = $order->getPayment() ?? new Payment();
         $payment->setCustomerOrder($order);
         $payment->setProvider(Payment::PROVIDER_STRIPE);
@@ -347,6 +351,32 @@ final class StripePaymentService
 
         $order->setStatus(Order::STATUS_EXPIRED);
         $this->entityManager->flush();
+    }
+
+    public function assertOrderTicketSaleOpen(Order $order, ?\DateTimeImmutable $now = null): void
+    {
+        if (Order::TYPE_TICKET !== $order->getOrderType()) {
+            return;
+        }
+
+        $now ??= new \DateTimeImmutable();
+
+        foreach ($order->getOrderItems() as $item) {
+            if (!$item instanceof OrderItem) {
+                continue;
+            }
+
+            $ticketType = $item->getTicketType();
+            $ticketEvent = $ticketType?->getEvent();
+
+            if (null === $ticketType || null === $ticketEvent || !$ticketType->isActive()
+                || 'published' !== strtolower((string) $ticketEvent->getStatus())
+                || $ticketType->getSalesStartAt() > $now
+                || $ticketType->getSalesEndAt() <= $now
+                || ($ticketEvent->getEndDatetime() ?? $ticketEvent->getStartDatetime()) <= $now) {
+                throw new \LogicException('La vente de ces billets est fermée.');
+            }
+        }
     }
 
     /**

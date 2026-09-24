@@ -236,3 +236,16 @@ export const ProfileCardsGrid = styled.section`
     }
   }
 `
+
+export const ProfileEventItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    background: #000;
+  }
+`

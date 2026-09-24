@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 
 type DetailShareNetwork = 'whatsapp' | 'instagram' | 'snapchat' | 'copy'
 
@@ -545,10 +546,23 @@ export const DetailOrganizerCard = styled.div`
   gap: 18px;
 `
 
-export const DetailOrganizerIdentity = styled.div`
+export const DetailOrganizerIdentity = styled(Link)`
   display: flex;
   align-items: center;
   gap: 14px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 6px;
+
+  &:hover h3 {
+    color: var(--color-primary, #f88f52);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary, #f88f52);
+    outline-offset: 4px;
+  }
 
   @media (max-width: 420px) {
     align-items: flex-start;

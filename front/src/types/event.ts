@@ -155,7 +155,7 @@ export type OrganizerProfileOrganizer = OrganizerIdentity & {
 export type OrganizerProfile = {
   organizer: OrganizerProfileOrganizer
   subscription: EventSubscription
-  events: EventSummary[]
+  events: (EventSummary & { souvenirVideoUrl: string | null })[]
 }
 
 export type PublicOrganizerSummary = OrganizerIdentity & {
