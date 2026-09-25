@@ -11,10 +11,9 @@ use App\Entity\User;
 use App\Repository\OrderItemRepository;
 use App\Repository\OrderRepository;
 use App\Repository\TicketTypeRepository;
-use App\Service\StripePaymentService;
+use App\Service\FedaPayPaymentService;
 use App\Service\TicketFulfillmentService;
 use Doctrine\ORM\EntityManagerInterface;
-use Stripe\Exception\ApiErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +31,7 @@ final class OrderPreparationController extends AbstractController
         TicketTypeRepository $ticketTypeRepository,
         OrderItemRepository $orderItemRepository,
         EntityManagerInterface $entityManager,
-        StripePaymentService $stripePaymentService,
+        FedaPayPaymentService $paymentService,
         TicketFulfillmentService $ticketFulfillmentService,
     ): JsonResponse {
         $user = $this->getUser();
@@ -225,14 +224,14 @@ final class OrderPreparationController extends AbstractController
             'message' => Order::STATUS_PAID === $order->getStatus()
                 ? 'Commande gratuite confirmée. Tes billets sont disponibles.'
                 : 'Commande preparee avec succès.',
-            'order' => $this->serializeOrder($order, $stripePaymentService),
+            'order' => $this->serializeOrder($order, $paymentService),
         ], Response::HTTP_CREATED);
     }
 
     #[Route('/pending', name: 'api_order_pending_index', methods: ['GET'])]
     public function pending(
         OrderRepository $orderRepository,
-        StripePaymentService $stripePaymentService,
+        FedaPayPaymentService $paymentService,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -246,7 +245,7 @@ final class OrderPreparationController extends AbstractController
 
         return $this->json([
             'orders' => array_map(
-                fn (Order $order): array => $this->serializeOrder($order, $stripePaymentService),
+                fn (Order $order): array => $this->serializeOrder($order, $paymentService),
                 $orders,
             ),
         ]);
@@ -256,7 +255,7 @@ final class OrderPreparationController extends AbstractController
     public function show(
         int $orderId,
         OrderRepository $orderRepository,
-        StripePaymentService $stripePaymentService,
+        FedaPayPaymentService $paymentService,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -275,15 +274,15 @@ final class OrderPreparationController extends AbstractController
         }
 
         return $this->json([
-            'order' => $this->serializeOrder($order, $stripePaymentService),
+            'order' => $this->serializeOrder($order, $paymentService),
         ]);
     }
 
-    #[Route('/{orderId<\d+>}/checkout-session', name: 'api_order_checkout_session_create', methods: ['POST'])]
+    #[Route('/{orderId<\d+>}/payment-session', name: 'api_order_payment_session_create', methods: ['POST'])]
     public function createCheckoutSession(
         int $orderId,
         OrderRepository $orderRepository,
-        StripePaymentService $stripePaymentService,
+        FedaPayPaymentService $paymentService,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -304,31 +303,74 @@ final class OrderPreparationController extends AbstractController
         if (Order::STATUS_PAID === $order->getStatus()) {
             return $this->json([
                 'message' => 'Cette commande est déjà payée.',
-                'order' => $this->serializeOrder($order, $stripePaymentService),
+                'order' => $this->serializeOrder($order, $paymentService),
             ], Response::HTTP_CONFLICT);
         }
 
         try {
-            $session = $stripePaymentService->createCheckoutSession($order);
+            $session = $paymentService->createCheckoutSession($order);
         } catch (\LogicException $exception) {
             return $this->json([
                 'message' => $exception->getMessage(),
-                'order' => $this->serializeOrder($order, $stripePaymentService),
+                'order' => $this->serializeOrder($order, $paymentService),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\RuntimeException $exception) {
             return $this->json([
                 'message' => $exception->getMessage(),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
-        } catch (ApiErrorException $exception) {
-            return $this->json([
-                'message' => $this->buildStripeCheckoutErrorMessage($exception),
-            ], Response::HTTP_BAD_GATEWAY);
         }
 
         return $this->json([
-            'message' => 'Session Stripe creee avec succès.',
-            'checkoutUrl' => $session->url,
-            'sessionId' => $session->id,
+            'message' => 'Paiement FedaPay créé avec succès.',
+            'checkoutUrl' => $session['checkoutUrl'],
+            'transactionId' => $session['transactionId'],
+        ]);
+    }
+
+    #[Route('/{orderId<\d+>}/confirm-payment', name: 'api_order_payment_confirm', methods: ['POST'])]
+    public function confirmPayment(
+        int $orderId,
+        Request $request,
+        OrderRepository $orderRepository,
+        FedaPayPaymentService $paymentService,
+        TicketFulfillmentService $ticketFulfillmentService,
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->json(['message' => 'Non authentifie.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $order = $orderRepository->find($orderId);
+        if (!$order instanceof Order || $order->getClient()?->getId() !== $user->getId()) {
+            return $this->json(['message' => 'Commande introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $payload = json_decode($request->getContent(), true);
+        $transactionId = is_array($payload) && is_scalar($payload['transactionId'] ?? null)
+            ? trim((string) $payload['transactionId'])
+            : '';
+        if ('' === $transactionId) {
+            return $this->json(['message' => 'Identifiant de transaction FedaPay manquant.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $transaction = $paymentService->retrieveTransaction($transactionId);
+            $paymentService->markOrderAsPaid($order, $transaction);
+            $ticketFulfillmentService->fulfillPaidOrder($order);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (\LogicException $exception) {
+            return $this->json([
+                'message' => $exception->getMessage(),
+                'order' => $this->serializeOrder($order, $paymentService),
+            ], Response::HTTP_ACCEPTED);
+        } catch (\RuntimeException $exception) {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        return $this->json([
+            'message' => 'Paiement FedaPay confirmé.',
+            'order' => $this->serializeOrder($order, $paymentService),
         ]);
     }
 
@@ -351,25 +393,10 @@ final class OrderPreparationController extends AbstractController
         return number_format($amountInCents / 100, 2, '.', '');
     }
 
-    private function buildStripeCheckoutErrorMessage(ApiErrorException $exception): string
-    {
-        $message = trim($exception->getMessage());
-
-        if (str_contains(strtolower($message), 'set an account or business name')) {
-            return "Le compte Stripe de test n’est pas encore complètement configuré. Ajoute d'abord le nom du compte ou de l'entreprise dans le dashboard Stripe, puis réessaie.";
-        }
-
-        if ('' !== $message) {
-            return sprintf('Stripe a refusé la création de la session : %s', $message);
-        }
-
-        return 'Impossible de créer la session Stripe pour le moment.';
-    }
-
     /**
      * @return array<string, mixed>
      */
-    private function serializeOrder(Order $order, StripePaymentService $stripePaymentService): array
+    private function serializeOrder(Order $order, FedaPayPaymentService $paymentService): array
     {
         $event = $this->getOrderEvent($order);
         $location = $event?->getLocation();
@@ -409,7 +436,7 @@ final class OrderPreparationController extends AbstractController
             ],
             'items' => $items,
             'payment' => $this->serializePayment($order->getPayment()),
-            'canStartCheckout' => $stripePaymentService->canStartCheckout($order),
+            'canStartCheckout' => $paymentService->canStartCheckout($order),
         ];
     }
 

@@ -15,13 +15,13 @@ final class PromotionChannelRateTest extends TestCase
             ->setChannelCode('newsletter')
             ->setDuration(PromotionCampaign::DURATION_7_DAYS)
             ->setPriceAmount('39,5')
-            ->setCurrency('eur')
+            ->setCurrency('xof')
         ;
 
         self::assertSame(PromotionCampaignChannel::CHANNEL_NEWSLETTER, $rate->getChannelCode());
         self::assertSame(PromotionCampaign::DURATION_7_DAYS, $rate->getDuration());
         self::assertSame('39.50', $rate->getPriceAmount());
-        self::assertSame('EUR', $rate->getCurrency());
+        self::assertSame('XOF', $rate->getCurrency());
         self::assertTrue($rate->isActive());
     }
 

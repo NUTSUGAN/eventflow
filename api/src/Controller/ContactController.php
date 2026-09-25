@@ -4,12 +4,12 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class ContactController extends AbstractController
@@ -58,11 +58,27 @@ final class ContactController extends AbstractController
 
         try {
             $mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($mailerConfiguration->fromEmail())
                     ->replyTo($email)
                     ->to($mailerConfiguration->reviewEmail())
                     ->subject('[Contact EventFlow] '.$subject)
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Nouvelle demande de contact',
+                        'preheader' => $subject,
+                        'appUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/'),
+                        'logoUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                        'eyebrow' => 'Administration',
+                        'heading' => 'Nouvelle demande de contact',
+                        'details' => [
+                            'Nom' => $name,
+                            'E-mail' => $email,
+                            'Catégorie' => '' !== $category ? $category : 'Non précisée',
+                            'Sujet' => $subject,
+                        ],
+                        'bodyText' => $message,
+                    ])
                     ->text(implode("\n", [
                         'Nouvelle demande reçue depuis le formulaire Contact EventFlow.',
                         '',
@@ -75,6 +91,41 @@ final class ContactController extends AbstractController
                         '',
                         'Message :',
                         $message,
+                    ]))
+            );
+
+            $mailer->send(
+                (new TemplatedEmail())
+                    ->from($mailerConfiguration->fromEmail())
+                    ->to($email)
+                    ->subject('Ta demande EventFlow a bien été reçue')
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Demande reçue',
+                        'preheader' => 'L’équipe EventFlow a bien reçu ton message.',
+                        'appUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/'),
+                        'logoUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                        'eyebrow' => 'Contact EventFlow',
+                        'heading' => 'Ton message est bien arrivé',
+                        'greeting' => 'Bonjour '.$name.',',
+                        'paragraphs' => [
+                            'Nous avons bien reçu ta demande adressée à l’équipe EventFlow.',
+                            'Notre équipe te répondra directement à cette adresse e-mail.',
+                        ],
+                        'details' => [
+                            'Sujet' => $subject,
+                            'Catégorie' => '' !== $category ? $category : 'Non précisée',
+                        ],
+                    ])
+                    ->text(implode("\n", [
+                        'Bonjour '.$name.',',
+                        '',
+                        'Nous avons bien reçu ta demande adressée à l’équipe EventFlow.',
+                        '',
+                        'Sujet : '.$subject,
+                        'Catégorie : '.('' !== $category ? $category : 'Non précisée'),
+                        '',
+                        'Notre équipe te répondra à cette adresse email.',
                     ]))
             );
         } catch (\Throwable) {

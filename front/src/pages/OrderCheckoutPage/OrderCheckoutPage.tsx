@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  createStripeCheckoutSession,
+  createPaymentSession,
+  confirmOrderPayment,
   getOrder,
 } from '../../api/orders'
 import type { PreparedOrder } from '../../types/order'
@@ -30,9 +31,9 @@ import {
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: 'XOF',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value)
 }
 
@@ -84,7 +85,7 @@ export function OrderCheckoutPage() {
   const [searchParams] = useSearchParams()
   const [order, setOrder] = useState<PreparedOrder | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isLaunchingStripe, setIsLaunchingStripe] = useState(false)
+  const [isLaunchingPayment, setIsLaunchingPayment] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const orderId = useMemo(() => {
@@ -101,6 +102,7 @@ export function OrderCheckoutPage() {
 
   const isSuccessReturn = location.pathname === '/checkout/success'
   const isCancelReturn = location.pathname === '/checkout/cancel'
+  const returnedTransactionId = searchParams.get('id')
 
   useEffect(() => {
     let isMounted = true
@@ -141,6 +143,18 @@ export function OrderCheckoutPage() {
     }
 
     async function loadWithPolling(attempt = 0) {
+      if (0 === attempt && orderId && returnedTransactionId) {
+        try {
+          const confirmed = await confirmOrderPayment(orderId, returnedTransactionId)
+          if (isMounted && confirmed.order.status === 'paid') {
+            setOrder(confirmed.order)
+            setIsLoading(false)
+            return
+          }
+        } catch {
+          // Le webhook peut encore confirmer la commande pendant le polling.
+        }
+      }
       const loadedOrder = await loadOrderOnce(false)
 
       if (!isMounted) {
@@ -177,27 +191,27 @@ export function OrderCheckoutPage() {
         window.clearTimeout(pollTimeoutId)
       }
     }
-  }, [isSuccessReturn, orderId])
+  }, [isSuccessReturn, orderId, returnedTransactionId])
 
-  async function handleStartStripeCheckout() {
-    if (!order || !orderId || isLaunchingStripe || !order.canStartCheckout) {
+  async function handleStartPayment() {
+    if (!order || !orderId || isLaunchingPayment || !order.canStartCheckout) {
       return
     }
 
-    setIsLaunchingStripe(true)
+    setIsLaunchingPayment(true)
     setErrorMessage(null)
 
     try {
-      const response = await createStripeCheckoutSession(orderId)
+      const response = await createPaymentSession(orderId)
       window.location.assign(response.checkoutUrl)
     } catch (error) {
       setErrorMessage(
         extractApiErrorMessage(
           error,
-          'Impossible de lancer la session de paiement Stripe pour le moment.',
+          'Impossible de lancer le paiement FedaPay pour le moment.',
         ),
       )
-      setIsLaunchingStripe(false)
+      setIsLaunchingPayment(false)
     }
   }
 
@@ -233,7 +247,7 @@ export function OrderCheckoutPage() {
           </OrderPreparationTitle>
           <OrderPreparationState>
             {isSuccessReturn
-              ? 'On’attend la confirmation finale de Stripe pour mettre à jour la commande.'
+              ? 'On attend la confirmation finale de FedaPay pour mettre à jour la commande.'
               : 'On recharge ta commande avant de lancer le paiement.'}
           </OrderPreparationState>
         </OrderPreparationHero>
@@ -277,12 +291,12 @@ export function OrderCheckoutPage() {
   const checkoutIntro = paymentAlreadyCompleted
     ? isFreeOrder
       ? `La commande gratuite ${order.reference} est confirmée. Ta place est réservée.`
-      : `Le paiement Stripe de la commande ${order.reference} a bien été confirmé.`
+      : `Le paiement FedaPay de la commande ${order.reference} a bien été confirmé.`
     : isSuccessReturn
-      ? `Stripe a bien renvoyé le navigateur, mais la commande ${order.reference} attend encore sa confirmation finale.`
+      ? `FedaPay a bien renvoyé le navigateur, mais la commande ${order.reference} attend encore sa confirmation finale.`
       : isCancelReturn
-        ? `Tu peux relancer le paiement Stripe pour la commande ${order.reference} quand tu veux.`
-        : `La commande ${order.reference} est prête. On peut maintenant la rediriger vers Stripe pour payer les billets.`
+        ? `Tu peux relancer le paiement FedaPay pour la commande ${order.reference} quand tu veux.`
+        : `La commande ${order.reference} est prête. On peut maintenant ouvrir FedaPay pour payer les billets.`
 
   return (
     <OrderPreparationSection>
@@ -296,20 +310,20 @@ export function OrderCheckoutPage() {
         {paymentAlreadyCompleted ? (
           <OrderPreparationSuccess>
             {isFreeOrder
-              ? 'Billet confirmé. Aucun paiement Stripe n’est nécessaire.'
+              ? 'Billet confirmé. Aucun paiement FedaPay n’est nécessaire.'
               : 'Paiement reçu. Le statut de la commande est maintenant à jour.'}
           </OrderPreparationSuccess>
         ) : null}
 
         {isCancelReturn ? (
           <OrderPreparationHint>
-            Aucun billet nest confirmé tant que Stripe na pas valide le paiement.
+            Aucun billet nest confirmé tant que FedaPay na pas valide le paiement.
           </OrderPreparationHint>
         ) : null}
 
         {!paymentAlreadyCompleted && !isSuccessReturn && !isCancelReturn ? (
           <OrderPreparationSuccess>
-            Le stock reste non deduit tant que Stripe na pas confirmé le paiement.
+            Le stock reste non deduit tant que FedaPay n'a pas confirmé le paiement.
           </OrderPreparationSuccess>
         ) : null}
 
@@ -346,7 +360,7 @@ export function OrderCheckoutPage() {
 
           {isSuccessReturn && !paymentAlreadyCompleted ? (
             <OrderPreparationState>
-              Stripe a redirige le navigateur. Si la confirmation tarde, recharge simplement
+              FedaPay a redirige le navigateur. Si la confirmation tarde, recharge simplement
               cette page dans quelques secondes.
             </OrderPreparationState>
           ) : null}
@@ -359,7 +373,7 @@ export function OrderCheckoutPage() {
             </OrderPreparationHint>
           ) : order.canStartCheckout ? (
             <OrderPreparationHint>
-              Le paiement est géré sur la page Stripe hebergee, puis on revient ici pour la confirmation.
+              Le paiement est géré sur la page FedaPay hébergée, puis on revient ici pour la confirmation.
             </OrderPreparationHint>
           ) : (
             <OrderPreparationState>
@@ -390,10 +404,10 @@ export function OrderCheckoutPage() {
             ) : (
               <OrderPreparationCheckoutButton
                 type="button"
-                onClick={handleStartStripeCheckout}
-                disabled={isLaunchingStripe || !order.canStartCheckout}
+                onClick={handleStartPayment}
+                disabled={isLaunchingPayment || !order.canStartCheckout}
               >
-                {isLaunchingStripe ? 'Redirection vers Stripe...' : 'Payer avec Stripe'}
+                {isLaunchingPayment ? 'Redirection vers FedaPay...' : 'Confirmé le paiement.'}
               </OrderPreparationCheckoutButton>
             )}
 

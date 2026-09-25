@@ -740,7 +740,7 @@ export function AccountPage() {
                   <AccountDecisionTitle>Conservé</AccountDecisionTitle>
                   <AccountDecisionList>
                     <li>Commandes payées</li>
-                    <li>Paiements et références Stripe</li>
+                    <li>Paiements et références FedaPay</li>
                     <li>Billets déjà émis</li>
                     <li>Traces utiles aux obligations légales</li>
                   </AccountDecisionList>

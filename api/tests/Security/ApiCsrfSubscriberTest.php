@@ -42,11 +42,11 @@ final class ApiCsrfSubscriberTest extends TestCase
         self::assertSame(403, $event->getResponse()?->getStatusCode());
     }
 
-    public function testStripeWebhookAndReadsAreExempt(): void
+    public function testFedaPayWebhookAndReadsAreExempt(): void
     {
         $manager = $this->createMock(CsrfTokenManagerInterface::class);
         $manager->expects(self::never())->method('isTokenValid');
-        foreach ([['/api/stripe/webhook', 'POST'], ['/api/csrf-token', 'GET'], ['/api/orders', 'OPTIONS']] as [$path, $method]) {
+        foreach ([['/api/fedapay/webhook', 'POST'], ['/api/csrf-token', 'GET'], ['/api/orders', 'OPTIONS']] as [$path, $method]) {
             $event = $this->request($path, $method);
             (new ApiCsrfSubscriber($manager))->validate($event);
             self::assertFalse($event->hasResponse());

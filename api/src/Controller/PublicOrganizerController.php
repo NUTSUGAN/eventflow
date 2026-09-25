@@ -145,7 +145,7 @@ class PublicOrganizerController extends AbstractController
                 ? $this->toPublicAssetUrl($request, $event->getEventVideo())
                 : null,
             'minPrice' => $minPrice,
-            'currency' => 'EUR',
+            'currency' => 'XOF',
         ];
     }
 

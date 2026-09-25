@@ -284,13 +284,13 @@ export function AdminWithdrawalsPage() {
         <AdminDashboardMetric>
           <AdminDashboardMetricLabel>CA brut</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>
-            {formatCurrency(totals.gross, 'EUR')}
+            {formatCurrency(totals.gross, 'XOF')}
           </AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>
           <AdminDashboardMetricLabel>Net à verser</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>
-            {formatCurrency(totals.net, 'EUR')}
+            {formatCurrency(totals.net, 'XOF')}
           </AdminDashboardMetricValue>
         </AdminDashboardMetric>
       </AdminDashboardGrid>

@@ -56,7 +56,7 @@ security:
         - { path: ^/api/search, roles: PUBLIC_ACCESS }
         - { path: ^/api/events, roles: PUBLIC_ACCESS }
         - { path: ^/api/guest-tickets, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/stripe/webhook$, roles: PUBLIC_ACCESS, methods: [POST] }
+        - { path: ^/api/fedapay/webhook$, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/organizers/\d+$, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/admin/(admin-users|admin-invitations|roles), roles: ROLE_ADMIN }
         - { path: ^/api/admin/users/\d+/(grant-admin|revoke-admin|change-admin-role)$, roles: ROLE_ADMIN }

@@ -44,9 +44,9 @@ function formatDateTime(value: string | null): string {
 function formatCurrency(value: number, currency: string | null): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: currency ?? 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: currency ?? 'XOF',
+    minimumFractionDigits: currency === 'XOF' ? 0 : 2,
+    maximumFractionDigits: currency === 'XOF' ? 0 : 2,
   }).format(value)
 }
 

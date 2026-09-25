@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\EventRepository;
 use App\Repository\EventReportRepository;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -15,7 +16,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class EventReportController extends AbstractController
@@ -97,10 +97,29 @@ final class EventReportController extends AbstractController
 
         try {
             $mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($mailerConfiguration->fromEmail())
                     ->to($mailerConfiguration->reviewEmail())
                     ->subject('Nouveau signalement d’évènement EventFlow')
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Nouveau signalement',
+                        'preheader' => (string) $event->getTitle(),
+                        'appUrl' => rtrim($frontendAppUrl, '/'),
+                        'logoUrl' => rtrim($frontendAppUrl, '/').'/eventflow-logo.png',
+                        'heroImage' => $event->getCoverPhoto() ?? $event->getThumbnailPhoto(),
+                        'heroAlt' => (string) $event->getTitle(),
+                        'eyebrow' => 'Modération',
+                        'heading' => 'Un événement a été signalé',
+                        'details' => [
+                            'Événement' => (string) $event->getTitle(),
+                            'Signalé par' => $reporter->getDisplayName(),
+                            'Motif' => $eventReport->getReason(),
+                        ],
+                        'bodyText' => (string) ($eventReport->getDetails() ?? 'Aucun détail supplémentaire.'),
+                        'actionUrl' => rtrim($frontendAppUrl, '/').'/events/'.$event->getId(),
+                        'actionLabel' => 'Examiner l’événement',
+                    ])
                     ->text($this->buildAdminNotificationBody($event, $reporter, $eventReport, $frontendAppUrl))
             );
         } catch (\Throwable) {

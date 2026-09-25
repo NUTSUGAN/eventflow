@@ -28,7 +28,7 @@ L'application se compose de plusieurs espaces :
 - Frontend : React, TypeScript, Vite
 - Base de donnees : MySQL / MariaDB
 - ORM : Doctrine
-- Paiement : Stripe
+- Paiement : FedaPay Checkout (XOF)
 - Email : SMTP reel via Symfony Mailer
 - Scan QR : html5-qrcode et douchette clavier
 - Tests backend : PHPUnit
@@ -114,10 +114,13 @@ FRONTEND_APP_URL
 GOOGLE_OAUTH_CLIENT_ID
 GOOGLE_OAUTH_CLIENT_SECRET
 GOOGLE_OAUTH_REDIRECT_URI
-STRIPE_SECRET_KEY
-STRIPE_WEBHOOK_SECRET
-STRIPE_CHECKOUT_SUCCESS_URL
-STRIPE_CHECKOUT_CANCEL_URL
+FEDAPAY_SECRET_KEY
+FEDAPAY_WEBHOOK_SECRET
+FEDAPAY_ENVIRONMENT
+FEDAPAY_BASE_URL
+FEDAPAY_CURRENCY
+FEDAPAY_ORDER_CALLBACK_URL
+FEDAPAY_PROMOTION_CALLBACK_URL
 SUPABASE_URL
 SUPABASE_STORAGE_KEY
 SUPABASE_STORAGE_BUCKET
@@ -151,6 +154,27 @@ GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8080/api/auth/google/callback
 
 Dans Google Cloud Console, l'URI de redirection autorisee doit correspondre
 exactement a `GOOGLE_OAUTH_REDIRECT_URI`.
+
+### Paiements FedaPay
+
+Les billets payants et les campagnes Booster utilisent la page de paiement
+hébergée FedaPay. Les billets gratuits restent confirmés directement sans
+redirection. Place les secrets dans `api/.env.local` :
+
+```dotenv
+FEDAPAY_SECRET_KEY=sk_sandbox_...
+FEDAPAY_WEBHOOK_SECRET=wh_sandbox_...
+FEDAPAY_ENVIRONMENT=sandbox
+FEDAPAY_BASE_URL=https://sandbox-api.fedapay.com/v1
+FEDAPAY_CURRENCY=XOF
+FEDAPAY_ORDER_CALLBACK_URL=http://localhost:5173/checkout/success?orderId={ORDER_ID}
+FEDAPAY_PROMOTION_CALLBACK_URL=http://localhost:5173/organizer/promotions?payment=success&campaignId={CAMPAIGN_ID}
+```
+
+Dans le Workbench FedaPay, configure un webhook HTTPS vers
+`https://votre-domaine/api/fedapay/webhook` pour les événements de transaction.
+EventFlow vérifie la signature `X-FEDAPAY-SIGNATURE`, puis recharge la transaction
+depuis l'API avant de confirmer une commande ou une campagne.
 
 ## Commandes utiles backend
 
@@ -204,7 +228,7 @@ Traitements planifies :
 ```
 
 Ces commandes expirent les campagnes Booster terminees et reconcilient les
-paiements Stripe des campagnes approuvees si le webhook n'a pas ete recu.
+paiements FedaPay des campagnes approuvees si le webhook n'a pas ete recu.
 
 Commandes utiles :
 
@@ -306,7 +330,7 @@ pourra etre ajoute ensuite avec des secrets GitHub comme `DEPLOY_HOST`,
 - Demande de role organisateur avec validation admin.
 - Exploration des evenements publics avec filtres.
 - Abonnement aux organisateurs favoris.
-- Achat de billets et paiement Stripe.
+- Achat de billets et paiement mobile FedaPay.
 - Vente de billets possible pendant l'evenement, tant que la date de fin de
   l'evenement n'est pas depassee.
 - Commandes en attente visibles dans "Mes billets".

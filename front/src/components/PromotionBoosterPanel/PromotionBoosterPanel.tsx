@@ -62,7 +62,7 @@ export function PromotionBoosterPanel({ eventId, eventStatus }: { eventId: numbe
     [duration, options, selectedChannels],
   )
   const total = selectedRates.reduce((sum, rate) => sum + Number(rate.priceAmount), 0)
-  const currency = selectedRates[0]?.currency ?? 'EUR'
+  const currency = selectedRates[0]?.currency ?? 'XOF'
 
   function toggleChannel(channel: PromotionChannelCode) {
     if (channel === 'LAUNCH_PACK' && options && !options.launchPack.available) return

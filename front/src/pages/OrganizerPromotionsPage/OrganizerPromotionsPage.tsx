@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import {
+  confirmPromotionPayment,
   getOrganizerPromotions,
   startPromotionCheckout,
 } from '../../api/promotions'
@@ -57,6 +58,7 @@ export function OrganizerPromotionsPage() {
   const [payingId, setPayingId] = useState<number | null>(null)
   const payment = searchParams.get('payment')
   const returnedCampaignId = Number(searchParams.get('campaignId'))
+  const returnedTransactionId = searchParams.get('id')
 
   useEffect(() => {
     let mounted = true
@@ -71,6 +73,10 @@ export function OrganizerPromotionsPage() {
         if (!canUseOrganizerAdminTools(user)) {
           navigate('/organizer-access', { replace: true })
           return null
+        }
+
+        if (payment === 'success' && returnedCampaignId > 0 && returnedTransactionId) {
+          await confirmPromotionPayment(returnedCampaignId, returnedTransactionId)
         }
 
         return getOrganizerPromotions(page, 10)
@@ -88,7 +94,7 @@ export function OrganizerPromotionsPage() {
       })
 
     return () => { mounted = false }
-  }, [navigate, page])
+  }, [navigate, page, payment, returnedCampaignId, returnedTransactionId])
 
   useEffect(() => {
     let mounted = true
@@ -148,7 +154,7 @@ export function OrganizerPromotionsPage() {
       {payment === 'cancelled' ? <PromotionMessage $error>Paiement annulé. La campagne reste disponible au paiement.</PromotionMessage> : null}
       {payment === 'success' && Number.isInteger(returnedCampaignId) && returnedCampaignId > 0 ? (
         <PromotionMessage>
-          Paiement terminé côté Stripe. EventFlow attend maintenant le webhook signé pour confirmer la campagne.
+          Paiement FedaPay reçu. EventFlow vérifie la transaction avant d’activer la campagne.
         </PromotionMessage>
       ) : null}
       {error ? <PromotionMessage $error>{error}</PromotionMessage> : null}

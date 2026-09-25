@@ -12,6 +12,7 @@ use App\Repository\UserOauthAccountRepository;
 use App\Repository\UserRepository;
 use App\Service\AccountErasureService;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use App\Service\UploadedImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,7 +20,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -554,10 +554,27 @@ class AuthController extends AbstractController
 
         try {
             $mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($mailerConfiguration->fromEmail())
                     ->to($email)
                     ->subject('Réinitialisation de ton mot de passe EventFlow')
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Réinitialisation du mot de passe',
+                        'preheader' => 'Ton lien sécurisé EventFlow est disponible.',
+                        'appUrl' => rtrim($frontendAppUrl, '/'),
+                        'logoUrl' => rtrim($frontendAppUrl, '/').'/eventflow-logo.png',
+                        'eyebrow' => 'Sécurité du compte',
+                        'heading' => 'Choisis un nouveau mot de passe',
+                        'greeting' => 'Bonjour,',
+                        'paragraphs' => [
+                            'Une demande de réinitialisation a été reçue pour ton compte EventFlow.',
+                            'Utilise le bouton ci-dessous pour définir un nouveau mot de passe.',
+                        ],
+                        'actionUrl' => $resetUrl,
+                        'actionLabel' => 'Réinitialiser mon mot de passe',
+                        'note' => 'Ce lien est valable pendant 1 heure. Si tu n’as rien demandé, ignore cet e-mail.',
+                    ])
                     ->text(
                         "Bonjour,\n\n".
                         "Voici ton lien de réinitialisation EventFlow :\n".

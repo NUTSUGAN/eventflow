@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'payments')]
 class Payment
 {
-    public const PROVIDER_STRIPE = 'stripe';
+    public const PROVIDER_FEDAPAY = 'fedapay';
     public const PROVIDER_FREE = 'free';
     public const STATUS_PAID = 'paid';
 

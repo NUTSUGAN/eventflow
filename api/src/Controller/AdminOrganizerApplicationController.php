@@ -6,12 +6,12 @@ use App\Entity\OrganizerApplication;
 use App\Entity\User;
 use App\Repository\OrganizerApplicationRepository;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -157,10 +157,27 @@ final class AdminOrganizerApplicationController extends AbstractController
 
         try {
             $mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($mailerConfiguration->fromEmail())
                     ->to($email)
                     ->subject($subject)
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => $subject,
+                        'preheader' => $approved ? 'Ta demande organisateur est approuvée.' : 'Une mise à jour concerne ta demande organisateur.',
+                        'appUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/'),
+                        'logoUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                        'eyebrow' => 'Espace organisateur',
+                        'heading' => $approved ? 'Ta demande est approuvée' : 'Ta demande doit être ajustée',
+                        'greeting' => 'Bonjour '.('' !== $fullName ? $fullName : 'Organisateur').',',
+                        'paragraphs' => [$approved
+                            ? 'Bonne nouvelle : tu peux maintenant accéder à ton espace organisateur EventFlow.'
+                            : 'Ta demande a été relue, mais elle ne peut pas encore être validée.'],
+                        'details' => ['Structure' => (string) $application->getOrganizationName()],
+                        'note' => $application->getReviewNote(),
+                        'actionUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').($approved ? '/organizer' : '/organizer-access'),
+                        'actionLabel' => $approved ? 'Ouvrir mon espace' : 'Mettre à jour ma demande',
+                    ])
                     ->text($body)
             );
         } catch (\Throwable) {

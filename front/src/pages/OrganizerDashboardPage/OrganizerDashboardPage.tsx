@@ -406,7 +406,7 @@ export function OrganizerDashboardPage() {
           <OrganizerDashboardMetricValue>
             {formatCurrency(
               dashboard?.stats.revenue.total ?? 0,
-              dashboard?.stats.revenue.currency ?? 'EUR',
+              dashboard?.stats.revenue.currency ?? 'XOF',
             )}
           </OrganizerDashboardMetricValue>
           <OrganizerDashboardMetricHint>Commandes payées uniquement</OrganizerDashboardMetricHint>

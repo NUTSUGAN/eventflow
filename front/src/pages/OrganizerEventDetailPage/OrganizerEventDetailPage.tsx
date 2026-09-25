@@ -415,7 +415,7 @@ export function OrganizerEventDetailPage() {
     revenueTotal: '0.00',
     paidOrders: 0,
     ticketsSold: 0,
-    currency: 'EUR',
+    currency: 'XOF',
   }
   const eventScans = event?.scans ?? {
     total: scanStats?.totalScans ?? 0,

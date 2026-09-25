@@ -7,11 +7,11 @@ use App\Entity\OrganizerStaffMember;
 use App\Entity\User;
 use App\Repository\OrganizerStaffMemberRepository;
 use App\Repository\UserRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 final class OrganizerStaffService
 {
@@ -238,12 +238,30 @@ final class OrganizerStaffService
         if ('' !== $staffEmail) {
             try {
                 $this->mailer->send(
-                    (new Email())
+                    (new TemplatedEmail())
                         ->from($this->mailerFromEmail)
                         ->to($staffEmail)
                         ->subject($wasReactivated
                             ? 'Tu es de nouveau actif dans un staff EventFlow'
                             : 'Tu fais maintenant partie d’un staff EventFlow')
+                        ->htmlTemplate('emails/notification.html.twig')
+                        ->context([
+                            'emailTitle' => 'Accès staff EventFlow',
+                            'preheader' => 'Ton accès au scan des billets est disponible.',
+                            'appUrl' => rtrim($frontendAppUrl, '/'),
+                            'logoUrl' => rtrim($frontendAppUrl, '/').'/eventflow-logo.png',
+                            'eyebrow' => 'Équipe événementielle',
+                            'heading' => $wasReactivated ? 'Ton accès staff est réactivé' : 'Bienvenue dans le staff',
+                            'greeting' => 'Bonjour '.$staffName.',',
+                            'paragraphs' => [
+                                $organizerName.($wasReactivated
+                                    ? ' t’a remis en service dans son staff EventFlow.'
+                                    : ' t’a ajouté à son staff EventFlow.'),
+                                'Tu retrouveras les événements auxquels tu peux donner accès sur la page de scan.',
+                            ],
+                            'actionUrl' => $scanUrl,
+                            'actionLabel' => 'Ouvrir le scanner',
+                        ])
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".
@@ -271,12 +289,27 @@ final class OrganizerStaffService
         if ('' !== $organizerEmail) {
             try {
                 $this->mailer->send(
-                    (new Email())
+                    (new TemplatedEmail())
                         ->from($this->mailerFromEmail)
                         ->to($organizerEmail)
                         ->subject($wasReactivated
                             ? 'Membre remis en service dans ton staff EventFlow'
                             : 'Nouveau membre ajouté à ton staff EventFlow')
+                        ->htmlTemplate('emails/notification.html.twig')
+                        ->context([
+                            'emailTitle' => 'Équipe EventFlow mise à jour',
+                            'preheader' => 'Ton équipe événementielle a été mise à jour.',
+                            'appUrl' => rtrim($frontendAppUrl, '/'),
+                            'logoUrl' => rtrim($frontendAppUrl, '/').'/eventflow-logo.png',
+                            'eyebrow' => 'Gestion du staff',
+                            'heading' => $wasReactivated ? 'Membre remis en service' : 'Nouveau membre ajouté',
+                            'greeting' => 'Bonjour '.$organizerName.',',
+                            'paragraphs' => [
+                                $staffName.' ('.($staffUser->getEmail() ?? 'email inconnu').') fait maintenant partie de ton équipe active.',
+                            ],
+                            'actionUrl' => $staffPageUrl,
+                            'actionLabel' => 'Gérer mon équipe',
+                        ])
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".

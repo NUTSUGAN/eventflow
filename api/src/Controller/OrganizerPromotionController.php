@@ -11,7 +11,7 @@ use App\Repository\PromotionCampaignRepository;
 use App\Service\PromotionCampaignService;
 use App\Service\PromotionNotificationService;
 use App\Service\PromotionPricingService;
-use App\Service\StripePaymentService;
+use App\Service\FedaPayPaymentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -184,7 +184,7 @@ final class OrganizerPromotionController extends AbstractController
     public function checkout(
         PromotionCampaign $campaign,
         PromotionCampaignService $campaignService,
-        StripePaymentService $stripePaymentService,
+        FedaPayPaymentService $paymentService,
         EntityManagerInterface $entityManager,
     ): JsonResponse {
         $user = $this->getUser();
@@ -203,9 +203,9 @@ final class OrganizerPromotionController extends AbstractController
 
         try {
             $campaignService->assertLaunchPackAvailable($campaign);
-            $session = $stripePaymentService->createPromotionCheckoutSession($campaign);
+            $session = $paymentService->createPromotionCheckoutSession($campaign);
             $campaign
-                ->setStripeSessionId((string) $session->id)
+                ->setPaymentReferenceId($session['transactionId'])
                 ->setUpdatedAt(new \DateTimeImmutable())
             ;
             $entityManager->flush();
@@ -216,15 +216,19 @@ final class OrganizerPromotionController extends AbstractController
         }
 
         return $this->json([
-            'checkoutUrl' => $session->url,
-            'sessionId' => $session->id,
+            'checkoutUrl' => $session['checkoutUrl'],
+            'transactionId' => $session['transactionId'],
         ]);
     }
 
     #[Route('/promotions/{id<\d+>}/confirm-payment', name: 'api_organizer_promotion_payment_confirm', methods: ['POST'])]
     public function confirmPayment(
         PromotionCampaign $campaign,
+        Request $request,
         PromotionCampaignService $campaignService,
+        FedaPayPaymentService $paymentService,
+        PromotionNotificationService $notificationService,
+        EntityManagerInterface $entityManager,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -247,10 +251,37 @@ final class OrganizerPromotionController extends AbstractController
             ]);
         }
 
+        $payload = json_decode($request->getContent(), true);
+        $transactionId = is_array($payload) && is_scalar($payload['transactionId'] ?? null)
+            ? trim((string) $payload['transactionId'])
+            : '';
+        if ('' === $transactionId) {
+            return $this->json(['message' => 'Identifiant de transaction FedaPay manquant.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $transaction = $paymentService->retrieveTransaction($transactionId);
+            $paymentService->assertPaidPromotionTransaction($transaction, $campaign);
+            $campaignService->assertLaunchPackAvailable($campaign);
+            $campaignService->activatePaidCampaign($campaign, $transactionId);
+            $paymentService->recordPromotionOrder($campaign, $transaction);
+            $entityManager->flush();
+            $notificationService->notifyPaymentConfirmed($campaign);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (\LogicException $exception) {
+            return $this->json([
+                'message' => $exception->getMessage(),
+                'campaign' => $campaignService->serialize($campaign),
+            ], Response::HTTP_ACCEPTED);
+        } catch (\RuntimeException $exception) {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
         return $this->json([
-            'message' => 'Paiement Stripe reçu par le navigateur. EventFlow attend le webhook Stripe signé pour confirmer la campagne.',
+            'message' => 'Paiement FedaPay confirmé.',
             'campaign' => $campaignService->serialize($campaign),
-        ], Response::HTTP_ACCEPTED);
+        ]);
     }
 
     /**

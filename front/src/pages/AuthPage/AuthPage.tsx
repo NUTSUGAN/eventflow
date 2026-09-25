@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { FaEye, FaEyeSlash } from 'react-icons/fa6'
 import {
   buildGoogleAuthUrl,
   finalizeGoogleAuth,
@@ -37,6 +38,8 @@ import {
   AuthLayout,
   AuthLegalLink,
   AuthPanel,
+  AuthPasswordButton,
+  AuthPasswordField,
   AuthPrimaryButton,
   AuthSecondaryButton,
   AuthStateBox,
@@ -230,6 +233,8 @@ export function AuthPage() {
     initialForgotPasswordForm,
   )
   const [resetPasswordValue, setResetPasswordValue] = useState('')
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
   const [googleConsent, setGoogleConsent] = useState({
     acceptTerms: false,
     acceptPrivacy: false,
@@ -376,6 +381,8 @@ export function AuthPage() {
     setErrorMessage(null)
     setStatusMessage(null)
     setResetPasswordValue('')
+    setShowLoginPassword(false)
+    setShowRegisterPassword(false)
   }
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
@@ -586,18 +593,30 @@ export function AuthPage() {
                 <AuthFieldLabel htmlFor="auth-login-password">
                   Mot de passe
                 </AuthFieldLabel>
-                <AuthTextInput
-                  id="auth-login-password"
-                  type="password"
-                  value={loginForm.password}
-                  onChange={(event) =>
-                    setLoginForm((current) => ({
-                      ...current,
-                      password: event.target.value,
-                    }))
-                  }
-                  required
-                />
+                <AuthPasswordField>
+                  <AuthTextInput
+                    id="auth-login-password"
+                    type={showLoginPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    value={loginForm.password}
+                    onChange={(event) =>
+                      setLoginForm((current) => ({
+                        ...current,
+                        password: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                  <AuthPasswordButton
+                    type="button"
+                    aria-label={showLoginPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    aria-pressed={showLoginPassword}
+                    title={showLoginPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    onClick={() => setShowLoginPassword((current) => !current)}
+                  >
+                    {showLoginPassword ? <FaEyeSlash /> : <FaEye />}
+                  </AuthPasswordButton>
+                </AuthPasswordField>
               </AuthField>
 
               <AuthField>
@@ -704,18 +723,30 @@ export function AuthPage() {
                 <AuthFieldLabel htmlFor="auth-register-password">
                   Mot de passe
                 </AuthFieldLabel>
-                <AuthTextInput
-                  id="auth-register-password"
-                  type="password"
-                  value={registerForm.password}
-                  onChange={(event) =>
-                    setRegisterForm((current) => ({
-                      ...current,
-                      password: event.target.value,
-                    }))
-                  }
-                  required
-                />
+                <AuthPasswordField>
+                  <AuthTextInput
+                    id="auth-register-password"
+                    type={showRegisterPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    value={registerForm.password}
+                    onChange={(event) =>
+                      setRegisterForm((current) => ({
+                        ...current,
+                        password: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                  <AuthPasswordButton
+                    type="button"
+                    aria-label={showRegisterPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    aria-pressed={showRegisterPassword}
+                    title={showRegisterPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    onClick={() => setShowRegisterPassword((current) => !current)}
+                  >
+                    {showRegisterPassword ? <FaEyeSlash /> : <FaEye />}
+                  </AuthPasswordButton>
+                </AuthPasswordField>
                 <AuthHelperText>{passwordRequirementsMessage}</AuthHelperText>
               </AuthField>
 

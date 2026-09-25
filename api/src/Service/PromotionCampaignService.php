@@ -56,7 +56,7 @@ final class PromotionCampaignService
         }
     }
 
-    public function activatePaidCampaign(PromotionCampaign $campaign, string $stripeSessionId): void
+    public function activatePaidCampaign(PromotionCampaign $campaign, string $paymentReferenceId): void
     {
         if (PromotionCampaign::STATUS_ACTIVE === $campaign->getStatus() && null !== $campaign->getPaidAt()) {
             return;
@@ -76,7 +76,7 @@ final class PromotionCampaignService
         $campaign
             ->setStatus(PromotionCampaign::STATUS_ACTIVE)
             ->setPaidAt($now)
-            ->setStripeSessionId($stripeSessionId)
+            ->setPaymentReferenceId($paymentReferenceId)
             ->setStartsAt($now)
             ->setEndsAt($this->calculateEnd($now, $duration))
             ->setUpdatedAt($now)

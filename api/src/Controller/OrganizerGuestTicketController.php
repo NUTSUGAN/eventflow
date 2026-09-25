@@ -15,6 +15,7 @@ use App\Repository\OrderItemRepository;
 use App\Repository\TicketRepository;
 use App\Repository\TicketTypeRepository;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +23,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class OrganizerGuestTicketController extends AbstractController
@@ -226,10 +226,32 @@ final class OrganizerGuestTicketController extends AbstractController
         $recipientName = trim((string) ($ticket->getRecipientName() ?? ''));
 
         $mailer->send(
-            (new Email())
+            (new TemplatedEmail())
                 ->from($mailerConfiguration->fromEmail())
                 ->to($recipientEmail)
                 ->subject('Ton invitation EventFlow')
+                ->htmlTemplate('emails/notification.html.twig')
+                ->context([
+                    'emailTitle' => 'Invitation EventFlow',
+                    'preheader' => 'Ton billet invité est prêt.',
+                    'appUrl' => $request->getSchemeAndHttpHost(),
+                    'logoUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                    'heroImage' => $event?->getCoverPhoto() ?? $event?->getThumbnailPhoto(),
+                    'heroAlt' => (string) ($event?->getTitle() ?? 'Événement EventFlow'),
+                    'eyebrow' => 'Invitation',
+                    'heading' => (string) ($event?->getTitle() ?? 'Ton événement EventFlow'),
+                    'greeting' => 'Bonjour '.('' !== $recipientName ? $recipientName : 'invité').',',
+                    'paragraphs' => ['Tu as reçu une invitation EventFlow. Ton billet et son QR code sont prêts.'],
+                    'details' => [
+                        'Date' => $this->formatDateTimeForFrontend($event?->getStartDatetime()) ?? 'Date à confirmer',
+                        'Lieu' => (string) ($location?->getAddress() ?? $location?->getCity() ?? 'Lieu à confirmer'),
+                        'Billet' => (string) ($ticket->getTicketType()?->getName() ?? 'Invitation'),
+                        'Code' => sprintf('EVF-%06d', (int) ($ticket->getId() ?? 0)),
+                    ],
+                    'actionUrl' => $guestTicketUrl,
+                    'actionLabel' => 'Ouvrir mon billet',
+                    'note' => 'Présente le QR code affiché sur ton billet au contrôle d’entrée.',
+                ])
                 ->text(sprintf(
                     "Bonjour %s,\n\n".
                     "Tu as reçu une invitation pour l'événement : %s.\n\n".

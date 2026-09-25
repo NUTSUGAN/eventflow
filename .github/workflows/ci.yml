@@ -59,10 +59,12 @@ jobs:
       DATABASE_URL: mysql://root:root@127.0.0.1:3306/eventflow_test?serverVersion=10.11.2-MariaDB&charset=utf8mb4
       MAILER_DSN: null://null
       MAILER_FROM_EMAIL: no-reply@eventflow.local
-      STRIPE_SECRET_KEY: sk_test_ci_placeholder
-      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
-      STRIPE_CHECKOUT_SUCCESS_URL: http://localhost:5173/checkout/success?orderId={ORDER_ID}&session_id={CHECKOUT_SESSION_ID}
-      STRIPE_CHECKOUT_CANCEL_URL: http://localhost:5173/checkout/cancel?orderId={ORDER_ID}
+      FEDAPAY_SECRET_KEY: sk_sandbox_ci_placeholder
+      FEDAPAY_WEBHOOK_SECRET: wh_sandbox_ci_placeholder
+      FEDAPAY_ENVIRONMENT: sandbox
+      FEDAPAY_BASE_URL: https://sandbox-api.fedapay.com/v1
+      FEDAPAY_CURRENCY: XOF
+      FEDAPAY_ORDER_CALLBACK_URL: http://localhost:5173/checkout/success?orderId={ORDER_ID}
 
     steps:
       - name: Checkout

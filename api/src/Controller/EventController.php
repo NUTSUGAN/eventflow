@@ -251,7 +251,7 @@ class EventController extends AbstractController
             'category' => $event->getCategory()?->getName() ?? 'évènement',
             'coverImageUrl' => $this->toPublicAssetUrl($request, $event->getThumbnailPhoto() ?? $event->getCoverPhoto()),
             'minPrice' => $minPrice,
-            'currency' => 'EUR',
+            'currency' => 'XOF',
             ...$this->serializeSponsorship($event),
         ];
     }

@@ -159,7 +159,7 @@ export function OrganizerWithdrawalDetailPage() {
     }
   }, [navigate, withdrawalId])
 
-  const currency = withdrawal?.currency ?? 'EUR'
+  const currency = withdrawal?.currency ?? 'XOF'
 
   return (
     <OrganizerDashboardSection>

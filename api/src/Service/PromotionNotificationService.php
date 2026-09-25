@@ -4,9 +4,9 @@ namespace App\Service;
 
 use App\Entity\PromotionCampaign;
 use App\Entity\PromotionCampaignChannel;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 final class PromotionNotificationService
 {
@@ -136,15 +136,36 @@ final class PromotionNotificationService
 
         try {
             $this->mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($this->fromEmail)
                     ->to(trim($recipient))
                     ->subject($subject)
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context($this->emailContext($subject, $body))
                     ->text($body)
             );
         } catch (\Throwable) {
             // A mail outage must not roll back a campaign or a confirmed payment.
         }
+    }
+
+    /** @return array<string, mixed> */
+    private function emailContext(string $subject, string $body): array
+    {
+        preg_match_all('~https?://[^\s]+~', $body, $matches);
+        $actionUrl = [] !== ($matches[0] ?? []) ? end($matches[0]) : null;
+
+        return [
+            'emailTitle' => $subject,
+            'preheader' => 'Une notification Booster EventFlow est disponible.',
+            'appUrl' => rtrim($this->frontendUrl, '/'),
+            'logoUrl' => rtrim($this->frontendUrl, '/').'/eventflow-logo.png',
+            'eyebrow' => 'EventFlow Booster',
+            'heading' => $subject,
+            'bodyText' => $body,
+            'actionUrl' => $actionUrl,
+            'actionLabel' => null !== $actionUrl ? 'Ouvrir dans EventFlow' : null,
+        ];
     }
 
     private function frontendUrl(string $path): string

@@ -1,6 +1,6 @@
 import { apiClient } from './client'
 import type {
-  OrderCheckoutSessionResponse,
+  OrderPaymentSessionResponse,
   PendingOrdersResponse,
   OrderPreparationPayload,
   OrderPreparationResponse,
@@ -36,12 +36,23 @@ export async function getPendingOrders(): Promise<PendingOrdersResponse> {
   return response.data
 }
 
-export async function createStripeCheckoutSession(
+export async function createPaymentSession(
   orderId: number,
-): Promise<OrderCheckoutSessionResponse> {
-  const response = await apiClient.post<OrderCheckoutSessionResponse>(
-    `/api/orders/${orderId}/checkout-session`,
+): Promise<OrderPaymentSessionResponse> {
+  const response = await apiClient.post<OrderPaymentSessionResponse>(
+    `/api/orders/${orderId}/payment-session`,
   )
 
+  return response.data
+}
+
+export async function confirmOrderPayment(
+  orderId: number,
+  transactionId: string,
+): Promise<OrderSummaryResponse> {
+  const response = await apiClient.post<OrderSummaryResponse>(
+    `/api/orders/${orderId}/confirm-payment`,
+    { transactionId },
+  )
   return response.data
 }

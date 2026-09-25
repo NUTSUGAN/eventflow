@@ -46,7 +46,7 @@ function formatCurrency(amount: string | null, currency: string | null): string 
 
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: currency || 'EUR',
+    currency: currency || 'XOF',
   }).format(Number.isFinite(numericAmount) ? numericAmount : 0)
 }
 
@@ -157,7 +157,7 @@ export function AdminOrdersPage() {
           <AdminDashboardEyebrow>Administration</AdminDashboardEyebrow>
           <AdminDashboardTitle>Commandes & paiements</AdminDashboardTitle>
           <AdminDashboardText>
-            Suivi des commandes, paiements Stripe et billets générés.
+            Suivi des commandes, paiements FedaPay et billets générés.
           </AdminDashboardText>
         </AdminDashboardHeaderText>
         <AdminDashboardActions>

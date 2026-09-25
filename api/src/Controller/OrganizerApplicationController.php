@@ -6,12 +6,12 @@ use App\Entity\OrganizerApplication;
 use App\Entity\User;
 use App\Repository\OrganizerApplicationRepository;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -133,10 +133,26 @@ final class OrganizerApplicationController extends AbstractController
 
         try {
             $mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($mailerConfiguration->fromEmail())
                     ->to($mailerConfiguration->reviewEmail())
                     ->subject('Nouvelle demande organisateur EventFlow')
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Nouvelle demande organisateur',
+                        'preheader' => (string) $application->getOrganizationName(),
+                        'appUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/'),
+                        'logoUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                        'eyebrow' => 'Administration',
+                        'heading' => 'Nouvelle demande organisateur',
+                        'details' => [
+                            'Compte' => $fullName,
+                            'E-mail' => (string) $user->getEmail(),
+                            'Structure' => (string) $application->getOrganizationName(),
+                            'Ville' => (string) $application->getCity(),
+                        ],
+                        'bodyText' => (string) $application->getMotivation(),
+                    ])
                     ->text(
                         "Nouvelle demande organisateur reçue.\n\n".
                         "Compte: {$fullName}\n".
@@ -154,10 +170,29 @@ final class OrganizerApplicationController extends AbstractController
 
             if (null !== $user->getEmail()) {
                 $mailer->send(
-                    (new Email())
+                    (new TemplatedEmail())
                         ->from($mailerConfiguration->fromEmail())
                         ->to((string) $user->getEmail())
                         ->subject('Ta demande organisateur EventFlow a été reçue')
+                        ->htmlTemplate('emails/notification.html.twig')
+                        ->context([
+                            'emailTitle' => 'Demande organisateur reçue',
+                            'preheader' => 'Ta demande organisateur est en cours de vérification.',
+                            'appUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/'),
+                            'logoUrl' => rtrim((string) ($_SERVER['FRONTEND_APP_URL'] ?? $_ENV['FRONTEND_APP_URL'] ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                            'eyebrow' => 'Espace organisateur',
+                            'heading' => 'Ta demande est entre de bonnes mains',
+                            'greeting' => 'Bonjour '.('' !== $fullName ? $fullName : 'Organisateur').',',
+                            'paragraphs' => [
+                                'Nous avons bien reçu ta demande organisateur.',
+                                'Notre équipe va vérifier les informations publiques envoyées puis revenir vers toi par e-mail.',
+                            ],
+                            'details' => [
+                                'Structure' => (string) $application->getOrganizationName(),
+                                'Ville' => (string) $application->getCity(),
+                                'Statut' => 'En attente de vérification',
+                            ],
+                        ])
                         ->text(
                             "Bonjour {$fullName},\n\n".
                             "Nous avons bien reçu ta demande organisateur pour {$application->getOrganizationName()}.\n".

@@ -6,7 +6,7 @@ use App\Entity\PromotionCampaign;
 use App\Repository\PromotionCampaignRepository;
 use App\Service\PromotionCampaignService;
 use App\Service\PromotionNotificationService;
-use App\Service\StripePaymentService;
+use App\Service\FedaPayPaymentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:promotions:reconcile-payments',
-    description: 'Réconcilie les campagnes approuvées avec les paiements Stripe confirmés.',
+    description: 'Réconcilie les campagnes approuvées avec les paiements FedaPay confirmés.',
 )]
 final class ReconcilePromotionPaymentsCommand extends Command
 {
@@ -24,7 +24,7 @@ final class ReconcilePromotionPaymentsCommand extends Command
         private readonly PromotionCampaignRepository $campaignRepository,
         private readonly PromotionCampaignService $campaignService,
         private readonly PromotionNotificationService $notificationService,
-        private readonly StripePaymentService $stripePaymentService,
+        private readonly FedaPayPaymentService $paymentService,
         private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
@@ -41,15 +41,15 @@ final class ReconcilePromotionPaymentsCommand extends Command
 
         foreach ($campaigns as $campaign) {
             try {
-                $session = $this->stripePaymentService->findPaidPromotionSession($campaign);
-
-                if (null === $session) {
+                $transactionId = $campaign->getPaymentReferenceId();
+                if (null === $transactionId) {
                     continue;
                 }
-
+                $transaction = $this->paymentService->retrieveTransaction($transactionId);
+                $this->paymentService->assertPaidPromotionTransaction($transaction, $campaign);
                 $this->campaignService->assertLaunchPackAvailable($campaign);
-                $this->campaignService->activatePaidCampaign($campaign, (string) $session->id);
-                $this->stripePaymentService->recordPromotionOrder($campaign, $session);
+                $this->campaignService->activatePaidCampaign($campaign, $transactionId);
+                $this->paymentService->recordPromotionOrder($campaign, $transaction);
                 $this->entityManager->flush();
                 $this->notificationService->notifyPaymentConfirmed($campaign);
                 ++$reconciled;

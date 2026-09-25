@@ -1,0 +1,3 @@
+fedapay_webhook_controller:
+    resource: ../../src/Controller/FedaPayWebhookController.php
+    type: attribute

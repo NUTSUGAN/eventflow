@@ -1,0 +1,22 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+  {% if greeting|default(null) %}<p style="margin:0 0 14px;">{{ greeting }}</p>{% endif %}
+  {% for paragraph in paragraphs|default([]) %}
+    <p style="margin:0 0 14px;">{{ paragraph }}</p>
+  {% endfor %}
+  {% if bodyText|default(null) %}
+    <div style="margin:0 0 14px;white-space:normal;">{{ bodyText|nl2br }}</div>
+  {% endif %}
+  {% if details|default([]) %}
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;margin:20px 0;background:#2a221e;border:1px solid #44372f;table-layout:fixed;">
+      {% for label, value in details %}
+        <tr>
+          <td width="38%" style="width:38%;padding:10px;color:#b9a99d;font-size:13px;border-bottom:1px solid #3b302a;vertical-align:top;word-break:break-word;">{{ label }}</td>
+          <td width="62%" align="right" style="width:62%;padding:10px;color:#fffaf4;font-size:13px;font-weight:700;border-bottom:1px solid #3b302a;vertical-align:top;word-break:break-word;">{{ value }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+  {% if note|default(null) %}<p style="margin:18px 0 0;color:#b9a99d;font-size:13px;">{{ note }}</p>{% endif %}
+{% endblock %}

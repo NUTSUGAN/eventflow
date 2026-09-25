@@ -1251,7 +1251,7 @@ export function AdminDashboardPage() {
         <AdminDashboardMetric>
           <AdminDashboardMetricLabel>CA total</AdminDashboardMetricLabel>
           <AdminDashboardMetricValue>
-            {formatCurrency(stats?.revenue.total ?? 0, stats?.revenue.currency ?? 'EUR')}
+            {formatCurrency(stats?.revenue.total ?? 0, stats?.revenue.currency ?? 'XOF')}
           </AdminDashboardMetricValue>
         </AdminDashboardMetric>
         <AdminDashboardMetric>

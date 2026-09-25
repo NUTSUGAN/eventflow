@@ -39,7 +39,7 @@ class PromotionCampaign
         self::DURATION_30_DAYS,
     ];
 
-    public const DEFAULT_CURRENCY = 'EUR';
+    public const DEFAULT_CURRENCY = 'XOF';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -91,8 +91,8 @@ class PromotionCampaign
     #[ORM\Column(name: 'paid_at', nullable: true)]
     private ?\DateTimeImmutable $paidAt = null;
 
-    #[ORM\Column(name: 'stripe_session_id', length: 255, nullable: true, unique: true)]
-    private ?string $stripeSessionId = null;
+    #[ORM\Column(name: 'payment_reference_id', length: 255, nullable: true, unique: true)]
+    private ?string $paymentReferenceId = null;
 
     #[ORM\Column(name: 'created_at')]
     private \DateTimeImmutable $createdAt;
@@ -351,16 +351,16 @@ class PromotionCampaign
         return $this;
     }
 
-    public function getStripeSessionId(): ?string
+    public function getPaymentReferenceId(): ?string
     {
-        return $this->stripeSessionId;
+        return $this->paymentReferenceId;
     }
 
-    public function setStripeSessionId(?string $stripeSessionId): static
+    public function setPaymentReferenceId(?string $paymentReferenceId): static
     {
-        $stripeSessionId = null !== $stripeSessionId ? trim($stripeSessionId) : null;
-        $this->stripeSessionId = null !== $stripeSessionId && '' !== $stripeSessionId
-            ? $stripeSessionId
+        $paymentReferenceId = null !== $paymentReferenceId ? trim($paymentReferenceId) : null;
+        $this->paymentReferenceId = null !== $paymentReferenceId && '' !== $paymentReferenceId
+            ? $paymentReferenceId
             : null;
 
         return $this;

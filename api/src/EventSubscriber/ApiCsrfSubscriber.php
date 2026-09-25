@@ -26,7 +26,7 @@ final class ApiCsrfSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         if (!$event->isMainRequest() || $request->isMethodSafe()
             || !str_starts_with($request->getPathInfo(), '/api/')
-            || '/api/stripe/webhook' === $request->getPathInfo()) {
+            || '/api/fedapay/webhook' === $request->getPathInfo()) {
             return;
         }
 

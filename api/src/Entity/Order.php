@@ -28,7 +28,7 @@ class Order
         self::STATUS_PAID,
     ];
 
-    public const DEFAULT_CURRENCY = 'EUR';
+    public const DEFAULT_CURRENCY = 'XOF';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

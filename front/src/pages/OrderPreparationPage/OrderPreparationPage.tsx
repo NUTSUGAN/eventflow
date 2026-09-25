@@ -34,9 +34,9 @@ import {
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: 'XOF',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value)
 }
 
@@ -431,7 +431,7 @@ export function OrderPreparationPage() {
                 <OrderPreparationHint>
                   {preparedOrder.status === 'paid'
                     ? 'Ta place est réservée. Le billet est déjà disponible dans Mes billets.'
-                    : 'Cette commande est prête. On peut maintenant ouvrir Stripe pour finaliser le paiement.'}
+                    : 'Cette commande est prête. On peut maintenant ouvrir FedaPay pour finaliser le paiement.'}
                 </OrderPreparationHint>
                 <OrderPreparationCheckoutButton
                   type="button"

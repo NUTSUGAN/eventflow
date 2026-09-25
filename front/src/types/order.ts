@@ -58,10 +58,10 @@ export type PendingOrdersResponse = {
   orders: PreparedOrder[]
 }
 
-export type OrderCheckoutSessionResponse = {
+export type OrderPaymentSessionResponse = {
   message: string
   checkoutUrl: string
-  sessionId: string
+  transactionId: string
 }
 
 export type OrderHistoryItem = {

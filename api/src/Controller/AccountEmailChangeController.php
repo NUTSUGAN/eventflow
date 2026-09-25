@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Repository\EmailChangeRequestRepository;
 use App\Repository\UserRepository;
 use App\Service\MailerConfiguration;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -14,7 +15,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class AccountEmailChangeController extends AbstractController
@@ -89,16 +89,33 @@ final class AccountEmailChangeController extends AbstractController
 
         try {
             $mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($mailerConfiguration->fromEmail())
-                    ->to($currentEmail)
+                    ->to($newEmail)
                     ->subject('Validation du changement d’email EventFlow')
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Validation du changement d’email',
+                        'preheader' => 'Confirme ta nouvelle adresse EventFlow.',
+                        'appUrl' => rtrim($frontendAppUrl, '/'),
+                        'logoUrl' => rtrim($frontendAppUrl, '/').'/eventflow-logo.png',
+                        'eyebrow' => 'Sécurité du compte',
+                        'heading' => 'Confirme ta nouvelle adresse',
+                        'greeting' => 'Bonjour,',
+                        'paragraphs' => [
+                            'Une demande a été faite pour associer cette adresse à un compte EventFlow.',
+                            'Confirme cette modification avec le bouton ci-dessous.',
+                        ],
+                        'actionUrl' => $confirmationUrl,
+                        'actionLabel' => 'Confirmer mon adresse',
+                        'note' => 'Ce lien reste valide pendant 24 heures. Si tu n’es pas à l’origine de cette demande, ignore cet e-mail.',
+                    ])
                     ->text(
                         "Bonjour,\n\n".
-                        "Tu as demande le changement de ton adresse EventFlow vers : ".$newEmail."\n\n".
+                        "Une demande a été faite pour associer cette adresse à un compte EventFlow.\n\n".
                         "Pour confirmer cette modification, ouvre ce lien :\n".
                         $confirmationUrl."\n\n".
-                        "Ce lien reste valide pendant 24 heures.\n"
+                        "Ce lien reste valide pendant 24 heures. Si tu n’es pas à l’origine de cette demande, ignore cet email.\n"
                     )
             );
         } catch (\Throwable) {
@@ -108,7 +125,7 @@ final class AccountEmailChangeController extends AbstractController
         }
 
         return $this->json([
-            'message' => "Un email de validation a été envoyé sur ton adresse actuelle.",
+            'message' => "Un email de validation a été envoyé sur ta nouvelle adresse.",
         ], Response::HTTP_CREATED);
     }
 

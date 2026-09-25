@@ -9,11 +9,11 @@ use App\Entity\Ticket;
 use App\Entity\User;
 use App\Repository\OrderRepository;
 use App\Repository\TicketRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 final class TicketFulfillmentService
 {
@@ -25,6 +25,8 @@ final class TicketFulfillmentService
         private readonly LoggerInterface $logger,
         #[Autowire('%env(string:MAILER_FROM_EMAIL)%')]
         private readonly string $mailerFromEmail,
+        #[Autowire('%env(string:ORGANIZER_REVIEW_EMAIL)%')]
+        private readonly string $reviewEmail,
     ) {
     }
 
@@ -140,10 +142,38 @@ final class TicketFulfillmentService
 
             try {
                 $this->mailer->send(
-                    (new Email())
+                    (new TemplatedEmail())
                         ->from($this->mailerFromEmail)
                         ->to($customerEmail)
                         ->subject('Tes billets EventFlow sont prêts')
+                        ->htmlTemplate('emails/notification.html.twig')
+                        ->context([
+                            'emailTitle' => 'Tes billets sont prêts',
+                            'preheader' => 'Retrouve tes billets et leurs QR codes EventFlow.',
+                            'appUrl' => rtrim($frontendAppUrl, '/'),
+                            'logoUrl' => rtrim($frontendAppUrl, '/').'/eventflow-logo.png',
+                            'heroImage' => $this->absoluteImageUrl($orderSummary['eventImage'] ?? null, $frontendAppUrl),
+                            'heroAlt' => (string) ($orderSummary['eventTitle'] ?? 'Événement EventFlow'),
+                            'eyebrow' => $isFreeOrder ? 'Réservation confirmée' : 'Paiement confirmé',
+                            'heading' => 'Tes billets sont prêts',
+                            'greeting' => 'Bonjour '.('' !== $customerName ? $customerName : 'EventFlow').',',
+                            'paragraphs' => [
+                                $isFreeOrder
+                                    ? 'Ta réservation gratuite est confirmée.'
+                                    : 'Ton paiement a bien été confirmé.',
+                                'Tes billets et leurs QR codes sont maintenant disponibles dans ton espace.',
+                            ],
+                            'details' => array_filter([
+                                'Événement' => $orderSummary['eventTitle'] ?? null,
+                                'Date' => $orderSummary['eventStartsAt'] instanceof \DateTimeImmutable
+                                    ? $orderSummary['eventStartsAt']->setTimezone(new \DateTimeZone('Europe/Paris'))->format('d/m/Y à H:i')
+                                    : null,
+                                'Commande' => (string) $order->getReference(),
+                            ]),
+                            'actionUrl' => $ticketListUrl,
+                            'actionLabel' => 'Voir mes billets',
+                            'note' => 'Présente le QR code du billet à l’entrée de l’événement.',
+                        ])
                         ->text(
                             sprintf(
                                 "Bonjour %s,\n\n".
@@ -164,6 +194,48 @@ final class TicketFulfillmentService
                 );
             } catch (\Throwable $exception) {
                 $this->logger->warning('Unable to send ticket confirmation email to customer.', [
+                    'orderId' => $order->getId(),
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        if (!$isFreeOrder && '' !== trim($this->reviewEmail)) {
+            $frontendAppUrl = $this->readEnv('FRONTEND_APP_URL') ?? 'http://localhost:5173';
+            try {
+                $this->mailer->send(
+                    (new TemplatedEmail())
+                        ->from($this->mailerFromEmail)
+                        ->to(trim($this->reviewEmail))
+                        ->subject('Nouveau paiement de billet EventFlow')
+                        ->htmlTemplate('emails/notification.html.twig')
+                        ->context([
+                            'emailTitle' => 'Nouveau paiement de billet',
+                            'preheader' => 'Une commande de billets a été payée.',
+                            'appUrl' => rtrim($frontendAppUrl, '/'),
+                            'eyebrow' => 'Paiement EventFlow',
+                            'heading' => 'Nouveau paiement confirmé',
+                            'paragraphs' => ['Une commande de billets vient d’être payée et les billets ont été émis.'],
+                            'details' => array_filter([
+                                'Événement' => $orderSummary['eventTitle'] ?? null,
+                                'Commande' => (string) $order->getReference(),
+                                'Montant' => number_format((float) $order->getTotalAmount(), 0, ',', ' ').' '.($order->getCurrency() ?? 'XOF'),
+                                'Client' => $customerEmail,
+                                'Organisateur' => $orderSummary['organizerEmail'] ?? null,
+                            ]),
+                        ])
+                        ->text(sprintf(
+                            "Nouveau paiement EventFlow\nÉvénement : %s\nCommande : %s\nMontant : %s %s\nClient : %s\nOrganisateur : %s\n",
+                            $orderSummary['eventTitle'] ?? 'Événement EventFlow',
+                            $order->getReference(),
+                            $order->getTotalAmount(),
+                            $order->getCurrency() ?? 'XOF',
+                            $customerEmail,
+                            $orderSummary['organizerEmail'] ?? '-',
+                        ))
+                );
+            } catch (\Throwable $exception) {
+                $this->logger->warning('Unable to send payment notification to EventFlow admin.', [
                     'orderId' => $order->getId(),
                     'message' => $exception->getMessage(),
                 ]);
@@ -196,7 +268,7 @@ final class TicketFulfillmentService
 
         try {
             $this->mailer->send(
-                (new Email())
+                (new TemplatedEmail())
                     ->from($this->mailerFromEmail)
                     ->to($organizerEmail)
                     ->subject(
@@ -204,6 +276,29 @@ final class TicketFulfillmentService
                             ? 'Nouvelle commande gratuite sur ton évènement EventFlow'
                             : 'Nouvelle commande payée sur ton évènement EventFlow'
                     )
+                    ->htmlTemplate('emails/notification.html.twig')
+                    ->context([
+                        'emailTitle' => 'Nouvelle commande EventFlow',
+                        'preheader' => 'Une nouvelle commande vient d’être confirmée.',
+                        'appUrl' => rtrim(($this->readEnv('FRONTEND_APP_URL') ?? 'http://localhost:5173'), '/'),
+                        'logoUrl' => rtrim(($this->readEnv('FRONTEND_APP_URL') ?? 'http://localhost:5173'), '/').'/eventflow-logo.png',
+                        'heroImage' => $this->absoluteImageUrl($orderSummary['eventImage'] ?? null, $this->readEnv('FRONTEND_APP_URL') ?? 'http://localhost:5173'),
+                        'heroAlt' => (string) ($orderSummary['eventTitle'] ?? 'Événement EventFlow'),
+                        'eyebrow' => 'Vente EventFlow',
+                        'heading' => $isFreeOrder ? 'Nouvelle réservation confirmée' : 'Nouveau paiement confirmé',
+                        'greeting' => 'Bonjour '.('' !== $organizerName ? $organizerName : 'Organisateur').',',
+                        'paragraphs' => [
+                            $isFreeOrder
+                                ? 'Une commande gratuite vient d’être confirmée sur ton événement.'
+                                : 'Une commande vient d’être payée sur ton événement.',
+                        ],
+                        'details' => array_filter([
+                            'Événement' => $orderSummary['eventTitle'] ?? null,
+                            'Commande' => (string) $order->getReference(),
+                            'Client' => '' !== $customerName ? $customerName : 'Client EventFlow',
+                            'E-mail' => trim((string) $order->getClient()?->getEmail()),
+                        ]),
+                    ])
                     ->text(
                         sprintf(
                             "Bonjour %s,\n\n".
@@ -246,6 +341,7 @@ final class TicketFulfillmentService
      *   eventTitle: string|null,
      *   eventStartsAt: \DateTimeImmutable|null,
      *   lineSummaries: list<string>,
+     *   eventImage: string|null,
      *   organizerEmail: string|null,
      *   organizerName: string|null
      * }
@@ -254,6 +350,7 @@ final class TicketFulfillmentService
     {
         $eventTitle = null;
         $eventStartsAt = null;
+        $eventImage = null;
         $lineSummaries = [];
         $organizerEmail = null;
         $organizerName = null;
@@ -270,6 +367,7 @@ final class TicketFulfillmentService
             if (null === $eventTitle) {
                 $eventTitle = $event?->getTitle();
                 $eventStartsAt = $event?->getStartDatetime();
+                $eventImage = $event?->getCoverPhoto() ?? $event?->getThumbnailPhoto();
                 $organizerEmail = $organizer?->getEmail();
                 $organizerName = trim(sprintf(
                     '%s %s',
@@ -289,9 +387,23 @@ final class TicketFulfillmentService
             'eventTitle' => $eventTitle,
             'eventStartsAt' => $eventStartsAt,
             'lineSummaries' => $lineSummaries,
+            'eventImage' => $eventImage,
             'organizerEmail' => $organizerEmail,
             'organizerName' => $organizerName,
         ];
+    }
+
+    private function absoluteImageUrl(?string $image, string $frontendAppUrl): ?string
+    {
+        $image = trim((string) $image);
+        if ('' === $image) {
+            return null;
+        }
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
+        }
+
+        return rtrim($frontendAppUrl, '/').'/'.ltrim($image, '/');
     }
 
     private function generateUniqueQrToken(): string

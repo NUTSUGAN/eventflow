@@ -43,8 +43,8 @@ function formatPrice(price: number | null, currency: string): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: currency === 'XOF' ? 0 : 2,
+    maximumFractionDigits: currency === 'XOF' ? 0 : 2,
   }).format(price)
 }
 

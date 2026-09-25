@@ -63,9 +63,9 @@ function formatDateTime(value: string | null): string {
 function formatCurrency(value: number, currency: string | null): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: currency ?? 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: currency ?? 'XOF',
+    minimumFractionDigits: currency === 'XOF' ? 0 : 2,
+    maximumFractionDigits: currency === 'XOF' ? 0 : 2,
   }).format(value)
 }
 
@@ -295,7 +295,7 @@ export function MyTicketsPage() {
         <MyTicketsStateCard>
           <MyTicketsStateTitle>Chargement de tes billets...</MyTicketsStateTitle>
           <MyTicketsStateText>
-            On récupère les commandes payées et les billets émis depuis Stripe.
+            On récupère les commandes payées et les billets émis depuis FedaPay.
           </MyTicketsStateText>
         </MyTicketsStateCard>
       ) : errorMessage ? (
@@ -333,7 +333,7 @@ export function MyTicketsPage() {
               <MyTicketsStateTitle>Aucune commande en’attente</MyTicketsStateTitle>
               <MyTicketsStateText>
                 On affichera ici tes commandes préparees sans paiement confirmé,
-                pour reprendre Stripe ou retirer la préparation de cette liste.
+                pour reprendre FedaPay ou retirer la préparation de cette liste.
               </MyTicketsStateText>
               <MyTicketsActions>
                 <MyTicketsPrimaryButton
@@ -410,7 +410,7 @@ export function MyTicketsPage() {
 
                 {!order.canStartCheckout ? (
                   <MyTicketsStatusMessage>
-                    Cette commande ne peut plus relancer Stripe depuis cet espace.
+                    Cette commande ne peut plus relancer FedaPay depuis cet espace.
                   </MyTicketsStatusMessage>
                 ) : null}
 
@@ -451,7 +451,7 @@ export function MyTicketsPage() {
                 : 'Aucun billet passé pour le moment'}
             </MyTicketsStateTitle>
             <MyTicketsStateText>
-              On affichera ici les billets liés à tes commandes Stripe confirmées.
+              On affichera ici les billets liés à tes commandes FedaPay confirmées.
             </MyTicketsStateText>
             <MyTicketsActions>
               <MyTicketsPrimaryButton
@@ -467,7 +467,7 @@ export function MyTicketsPage() {
             <MyTicketsInfoTitle>Conditions de revente</MyTicketsInfoTitle>
             <MyTicketsInfoText>
               La revente de billets n&apos;est pas encore gérée depuis cet espace.
-              Chaque billet visible ici correspond uniquement à une commande Stripe payée.
+              Chaque billet visible ici correspond uniquement à une commande FedaPay payée.
             </MyTicketsInfoText>
           </MyTicketsInfoCard>
         </>

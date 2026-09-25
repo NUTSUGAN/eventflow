@@ -53,6 +53,17 @@ export async function startPromotionCheckout(campaignId: number): Promise<string
   return response.data.checkoutUrl
 }
 
+export async function confirmPromotionPayment(
+  campaignId: number,
+  transactionId: string,
+): Promise<PromotionCampaign> {
+  const response = await apiClient.post<{ campaign: PromotionCampaign }>(
+    `/api/organizer/promotions/${campaignId}/confirm-payment`,
+    { transactionId },
+  )
+  return response.data.campaign
+}
+
 export async function getAdminPromotions(
   page = 1,
   pageSize = 20,

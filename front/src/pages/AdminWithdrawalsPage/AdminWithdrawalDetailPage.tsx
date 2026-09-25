@@ -223,7 +223,7 @@ export function AdminWithdrawalDetailPage() {
     setDraft((current) => (current ? { ...current, ...patch } : current))
   }
 
-  const currency = withdrawal?.currency ?? 'EUR'
+  const currency = withdrawal?.currency ?? 'XOF'
 
   return (
     <AdminDashboardSection>
@@ -422,7 +422,7 @@ export function AdminWithdrawalDetailPage() {
                     onChange={(event) =>
                       updateDraft({ paymentReference: event.target.value })
                     }
-                    placeholder="Virement, Stripe, banque..."
+                    placeholder="Virement, FedaPay, banque..."
                   />
                 </AdminDashboardField>
               </WithdrawalFormGrid>

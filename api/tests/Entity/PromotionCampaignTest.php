@@ -26,12 +26,12 @@ class PromotionCampaignTest extends TestCase
             ->setStartsAt($startsAt)
             ->setEndsAt($endsAt)
             ->setTotalPrice('88')
-            ->setCurrency('eur');
+            ->setCurrency('xof');
 
         self::assertSame(PromotionCampaign::STATUS_PENDING, $campaign->getStatus());
         self::assertSame(PromotionCampaign::DURATION_7_DAYS, $campaign->getDuration());
         self::assertSame('88.00', $campaign->getTotalPrice());
-        self::assertSame('EUR', $campaign->getCurrency());
+        self::assertSame('XOF', $campaign->getCurrency());
         self::assertTrue($campaign->hasValidSchedule());
     }
 

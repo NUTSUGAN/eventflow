@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ emailTitle|default('EventFlow') }}</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-outer { padding: 10px 6px !important; }
+      .email-header { padding: 16px 18px !important; }
+      .email-content { padding: 25px 18px !important; }
+      .email-footer { padding: 17px 18px !important; }
+      .email-title { font-size: 25px !important; }
+      .email-logo { width: 48px !important; height: 48px !important; }
+      .email-brand { font-size: 22px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#171412;color:#fffaf4;font-family:Arial,Helvetica,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">{{ preheader|default('Une notification EventFlow t’attend.') }}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#171412;">
+    <tr>
+      <td class="email-outer" align="center" style="padding:24px 10px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;background:#211b18;border:1px solid #3a302a;">
+          <tr>
+            <td class="email-header" style="padding:16px 24px;background:#12100f;border-bottom:1px solid #342b27;">
+              <a href="{{ appUrl }}" style="display:inline-block;text-decoration:none;color:#fffaf4;">
+                <table role="presentation" cellspacing="0" cellpadding="0"><tr>
+                  <td style="vertical-align:middle;"><img class="email-logo" src="{{ email.image('emails/assets/eventflow.png', 'image/png', 'eventflow.png') }}" width="52" height="52" alt="" style="display:block;width:52px;height:52px;border:0;"></td>
+                  <td class="email-brand" style="padding-left:8px;vertical-align:middle;color:#fffaf4;font-size:23px;font-weight:800;line-height:1;">EventFlow</td>
+                </tr></table>
+              </a>
+            </td>
+          </tr>
+          {% if heroImage|default(null) %}
+            <tr>
+              <td style="background:#12100f;">
+                <img src="{{ heroImage }}" width="600" alt="{{ heroAlt|default('Événement EventFlow') }}" style="display:block;width:100%;max-width:600px;height:auto;border:0;">
+              </td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td class="email-content" style="padding:30px 24px;">
+              <div style="margin:0 0 10px;color:#ff9d5a;font-size:12px;font-weight:700;text-transform:uppercase;">{{ eyebrow|default('EventFlow') }}</div>
+              <h1 class="email-title" style="margin:0 0 18px;color:#fffaf4;font-size:29px;line-height:1.2;font-weight:800;">{{ heading }}</h1>
+              <div style="color:#ead8ca;font-size:16px;line-height:1.65;">{% block content %}{% endblock %}</div>
+              {% if actionUrl|default(null) and actionLabel|default(null) %}
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px 0 18px;">
+                  <tr>
+                    <td style="border-radius:6px;background:#eb9451;">
+                      <a href="{{ actionUrl }}" style="display:inline-block;padding:14px 20px;color:#1c130f;font-size:15px;font-weight:800;text-decoration:none;">{{ actionLabel }}</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:18px 0 0;color:#a9998e;font-size:12px;line-height:1.5;word-break:break-all;">Si le bouton ne fonctionne pas, ouvre ce lien :<br><a href="{{ actionUrl }}" style="color:#f3b183;">{{ actionUrl }}</a></p>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td class="email-footer" style="padding:18px 24px;background:#181412;border-top:1px solid #342b27;color:#91847c;font-size:12px;line-height:1.55;">
+              Cet e-mail a été envoyé par EventFlow. Ne communique jamais tes codes ou mots de passe par e-mail.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

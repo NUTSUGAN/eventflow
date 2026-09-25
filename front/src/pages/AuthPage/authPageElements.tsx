@@ -203,6 +203,41 @@ export const AuthCheckbox = styled.input`
   flex-shrink: 0;
 `
 
+export const AuthPasswordField = styled.div`
+  position: relative;
+  width: 100%;
+
+  ${AuthTextInput} {
+    padding-right: 60px;
+  }
+`
+
+export const AuthPasswordButton = styled.button`
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 241, 230, 0.76);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff8f2;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(239, 145, 79, 0.82);
+    outline-offset: 1px;
+  }
+`
+
 export const AuthLegalLink = styled.a`
   color: #f3b183;
   font-weight: 700;
