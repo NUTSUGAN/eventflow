@@ -40,6 +40,12 @@ class OrganizerPayoutAccount
     #[ORM\Column(name: 'iban', length: 80, nullable: true)]
     private ?string $iban = null;
 
+    #[ORM\Column(name: 'bank_account_reference', length: 120, nullable: true)]
+    private ?string $bankAccountReference = null;
+
+    public function getBankAccountReference(): ?string { return $this->bankAccountReference; }
+    public function setBankAccountReference(?string $value): static { $this->bankAccountReference = $this->normalizeNullable($value); return $this; }
+
     #[ORM\Column(name: 'bic', length: 40, nullable: true)]
     private ?string $bic = null;
 

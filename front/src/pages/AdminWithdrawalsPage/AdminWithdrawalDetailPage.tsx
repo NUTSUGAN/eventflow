@@ -63,7 +63,7 @@ function formatDate(value: string | null): string {
     return 'À définir'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
@@ -334,8 +334,8 @@ export function AdminWithdrawalDetailPage() {
                       <strong>{withdrawal.payout.bank.holderName ?? 'À définir'}</strong>
                     </WithdrawalInfo>
                     <WithdrawalInfo>
-                      <span>IBAN</span>
-                      <strong>{withdrawal.payout.bank.iban ?? 'À définir'}</strong>
+                      <span>RIB / compte bancaire</span>
+                      <strong>{withdrawal.payout.bank.accountReference ?? withdrawal.payout.bank.iban ?? 'À définir'}</strong>
                     </WithdrawalInfo>
                     <WithdrawalInfo>
                       <span>BIC</span>

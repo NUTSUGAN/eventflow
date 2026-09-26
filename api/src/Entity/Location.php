@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LocationRepository::class)]
 #[ORM\Table(name: 'locations')]
+#[ORM\Index(name: 'IDX_LOCATION_CITY', columns: ['city_id'])]
 class Location
 {
     #[ORM\Id]
@@ -23,7 +24,11 @@ class Location
     #[ORM\Column(name: 'city', length: 120)]
     private ?string $city = null;
 
-    #[ORM\Column(name: 'postal_code', length: 20)]
+    #[ORM\ManyToOne(targetEntity: City::class)]
+    #[ORM\JoinColumn(name: 'city_id', nullable: true)]
+    private ?City $managedCity = null;
+
+    #[ORM\Column(name: 'postal_code', length: 20, nullable: true)]
     private ?string $postalCode = null;
 
     #[ORM\Column(name: 'country', length: 80)]
@@ -65,8 +70,11 @@ class Location
 
     public function getCity(): ?string
     {
-        return $this->city;
+        return $this->managedCity?->getName() ?? $this->city;
     }
+
+    public function getManagedCity(): ?City { return $this->managedCity; }
+    public function setManagedCity(?City $city): static { $this->managedCity = $city; return $this; }
 
     public function setCity(string $city): static
     {
@@ -80,9 +88,9 @@ class Location
         return $this->postalCode;
     }
 
-    public function setPostalCode(string $postalCode): static
+    public function setPostalCode(?string $postalCode): static
     {
-        $this->postalCode = $postalCode;
+        $this->postalCode = null !== $postalCode && '' !== trim($postalCode) ? trim($postalCode) : null;
 
         return $this;
     }

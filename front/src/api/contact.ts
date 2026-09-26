@@ -3,6 +3,7 @@ import { apiClient } from './client'
 export type ContactPayload = {
   name: string
   email: string
+  phone?: string
   category: string
   subject: string
   message: string

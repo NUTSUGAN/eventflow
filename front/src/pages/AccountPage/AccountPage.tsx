@@ -48,6 +48,7 @@ import {
   AccountModalWarning,
   AccountMutedValue,
   AccountOverviewCard,
+  AccountOverviewActions,
   AccountPrimaryButton,
   AccountReadonlyField,
   AccountSection,
@@ -416,14 +417,14 @@ export function AccountPage() {
         <AccountStateCard>
           <AccountSectionTitle>Profil indisponible</AccountSectionTitle>
           <AccountState>{errorMessage}</AccountState>
-          <AccountActions>
+          <AccountOverviewActions>
             <AccountPrimaryButton
               type="button"
               onClick={() => navigate('/auth?mode=login')}
             >
               Se connecter
             </AccountPrimaryButton>
-          </AccountActions>
+          </AccountOverviewActions>
         </AccountStateCard>
       </AccountSection>
     )

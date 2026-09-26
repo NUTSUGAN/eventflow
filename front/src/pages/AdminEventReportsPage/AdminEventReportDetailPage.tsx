@@ -54,7 +54,7 @@ function formatDate(value: string | null): string {
     return 'Date inconnue'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))

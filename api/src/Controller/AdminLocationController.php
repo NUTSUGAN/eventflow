@@ -52,7 +52,6 @@ class AdminLocationController extends AbstractController
         if (
             $address === '' ||
             $city === '' ||
-            $postalCode === '' ||
             $country === '' ||
             $latitude === '' ||
             $longitude === ''
@@ -140,12 +139,6 @@ class AdminLocationController extends AbstractController
 
         if (array_key_exists('postalCode', $data)) {
             $newPostalCode = trim((string) $data['postalCode']);
-
-            if ($newPostalCode === '') {
-                return $this->json([
-                    'message' => 'Le code postal ne peut pas être vide.'
-                ], 400);
-            }
 
             $location->setPostalCode($newPostalCode);
             $postalCode = $newPostalCode;

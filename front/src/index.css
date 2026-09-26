@@ -93,6 +93,20 @@ select {
   font: inherit;
 }
 
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #241f1c;
+  color: #fffaf4;
+}
+
+select option:checked {
+  background-color: #4a3022;
+  color: #fffaf4;
+}
+
 h1,
 h2,
 h3,

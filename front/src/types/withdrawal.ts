@@ -27,6 +27,7 @@ export type WithdrawalPayoutSnapshot = {
   bank: {
     holderName: string | null
     iban: string | null
+    accountReference: string | null
     bic: string | null
     bankName: string | null
   }

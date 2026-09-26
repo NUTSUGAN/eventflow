@@ -13,6 +13,7 @@ export type EventSummary = {
   title: string
   shortDescription: string
   city: string
+  country?: string | null
   venue: string
   startsAt: string
   category: string
@@ -31,7 +32,7 @@ export type EventFilterCategory = {
 
 export type EventFiltersResponse = {
   categories: EventFilterCategory[]
-  cities: string[]
+  cities: { id: number; name: string }[]
 }
 
 export type PublicEventsResponse = {
@@ -57,6 +58,7 @@ export type EventMedia = {
 }
 
 export type EventLocation = {
+  cityId: number | null
   address: string | null
   city: string | null
   postalCode: string | null

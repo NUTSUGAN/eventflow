@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { AdminCitiesPage } from './pages/AdminCitiesPage/AdminCitiesPage'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { SiteFooter } from './components/Footer/Footer'
 import { Navbar } from './components/Navbar/Navbar'
@@ -6,6 +7,7 @@ import { CookieConsentBanner } from './components/CookieConsentBanner/CookieCons
 import { AccountPage } from './pages/AccountPage/AccountPage'
 import { AccountEmailChangeConfirmPage } from './pages/AccountPage/AccountEmailChangeConfirmPage'
 import { ContactPage } from './pages/ContactPage/ContactPage'
+import { PartnerPage } from './pages/PartnerPage/PartnerPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage/AdminDashboardPage'
 import { AdminEventReportDetailPage } from './pages/AdminEventReportsPage/AdminEventReportDetailPage'
 import { AdminEventReportsPage } from './pages/AdminEventReportsPage/AdminEventReportsPage'
@@ -66,6 +68,7 @@ function App() {
         <Routes>
           <Route path="/" element={<EventsListPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/cities" element={<AdminCitiesPage />} />
           <Route path="/admin/logs" element={<AdminLogsPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
           <Route path="/admin/event-reports" element={<AdminEventReportsPage />} />
@@ -133,6 +136,7 @@ function App() {
           <Route path="/qui-sommes-nous" element={<LegalPage {...legalPages.about} />} />
           <Route path="/aide" element={<LegalPage {...legalPages.help} />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/devenir-partenaire" element={<PartnerPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

@@ -78,6 +78,11 @@ class WithdrawalRequest
     #[ORM\Column(name: 'bank_iban', length: 80, nullable: true)]
     private ?string $bankIban = null;
 
+    #[ORM\Column(name: 'bank_account_reference', length: 120, nullable: true)]
+    private ?string $bankAccountReference = null;
+
+    public function getBankAccountReference(): ?string { return $this->bankAccountReference; }
+
     #[ORM\Column(name: 'bank_bic', length: 40, nullable: true)]
     private ?string $bankBic = null;
 
@@ -182,6 +187,7 @@ class WithdrawalRequest
 
     public function copyPayoutAccount(OrganizerPayoutAccount $payoutAccount): static
     {
+        $this->bankAccountReference = $payoutAccount->getBankAccountReference();
         return $this
             ->setPayoutType($payoutAccount->getType())
             ->setPayoutLabel($payoutAccount->getLabel())

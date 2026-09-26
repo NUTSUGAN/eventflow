@@ -38,7 +38,7 @@ function formatDateLabel(value: string | null): string {
     return 'Ajout recent'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))

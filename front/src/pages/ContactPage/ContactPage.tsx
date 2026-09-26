@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { publicIdentity } from '../../config/publicIdentity'
 import { sendContactMessage } from '../../api/contact'
 import {
   ContactActions,
@@ -23,19 +24,21 @@ const categoryOptions = [
   'Billet ou commande',
   'Espace organisateur',
   'Booster / promotion',
+  'Devenir partenaire',
   'Signalement',
 ]
 
-const initialForm = {
+const createInitialForm = (category: string) => ({
   name: '',
   email: '',
-  category: categoryOptions[0],
+  phone: '',
+  category,
   subject: '',
   message: '',
-}
+})
 
-export function ContactPage() {
-  const [form, setForm] = useState(initialForm)
+export function ContactFormBlock({ initialCategory = categoryOptions[0] }: { initialCategory?: string }) {
+  const [form, setForm] = useState(() => createInitialForm(initialCategory))
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -66,12 +69,13 @@ export function ContactPage() {
       const response = await sendContactMessage({
         name: form.name.trim(),
         email: form.email.trim(),
+        phone: form.phone.trim(),
         category: form.category,
         subject: form.subject.trim(),
         message: form.message.trim(),
       })
 
-      setForm(initialForm)
+      setForm(createInitialForm(initialCategory))
       setStatusMessage(response.message)
     } catch {
       setErrorMessage('Impossible d’envoyer ton message pour le moment.')
@@ -81,16 +85,6 @@ export function ContactPage() {
   }
 
   return (
-    <ContactPageShell>
-      <ContactBackLink as={Link} to="/">
-        Retour à l’accueil
-      </ContactBackLink>
-      <ContactTitle>Contact EventFlow</ContactTitle>
-      <ContactLead>
-        Envoie une demande à l’équipe EventFlow. Ajoute une référence de commande,
-        d’évènement ou de campagne Booster si tu en as une.
-      </ContactLead>
-
       <ContactForm onSubmit={handleSubmit}>
         <ContactFormGrid>
           <ContactField>
@@ -114,6 +108,18 @@ export function ContactPage() {
             />
           </ContactField>
         </ContactFormGrid>
+
+        <ContactField>
+          <label htmlFor="contact-phone">Téléphone (facultatif)</label>
+          <ContactInput
+            id="contact-phone"
+            type="tel"
+            value={form.phone}
+            onChange={(event) => setForm({ ...form, phone: event.target.value })}
+            autoComplete="tel"
+            placeholder="+228 ..."
+          />
+        </ContactField>
 
         <ContactFormGrid>
           <ContactField>
@@ -160,6 +166,22 @@ export function ContactPage() {
           </ContactButton>
         </ContactActions>
       </ContactForm>
+  )
+}
+
+export function ContactPage() {
+  return (
+    <ContactPageShell>
+      <ContactBackLink as={Link} to="/">
+        Retour à l’accueil
+      </ContactBackLink>
+      <ContactTitle>Contact EventFlow</ContactTitle>
+      <ContactLead>
+        Envoie une demande à l’équipe EventFlow. Ajoute une référence de commande,
+        d’évènement ou de campagne Booster si tu en as une.
+      </ContactLead>
+      {publicIdentity.support && <p>Contact : <a href={`mailto:${publicIdentity.support}`}>{publicIdentity.support}</a></p>}
+      <ContactFormBlock />
     </ContactPageShell>
   )
 }

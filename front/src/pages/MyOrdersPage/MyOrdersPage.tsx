@@ -29,7 +29,7 @@ import {
 
 function formatDateTime(value: string | null): string {
   if (!value) return 'Date indisponible'
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'long',
     timeStyle: 'short',
   }).format(new Date(value))

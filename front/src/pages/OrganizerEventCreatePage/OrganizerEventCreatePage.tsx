@@ -1,5 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { CitySelect } from '../../components/CitySelect/CitySelect'
+import { eventInputDate, formatEventInput } from '../../utils/eventTime'
 import { getCurrentUser } from '../../api/auth'
 import { canUseOrganizerAdminTools } from '../../auth/adminPermissions'
 import {
@@ -49,6 +51,7 @@ type OrganizerEventFormState = {
   categoryId: string
   locationAddress: string
   locationCity: string
+  locationCityId: string
   locationPostalCode: string
   locationCountry: string
   locationLatitude: string
@@ -67,8 +70,9 @@ const initialFormState: OrganizerEventFormState = {
   categoryId: '',
   locationAddress: '',
   locationCity: '',
+  locationCityId: '',
   locationPostalCode: '',
-  locationCountry: 'France',
+  locationCountry: 'Togo',
   locationLatitude: '',
   locationLongitude: '',
   startDatetime: '',
@@ -80,19 +84,17 @@ const initialFormState: OrganizerEventFormState = {
 }
 
 function formatDateTimeLocal(date: Date): string {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-
-  return localDate.toISOString().slice(0, 16)
+  return formatEventInput(date)
 }
 
 function addMinutesToDateTimeLocal(value: string, minutes: number): string {
-  const date = new Date(value)
+  const date = eventInputDate(value)
 
   if (Number.isNaN(date.getTime())) {
     return value
   }
 
-  date.setMinutes(date.getMinutes() + minutes)
+  date.setUTCMinutes(date.getUTCMinutes() + minutes)
 
   return formatDateTimeLocal(date)
 }
@@ -224,8 +226,8 @@ export function OrganizerEventCreatePage() {
     }
 
     const now = new Date()
-    const startDateTime = new Date(form.startDatetime)
-    const endDateTime = new Date(form.endDatetime)
+    const startDateTime = eventInputDate(form.startDatetime)
+    const endDateTime = eventInputDate(form.endDatetime)
 
     if (Number.isNaN(startDateTime.getTime()) || Number.isNaN(endDateTime.getTime())) {
       setErrorMessage('Renseigne des dates valides pour le début et la fin.')
@@ -252,6 +254,7 @@ export function OrganizerEventCreatePage() {
       payload.append('categoryId', form.categoryId)
       payload.append('locationAddress', form.locationAddress)
       payload.append('locationCity', form.locationCity)
+      payload.append('locationCityId', form.locationCityId)
       payload.append('locationPostalCode', form.locationPostalCode)
       payload.append('locationCountry', form.locationCountry)
       payload.append('locationLatitude', form.locationLatitude)
@@ -444,30 +447,21 @@ export function OrganizerEventCreatePage() {
                         locationAddress: event.target.value,
                       }))
                     }
-                    placeholder="10 Rue de l’Exemple"
+                    placeholder="Nom du lieu, rue et repère"
                     required
                   />
                 </OrganizerEventCreateField>
 
                 <OrganizerEventCreateField>
                   <OrganizerEventCreateLabel>Ville</OrganizerEventCreateLabel>
-                  <OrganizerEventCreateInput
-                    value={form.locationCity}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        locationCity: event.target.value,
-                      }))
-                    }
-                    placeholder="Paris"
-                    required
-                  />
+                  <CitySelect cityId={form.locationCityId} name={form.locationCity}
+                    onChange={(locationCityId, locationCity) => setForm(current => ({ ...current, locationCityId, locationCity }))} />
                 </OrganizerEventCreateField>
               </OrganizerEventCreateGrid>
 
               <OrganizerEventCreateGrid>
                 <OrganizerEventCreateField>
-                  <OrganizerEventCreateLabel>Code postal</OrganizerEventCreateLabel>
+                  <OrganizerEventCreateLabel>Code postal (facultatif)</OrganizerEventCreateLabel>
                   <OrganizerEventCreateInput
                     value={form.locationPostalCode}
                     onChange={(event) =>
@@ -476,8 +470,8 @@ export function OrganizerEventCreatePage() {
                         locationPostalCode: event.target.value,
                       }))
                     }
-                    placeholder="75010"
-                    required
+                    placeholder="Facultatif"
+
                   />
                 </OrganizerEventCreateField>
 
@@ -491,7 +485,7 @@ export function OrganizerEventCreatePage() {
                         locationCountry: event.target.value,
                       }))
                     }
-                    placeholder="France"
+                    placeholder="Togo"
                     required
                   />
                 </OrganizerEventCreateField>
@@ -510,7 +504,7 @@ export function OrganizerEventCreatePage() {
                         locationLatitude: event.target.value,
                       }))
                     }
-                    placeholder="48.8566000"
+                    placeholder="Latitude du lieu"
                   />
                   <OrganizerEventCreateHint>
                     Facultatif. Utile si tu veux positionner précisément le lieu plus tard.
@@ -529,7 +523,7 @@ export function OrganizerEventCreatePage() {
                         locationLongitude: event.target.value,
                       }))
                     }
-                    placeholder="2.3522000"
+                    placeholder="Longitude du lieu"
                   />
                   <OrganizerEventCreateHint>
                     Facultatif. Laisse vide si tu n’as pas encore les coordonnées.

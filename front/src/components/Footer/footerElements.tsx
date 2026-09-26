@@ -7,7 +7,7 @@ export const FooterContainer = styled.footer`
 `
 
 export const FooterTop = styled.section`
-  width: min(1280px, calc(100% - 64px));
+  width: min(1440px, calc(100% - 64px));
   min-width: 0;
   margin: 0 auto;
   padding: 26px 0 24px;
@@ -23,38 +23,59 @@ export const FooterTrustTitle = styled.h2`
   margin: 0 0 16px;
   color: var(--color-text);
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   text-align: center;
 `
 
 export const FooterTrustList = styled.div`
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  align-items: center;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  @media (max-width: 560px) {
+  @media (max-width: 640px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 `
 
 export const FooterTrustItem = styled.div`
   min-width: 0;
-  min-height: 44px;
+  min-height: clamp(96px, 10vw, 144px);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.035);
   color: rgba(255, 255, 255, 0.76);
   font-size: 0.9rem;
   font-weight: 800;
   line-height: 1.25;
   overflow-wrap: anywhere;
   text-align: center;
+
+  img {
+    display: block;
+    max-width: 100%;
+    width: min(100%, 136px);
+    max-height: 104px;
+    object-fit: contain;
+    filter: grayscale(1);
+  }
+
+  span {
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 640px) {
+    min-height: 104px;
+    padding: 12px;
+
+    img {
+      max-height: 76px;
+    }
+  }
 `
 
 export const FooterMain = styled.section`

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { FaCalendarDays, FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getCurrentUser } from '../../api/auth'
 import {
@@ -22,6 +23,15 @@ import {
   ExplorerStateText,
   ExplorerTitle,
   FilterDateInput,
+  DatePickerControl,
+  CalendarButton,
+  CalendarPopover,
+  CalendarHeader,
+  CalendarMonthButton,
+  CalendarWeekdays,
+  CalendarDays,
+  CalendarDay,
+  CalendarFooter,
   FilterGroup,
   FilterLabel,
   FilterMetaActions,
@@ -102,6 +112,9 @@ function buildPaginationTokens(currentPage: number, totalPages: number): Array<n
 export function ExplorerPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const datePickerRef = useRef<HTMLDivElement>(null)
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [viewMonth, setViewMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [events, setEvents] = useState<EventSummary[]>([])
   const [pagination, setPagination] =
@@ -116,8 +129,37 @@ export function ExplorerPage() {
   const typeFilter = searchParams.get('type')?.trim() ?? ''
   const cityFilter = searchParams.get('city')?.trim() ?? ''
   const dateFilter = searchParams.get('date')?.trim() ?? ''
+  const selectedDate = dateFilter ? new Date(`${dateFilter}T12:00:00`) : null
+  const offset = (viewMonth.getDay() + 6) % 7
+  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate()
+  const calendarDays: Array<Date | null> = [
+    ...Array.from({ length: offset }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) => new Date(viewMonth.getFullYear(), viewMonth.getMonth(), index + 1)),
+  ]
   const followingFilter = searchParams.get('following') === '1'
   const currentPage = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1)
+
+  useEffect(() => {
+    if (!selectedDate || Number.isNaN(selectedDate.getTime())) return
+    setViewMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
+  }, [dateFilter])
+
+  useEffect(() => {
+    if (calendarOpen) {
+      const onPointerDown = (event: PointerEvent) => {
+        if (!datePickerRef.current?.contains(event.target as Node)) setCalendarOpen(false)
+      }
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') setCalendarOpen(false)
+      }
+      document.addEventListener('pointerdown', onPointerDown)
+      document.addEventListener('keydown', onKeyDown)
+      return () => {
+        document.removeEventListener('pointerdown', onPointerDown)
+        document.removeEventListener('keydown', onKeyDown)
+      }
+    }
+  }, [calendarOpen])
 
   useEffect(() => {
     let isMounted = true
@@ -320,9 +362,11 @@ export function ExplorerPage() {
             disabled={isFiltersLoading}
           >
             <option value="">Toutes les villes</option>
+            {cityFilter && !filterOptions.cities.some(city => String(city.id) === cityFilter) &&
+              <option value={cityFilter}>{filterOptions.cities.find(city => city.name.toLocaleLowerCase() === cityFilter.toLocaleLowerCase())?.name ?? cityFilter}</option>}
             {filterOptions.cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
+              <option key={city.id} value={city.id}>
+                {city.name}
               </option>
             ))}
           </FilterSelect>
@@ -330,12 +374,61 @@ export function ExplorerPage() {
 
         <FilterGroup>
           <FilterLabel>Date</FilterLabel>
-          <FilterDateInput
-            id="explorer-date"
-            type="date"
-            value={dateFilter}
-            onChange={(event) => updateFilter('date', event.target.value)}
-          />
+          <DatePickerControl ref={datePickerRef}>
+            <FilterDateInput
+              id="explorer-date"
+              type="text"
+              value="Choisir une date"
+              aria-label={selectedDate ? `Date sélectionnée : ${selectedDate.toLocaleDateString('fr-FR')}. Cliquer pour modifier` : 'Choisir une date'}
+              readOnly
+              aria-haspopup="dialog"
+              onClick={() => setCalendarOpen(true)}
+            />
+            <CalendarButton type="button" aria-label="Choisir une date" title="Choisir une date"
+              aria-expanded={calendarOpen} onClick={() => setCalendarOpen(value => !value)}>
+              <FaCalendarDays aria-hidden="true" />
+            </CalendarButton>
+            {calendarOpen && <CalendarPopover role="dialog" aria-label="Calendrier de sélection de date">
+              <CalendarHeader>
+                <CalendarMonthButton type="button" aria-label="Mois précédent"
+                  onClick={() => setViewMonth(month => new Date(month.getFullYear(), month.getMonth() - 1, 1))}>
+                  <FaChevronLeft aria-hidden="true" />
+                </CalendarMonthButton>
+                <strong aria-live="polite">{viewMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</strong>
+                <CalendarMonthButton type="button" aria-label="Mois suivant"
+                  onClick={() => setViewMonth(month => new Date(month.getFullYear(), month.getMonth() + 1, 1))}>
+                  <FaChevronRight aria-hidden="true" />
+                </CalendarMonthButton>
+              </CalendarHeader>
+              <CalendarWeekdays aria-hidden="true">
+                {['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'].map(day => <span key={day}>{day}</span>)}
+              </CalendarWeekdays>
+              <CalendarDays>
+                {calendarDays.map((day, index) => day ? (
+                  <CalendarDay key={day.toISOString()} type="button"
+                    $selected={Boolean(selectedDate && selectedDate.getFullYear() === day.getFullYear() && selectedDate.getMonth() === day.getMonth() && selectedDate.getDate() === day.getDate())}
+                    $today={day.toDateString() === new Date().toDateString()}
+                    aria-label={day.toLocaleDateString('fr-FR', { dateStyle: 'full' })}
+                    aria-pressed={Boolean(selectedDate && selectedDate.getFullYear() === day.getFullYear() && selectedDate.getMonth() === day.getMonth() && selectedDate.getDate() === day.getDate())}
+                    onClick={() => {
+                      const value = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`
+                      updateFilter('date', value)
+                      setCalendarOpen(false)
+                    }}>{day.getDate()}</CalendarDay>
+                ) : <span key={`blank-${index}`} />)}
+              </CalendarDays>
+              <CalendarFooter>
+                <button type="button" onClick={() => { updateFilter('date', ''); setCalendarOpen(false) }}>Effacer</button>
+                <button type="button" onClick={() => {
+                  const today = new Date()
+                  const value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                  setViewMonth(new Date(today.getFullYear(), today.getMonth(), 1))
+                  updateFilter('date', value)
+                  setCalendarOpen(false)
+                }}>Aujourd’hui</button>
+              </CalendarFooter>
+            </CalendarPopover>}
+          </DatePickerControl>
         </FilterGroup>
       </FilterToolbar>
 

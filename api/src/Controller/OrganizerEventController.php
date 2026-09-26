@@ -29,7 +29,7 @@ final class OrganizerEventController extends AbstractController
 {
     use OrganizerAdminReadOnlyTrait;
 
-    private const ORGANIZER_TIMEZONE = 'Europe/Paris';
+    private const ORGANIZER_TIMEZONE = 'Africa/Lome';
     private const ALLOWED_STATUSES = ['draft', 'published'];
     private const DEFAULT_CATEGORIES = [
         [
@@ -65,6 +65,7 @@ final class OrganizerEventController extends AbstractController
     public function __construct(
         private readonly UploadedImageStorage $imageStorage,
         private readonly WithdrawalSettingRepository $withdrawalSettingRepository,
+        private readonly \App\Service\CitySelection $citySelection,
     ) {
     }
 
@@ -253,7 +254,12 @@ final class OrganizerEventController extends AbstractController
         $status = strtolower(trim((string) ($data['status'] ?? 'draft')));
         $capacity = $data['capacity'] ?? null;
         $locationAddress = trim((string) ($data['locationAddress'] ?? ''));
-        $locationCity = trim((string) ($data['locationCity'] ?? ''));
+        try {
+            $managedCity = $this->citySelection->resolve($data);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json(['message' => $exception->getMessage()], 400);
+        }
+        $locationCity = $managedCity?->getName() ?? trim((string) ($data['locationCity'] ?? ''));
         $locationPostalCode = trim((string) ($data['locationPostalCode'] ?? ''));
         $locationCountry = trim((string) ($data['locationCountry'] ?? ''));
         $locationLatitude = $this->normalizeOptionalDecimal($data['locationLatitude'] ?? null);
@@ -265,7 +271,6 @@ final class OrganizerEventController extends AbstractController
             $description === '' ||
             $locationAddress === '' ||
             $locationCity === '' ||
-            $locationPostalCode === '' ||
             $locationCountry === ''
         ) {
             return $this->json([
@@ -359,6 +364,7 @@ final class OrganizerEventController extends AbstractController
         $location = new Location();
         $location->setAddress($locationAddress);
         $location->setCity($locationCity);
+        $location->setManagedCity($managedCity);
         $location->setPostalCode($locationPostalCode);
         $location->setCountry($locationCountry);
         $location->setLatitude($locationLatitude);
@@ -481,7 +487,12 @@ final class OrganizerEventController extends AbstractController
         $status = strtolower(trim((string) ($data['status'] ?? 'draft')));
         $capacity = $data['capacity'] ?? null;
         $locationAddress = trim((string) ($data['locationAddress'] ?? ''));
-        $locationCity = trim((string) ($data['locationCity'] ?? ''));
+        try {
+            $managedCity = $this->citySelection->resolve($data, $event->getLocation());
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json(['message' => $exception->getMessage()], 400);
+        }
+        $locationCity = $managedCity?->getName() ?? trim((string) ($data['locationCity'] ?? ''));
         $locationPostalCode = trim((string) ($data['locationPostalCode'] ?? ''));
         $locationCountry = trim((string) ($data['locationCountry'] ?? ''));
         $locationLatitude = $this->normalizeOptionalDecimal($data['locationLatitude'] ?? null);
@@ -493,7 +504,6 @@ final class OrganizerEventController extends AbstractController
             $description === '' ||
             $locationAddress === '' ||
             $locationCity === '' ||
-            $locationPostalCode === '' ||
             $locationCountry === ''
         ) {
             return $this->json([
@@ -656,6 +666,7 @@ final class OrganizerEventController extends AbstractController
 
         $location->setAddress($locationAddress);
         $location->setCity($locationCity);
+        $location->setManagedCity($managedCity);
         $location->setPostalCode($locationPostalCode);
         $location->setCountry($locationCountry);
         $location->setLatitude($locationLatitude);
@@ -994,6 +1005,7 @@ final class OrganizerEventController extends AbstractController
                 'id' => $event->getLocation()?->getId(),
                 'address' => $event->getLocation()?->getAddress(),
                 'city' => $event->getLocation()?->getCity(),
+                'cityId' => $event->getLocation()?->getManagedCity()?->getId(),
                 'postalCode' => $event->getLocation()?->getPostalCode(),
                 'country' => $event->getLocation()?->getCountry(),
                 'latitude' => $event->getLocation()?->getLatitude(),

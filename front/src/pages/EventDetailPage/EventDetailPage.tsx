@@ -91,7 +91,7 @@ function formatEventDate(date: string | null): string {
     return 'Date à confirmer'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -104,7 +104,7 @@ function formatEventTimeRange(start: string | null, end: string | null): string 
     return 'Horaire à confirmer'
   }
 
-  const startTime = new Intl.DateTimeFormat('fr-FR', {
+  const startTime = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(start))
@@ -113,7 +113,7 @@ function formatEventTimeRange(start: string | null, end: string | null): string 
     return startTime
   }
 
-  const endTime = new Intl.DateTimeFormat('fr-FR', {
+  const endTime = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(end))

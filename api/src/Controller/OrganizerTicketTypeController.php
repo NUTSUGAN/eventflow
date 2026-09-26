@@ -20,7 +20,7 @@ class OrganizerTicketTypeController extends AbstractController
 {
     use OrganizerAdminReadOnlyTrait;
 
-    private const ORGANIZER_TIMEZONE = 'Europe/Paris';
+    private const ORGANIZER_TIMEZONE = 'Africa/Lome';
 
     #[Route('/events/{eventId}/ticket-types', name: 'api_organizer_ticket_type_create', methods: ['POST'])]
     public function create(

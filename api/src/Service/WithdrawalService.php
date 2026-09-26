@@ -183,6 +183,7 @@ final class WithdrawalService
             'bank' => [
                 'holderName' => $withdrawal->getBankHolderName(),
                 'iban' => $this->maskUnlessAllowed($withdrawal->getBankIban(), $includeSensitivePayout),
+                'accountReference' => $this->maskUnlessAllowed($withdrawal->getBankAccountReference(), $includeSensitivePayout),
                 'bic' => $withdrawal->getBankBic(),
                 'bankName' => $withdrawal->getBankName(),
             ],

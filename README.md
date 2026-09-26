@@ -395,6 +395,63 @@ fonctionnels, mais les points suivants restent prevus avant une version finale :
 
 ## Notes de developpement
 
+### Adaptation Togo
+
+- Les horaires saisis et affiches utilisent `Africa/Lome` (UTC). Les dates
+  historiques ne sont pas reecrites. Les prix restent en XOF / FCFA.
+- Dans l'onglet **Villes** de `/admin`, l'administration gere la liste **Villes**.
+  Une courte liste togolaise est ajoutee par la migration initiale des villes.
+  Lome et Adidogome peuvent etre deux entrees independantes, sans hierarchie.
+  Seules les villes actives associees aux evenements publics a venir apparaissent
+  dans les filtres. Une ville libre reste recherchable, mais non filtrable.
+  Le rattachement des lieux historiques exige une action manuelle sur cette page.
+- Le code postal est facultatif. La migration `Version20260926100000` ajoute
+  les relations sans deviner les villes existantes. Sauvegarder la base avant
+  toute migration en production. Ne pas executer `doctrine:schema:update --force`.
+- Les exemples du generateur de demonstration sont explicitement fictifs et
+  togolais. Ne pas lancer ce generateur sur les donnees de production.
+- Les versements organisateurs restent **manuels**, sans appel a une API payout.
+  `PAYOUT_MOBILE_MONEY_PROVIDERS=moov_tg,mixx_tg` definit les moyens proposes :
+  ne conserver que ceux que l'exploitant peut effectivement utiliser.
+  Verifier numero, titulaire et coordonnees bancaires avant paiement. Une demande
+  n'est pas un versement : effectuer le paiement hors site, puis enregistrer
+  sa reference et le statut paye. Les anciens IBAN restent consultables.
+- Un remboursement ou un debit sans billet doit etre traite par le support :
+  rapprocher reference de commande et transaction FedaPay, verifier le statut
+  serveur, puis proceder manuellement au remboursement si applicable. Aucune
+  promesse de remboursement automatique ne doit etre faite.
+
+#### Informations publiques a completer
+
+Dans `front/.env.local`, renseigner uniquement des informations verifiees :
+
+```dotenv
+VITE_LEGAL_OPERATOR=
+VITE_LEGAL_ADDRESS=
+VITE_LEGAL_REGISTRATION=
+VITE_SUPPORT_EMAIL=
+VITE_LEGAL_HOSTING=
+```
+
+Ces valeurs sont publiques et integrees au build frontend : aucun secret ici.
+Les champs vides ne sont pas inventes. Faire valider les conditions de vente,
+la confidentialite et les informations de l'exploitant avant publication.
+
+#### Avant le premier paiement reel
+
+La configuration locale/sandbox n'est pas une mise en production. Prevoir un
+domaine HTTPS, le compte marchand valide, les cles FedaPay live cote backend,
+un webhook et une URL de retour publics, et les moyens de paiement actives.
+Verifier aussi les URL des e-mails, les images et les redirections OAuth.
+Effectuer un achat reel controle : confirmation serveur, billet, e-mail, scan,
+rejet du second scan, rapprochement financier puis versement manuel reference.
+Ne jamais confirmer une commande sur la seule base du retour navigateur.
+
+L'accueil utilise une demonstration generee (QR non valable), avec videos
+WebM desktop/mobile, images de secours et respect des animations reduites.
+Le script `front/scripts/render-scan-demo.cjs` permet de regenerer ces medias
+avec Playwright et qr.js disponibles dans l'environnement Node.
+
 Le projet est utilise comme support de rendu pour le jalon 5 :
 Developpement, Securite et Tests. Il correspond a une version beta publique,
 pas encore a une version de production definitive.

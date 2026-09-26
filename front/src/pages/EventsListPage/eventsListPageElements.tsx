@@ -33,7 +33,8 @@ export const PageTitle = styled.h1`
   margin: 0;
   color: var(--color-text);
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: 3rem;
+  @media (max-width: 640px) { font-size: 2rem; }
   line-height: 1.05;
 `
 

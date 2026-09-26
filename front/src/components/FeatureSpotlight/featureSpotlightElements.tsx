@@ -110,12 +110,12 @@ export const FeatureMedia = styled.div`
 export const FeatureMediaCard = styled.div`
   width: min(100%, 520px);
   min-width: 0;
-  min-height: 360px;
-  padding: 24px;
+  min-height: 0;
+  padding: 24px 28px;
   display: grid;
-  align-content: center;
+  align-content: start;
   justify-items: center;
-  gap: 18px;
+  gap: 14px;
   border-radius: 24px;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
@@ -123,17 +123,29 @@ export const FeatureMediaCard = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.06);
   overflow: hidden;
 
+  .scan-demo {
+    display: block;
+    width: min(100%, 390px);
+    aspect-ratio: 39 / 43;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #111715;
+  }
+
   @media (max-width: 560px) {
-    min-height: 260px;
-    padding: 18px;
+    padding: 18px 14px;
     border-radius: 16px;
+
+    .scan-demo { width: min(100%, 280px); aspect-ratio: 39 / 43; }
   }
 `
 
 export const FeatureMediaImage = styled.img`
-  width: min(100%, 360px);
-  height: auto;
+  width: min(100%, 380px);
+  height: 112px;
   display: block;
+  object-fit: cover;
+  object-position: center;
   mix-blend-mode: screen;
   filter: brightness(1.12);
 `

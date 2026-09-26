@@ -1,5 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { CitySelect } from '../../components/CitySelect/CitySelect'
+import { eventInputDate, formatEventInput } from '../../utils/eventTime'
 import { getCurrentUser } from '../../api/auth'
 import {
   ADMIN_ORGANIZER_READ_ONLY_MESSAGE,
@@ -119,6 +121,7 @@ type OrganizerEventEditFormState = {
   categoryId: string
   locationAddress: string
   locationCity: string
+  locationCityId: string
   locationPostalCode: string
   locationCountry: string
   locationLatitude: string
@@ -138,8 +141,9 @@ const initialEventForm: OrganizerEventEditFormState = {
   categoryId: '',
   locationAddress: '',
   locationCity: '',
+  locationCityId: '',
   locationPostalCode: '',
-  locationCountry: 'France',
+  locationCountry: 'Togo',
   locationLatitude: '',
   locationLongitude: '',
   startDatetime: '',
@@ -182,9 +186,7 @@ const organizerEventDetailTabs: Array<{
 ]
 
 function formatDateTimeLocal(date: Date): string {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-
-  return localDate.toISOString().slice(0, 16)
+  return formatEventInput(date)
 }
 
 function formatApiDateToInput(value: string | null): string {
@@ -196,13 +198,13 @@ function formatApiDateToInput(value: string | null): string {
 }
 
 function addMinutesToDateTimeLocal(value: string, minutes: number): string {
-  const date = new Date(value)
+  const date = eventInputDate(value)
 
   if (Number.isNaN(date.getTime())) {
     return value
   }
 
-  date.setMinutes(date.getMinutes() + minutes)
+  date.setUTCMinutes(date.getUTCMinutes() + minutes)
 
   return formatDateTimeLocal(date)
 }
@@ -216,8 +218,9 @@ function buildEventFormFromEvent(
     categoryId: event.category.id !== null ? String(event.category.id) : '',
     locationAddress: event.location.address ?? '',
     locationCity: event.location.city ?? '',
+    locationCityId: event.location.cityId ? String(event.location.cityId) : '',
     locationPostalCode: event.location.postalCode ?? '',
-    locationCountry: event.location.country ?? 'France',
+    locationCountry: event.location.country ?? 'Togo',
     locationLatitude: event.location.latitude ?? '',
     locationLongitude: event.location.longitude ?? '',
     startDatetime: formatApiDateToInput(event.startDatetime),
@@ -556,7 +559,6 @@ export function OrganizerEventDetailPage() {
       eventForm.categoryId.trim() === '' ||
       eventForm.locationAddress.trim() === '' ||
       eventForm.locationCity.trim() === '' ||
-      eventForm.locationPostalCode.trim() === '' ||
       eventForm.locationCountry.trim() === ''
     ) {
       setEventErrorMessage(
@@ -573,8 +575,8 @@ export function OrganizerEventDetailPage() {
       return
     }
 
-    const startDatetime = new Date(eventForm.startDatetime)
-    const endDatetime = new Date(eventForm.endDatetime)
+    const startDatetime = eventInputDate(eventForm.startDatetime)
+    const endDatetime = eventInputDate(eventForm.endDatetime)
     const now = new Date()
 
     if (Number.isNaN(startDatetime.getTime()) || Number.isNaN(endDatetime.getTime())) {
@@ -583,7 +585,7 @@ export function OrganizerEventDetailPage() {
     }
 
     const existingStartDatetime = event?.startDatetime
-      ? new Date(formatApiDateToInput(event.startDatetime))
+      ? eventInputDate(formatApiDateToInput(event.startDatetime))
       : null
     const isKeepingExistingPastStartDatetime =
       existingStartDatetime !== null &&
@@ -618,6 +620,7 @@ export function OrganizerEventDetailPage() {
       payload.append('categoryId', eventForm.categoryId)
       payload.append('locationAddress', eventForm.locationAddress)
       payload.append('locationCity', eventForm.locationCity)
+      payload.append('locationCityId', eventForm.locationCityId)
       payload.append('locationPostalCode', eventForm.locationPostalCode)
       payload.append('locationCountry', eventForm.locationCountry)
       payload.append('locationLatitude', eventForm.locationLatitude)
@@ -1044,30 +1047,21 @@ export function OrganizerEventDetailPage() {
                       locationAddress: changeEvent.target.value,
                     }))
                   }
-                  placeholder="10 Rue de l’Exemple"
+                  placeholder="Nom du lieu, rue et repère"
                   required
                 />
               </OrganizerEventDetailField>
 
               <OrganizerEventDetailField>
                 <OrganizerEventDetailLabel>Ville</OrganizerEventDetailLabel>
-                <OrganizerEventDetailInput
-                  value={eventForm.locationCity}
-                  onChange={(changeEvent) =>
-                    setEventForm((current) => ({
-                      ...current,
-                      locationCity: changeEvent.target.value,
-                    }))
-                  }
-                  placeholder="Paris"
-                  required
-                />
+                <CitySelect cityId={eventForm.locationCityId} name={eventForm.locationCity}
+                  onChange={(locationCityId, locationCity) => setEventForm(current => ({ ...current, locationCityId, locationCity }))} />
               </OrganizerEventDetailField>
             </OrganizerEventDetailGrid>
 
             <OrganizerEventDetailGrid>
               <OrganizerEventDetailField>
-                <OrganizerEventDetailLabel>Code postal</OrganizerEventDetailLabel>
+                <OrganizerEventDetailLabel>Code postal (facultatif)</OrganizerEventDetailLabel>
                 <OrganizerEventDetailInput
                   value={eventForm.locationPostalCode}
                   onChange={(changeEvent) =>
@@ -1076,8 +1070,8 @@ export function OrganizerEventDetailPage() {
                       locationPostalCode: changeEvent.target.value,
                     }))
                   }
-                  placeholder="75010"
-                  required
+                  placeholder="Facultatif"
+
                 />
               </OrganizerEventDetailField>
 
@@ -1091,7 +1085,7 @@ export function OrganizerEventDetailPage() {
                       locationCountry: changeEvent.target.value,
                     }))
                   }
-                  placeholder="France"
+                  placeholder="Togo"
                   required
                 />
               </OrganizerEventDetailField>
@@ -1110,7 +1104,7 @@ export function OrganizerEventDetailPage() {
                       locationLatitude: changeEvent.target.value,
                     }))
                   }
-                  placeholder="48.8566000"
+                  placeholder="Latitude du lieu"
                 />
                 <OrganizerEventDetailHint>
                   Facultatif. Utile si tu veux positionner précisément le lieu.
@@ -1129,7 +1123,7 @@ export function OrganizerEventDetailPage() {
                       locationLongitude: changeEvent.target.value,
                     }))
                   }
-                  placeholder="2.3522000"
+                  placeholder="Longitude du lieu"
                 />
                 <OrganizerEventDetailHint>
                   Facultatif. Laisse vide si tu n’as pas encore les coordonnées.

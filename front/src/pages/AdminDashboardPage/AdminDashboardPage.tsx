@@ -21,6 +21,7 @@ import {
   isAdminUser,
 } from '../../auth/adminPermissions'
 import { AdminPagination } from '../../components/AdminPagination/AdminPagination'
+import { AdminCitiesPage } from '../AdminCitiesPage/AdminCitiesPage'
 import { usePagination } from '../../hooks/usePagination'
 import { getAdminOrganizerApplications } from '../../api/organizerApplication'
 import type { AuthUser } from '../../types/auth'
@@ -86,7 +87,7 @@ import {
   AdminDashboardTitle,
 } from './adminDashboardPageElements'
 
-type AdminDashboardTabId = 'overview' | 'events' | 'categories'
+type AdminDashboardTabId = 'overview' | 'events' | 'categories' | 'cities'
 
 type CategoryFormState = {
   name: string
@@ -129,7 +130,7 @@ function formatDate(value: string | null): string {
     return 'Date à confirmer'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
@@ -331,7 +332,7 @@ export function AdminDashboardPage() {
     const tabs: Array<[AdminDashboardTabId, string]> = [['overview', 'Vue globale']]
 
     if (canAccessContent) {
-      tabs.push(['events', 'Évènements'], ['categories', 'Catégories'])
+      tabs.push(['events', 'Évènements'], ['categories', 'Catégories'], ['cities', 'Villes'])
     }
 
     return tabs
@@ -730,9 +731,9 @@ export function AdminDashboardPage() {
         <AdminDashboardMessage $tone="danger">{errorMessage}</AdminDashboardMessage>
       ) : null}
 
-      <AdminDashboardGrid>
+      {activeTab !== 'cities' && <AdminDashboardGrid>
         {renderMetrics()}
-      </AdminDashboardGrid>
+      </AdminDashboardGrid>}
 
       {isLoading ? (
         <AdminDashboardMessage $tone="neutral">
@@ -1001,6 +1002,7 @@ export function AdminDashboardPage() {
           />
         </AdminDashboardPanel>
       ) : null}
+      {activeTab === 'cities' && canAccessContent ? <AdminCitiesPage embedded /> : null}
       {renderAdminConfirmationModal()}
     </AdminDashboardSection>
   )

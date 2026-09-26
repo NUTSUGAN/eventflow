@@ -131,7 +131,7 @@ final class TicketFulfillmentService
                 $eventLine .= sprintf(
                     "Date : %s\n",
                     $orderSummary['eventStartsAt']
-                        ->setTimezone(new \DateTimeZone('Europe/Paris'))
+                        ->setTimezone(new \DateTimeZone('Africa/Lome'))
                         ->format('d/m/Y a H:i')
                 );
             }
@@ -166,7 +166,7 @@ final class TicketFulfillmentService
                             'details' => array_filter([
                                 'Événement' => $orderSummary['eventTitle'] ?? null,
                                 'Date' => $orderSummary['eventStartsAt'] instanceof \DateTimeImmutable
-                                    ? $orderSummary['eventStartsAt']->setTimezone(new \DateTimeZone('Europe/Paris'))->format('d/m/Y à H:i')
+                                    ? $orderSummary['eventStartsAt']->setTimezone(new \DateTimeZone('Africa/Lome'))->format('d/m/Y à H:i')
                                     : null,
                                 'Commande' => (string) $order->getReference(),
                             ]),
@@ -257,7 +257,7 @@ final class TicketFulfillmentService
             $eventLine .= sprintf(
                 "Date : %s\n",
                 $orderSummary['eventStartsAt']
-                    ->setTimezone(new \DateTimeZone('Europe/Paris'))
+                    ->setTimezone(new \DateTimeZone('Africa/Lome'))
                     ->format('d/m/Y a H:i')
             );
         }

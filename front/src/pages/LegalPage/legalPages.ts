@@ -1,4 +1,5 @@
 import type { LegalPageProps } from './LegalPage'
+import { publicIdentitySections } from '../../config/publicIdentity'
 
 export const legalPages = {
   conditions: {
@@ -23,9 +24,10 @@ export const legalPages = {
     title: 'Mentions légales',
     lead: 'Retrouve ici les informations légales liées à EventFlow.',
     sections: [
+      ...publicIdentitySections,
       {
         title: 'Éditeur',
-        body: 'EventFlow est une plateforme de billetterie et de gestion événementielle développée dans le cadre du projet.',
+        body: 'EventFlow est une plateforme de découverte, de billetterie et de gestion d’événements au Togo.',
       },
       {
         title: 'Création digitale',
@@ -59,6 +61,7 @@ export const legalPages = {
     title: 'Documents légaux EventFlow',
     lead: 'Ce document regroupe les informations légales, contractuelles et financières utiles aux utilisateurs et aux organisateurs EventFlow.',
     sections: [
+      ...publicIdentitySections,
       {
         id: 'mentions-legales',
         title: 'Mentions légales',
@@ -91,6 +94,7 @@ export const legalPages = {
         id: 'politique-remboursement',
         title: 'Politique de remboursement',
         body: [
+          'Les demandes sont traitées manuellement par EventFlow avec l’organisateur. Aucun remboursement automatique n’est déclenché depuis le site. En cas de débit sans billet, contacte le support avec la référence de commande et la référence FedaPay avant de renouveler ton paiement. Ne transmets jamais ton code PIN Mobile Money.',
           'Les demandes de remboursement sont étudiées en fonction du statut de la commande, de la nature du billet, des conditions propres à l’événement, des informations communiquées au moment de l’achat et des règles applicables aux prestations datées. Un billet associé à un événement précis peut être soumis à des conditions différentes d’un produit standard, notamment lorsque l’accès est lié à une date, un lieu ou une prestation organisée par un tiers.',
           'Pour faciliter le traitement, toute demande doit mentionner l’adresse email du compte, la référence de commande, le nom de l’événement, le type de billet concerné et le motif de la demande. EventFlow peut demander des informations complémentaires lorsque la commande est introuvable, lorsque le paiement doit être vérifié ou lorsque la situation nécessite une validation par l’organisateur.',
           'En cas d’annulation officielle d’un événement, de modification majeure ou d’erreur manifeste sur une commande, EventFlow et l’organisateur peuvent définir une procédure de remboursement, d’avoir ou de report. Les délais de remboursement peuvent dépendre du prestataire de paiement, du moyen de paiement utilisé, du statut de la commande et des contrôles nécessaires pour éviter les remboursements multiples ou frauduleux.',
@@ -101,6 +105,7 @@ export const legalPages = {
         id: 'politique-confidentialite',
         title: 'Politique de confidentialité',
         body: [
+          'FedaPay traite les paiements sur sa page hébergée. EventFlow conserve les références et statuts nécessaires à la commande, mais ne demande pas ton code PIN Mobile Money. Les informations visibles par le staff sont utilisées pour vérifier l’accès à l’événement.',
           'EventFlow traite les données nécessaires à la création et à la gestion des comptes, à l’authentification, aux commandes, aux billets, aux QR codes, aux demandes organisateur, aux services de promotion, aux paiements, aux retraits, au support et à la sécurité de la plateforme. Ces données peuvent inclure l’identité déclarée, l’adresse email, les informations de commande, l’historique des billets, les informations de suivi organisateur et les éléments nécessaires au contrôle d’accès.',
           'Les données sont utilisées pour fournir le service demandé, sécuriser les accès, prévenir les abus, envoyer les informations nécessaires à l’utilisation des billets, permettre aux organisateurs de gérer leurs événements et répondre aux demandes de support. Certaines informations peuvent être conservées pour répondre à des obligations comptables, contractuelles, de preuve ou de sécurité.',
           'EventFlow limite l’accès aux données aux personnes et services qui en ont besoin pour exploiter la plateforme. Des prestataires techniques peuvent intervenir pour l’hébergement, l’envoi d’emails, le paiement, la maintenance ou l’analyse du fonctionnement du service. Lorsque ces prestataires traitent des données pour le compte d’EventFlow, ils doivent respecter un cadre de confidentialité et de sécurité adapté.',
@@ -157,7 +162,7 @@ export const legalPages = {
       },
       {
         title: 'Facturation et retraits',
-        body: 'Les informations de facturation, de paiement et de retrait sont consultables depuis les espaces concernés. Les organisateurs doivent renseigner un moyen de retrait valide avant de demander un paiement.',
+        body: 'Après la fin de l’événement, l’organisateur demande le versement des ventes confirmées vers son moyen de retrait. EventFlow vérifie les coordonnées, réalise le transfert manuellement puis enregistre sa référence. L’approbation d’une demande ne signifie pas que le transfert a déjà été effectué. Les éventuels frais de paiement sont présentés par FedaPay avant validation.',
       },
     ],
   },

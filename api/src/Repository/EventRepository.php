@@ -286,18 +286,20 @@ class EventRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<string>
+     * @return list<array{id: int, name: string}>
      */
     public function findPublicCityFilters(): array
     {
         $queryBuilder = $this->createQueryBuilder('event')
-            ->select('DISTINCT location.city AS city')
+            ->select('DISTINCT managedCity.id AS id, managedCity.name AS name')
             ->innerJoin('event.location', 'location')
+            ->innerJoin('location.managedCity', 'managedCity')
+            ->andWhere('managedCity.active = true')
             ->andWhere('LOWER(event.status) = :publishedStatus')
             ->andWhere('location.city IS NOT NULL')
             ->andWhere("location.city <> ''")
             ->setParameter('publishedStatus', 'published')
-            ->orderBy('location.city', 'ASC')
+            ->orderBy('managedCity.name', 'ASC')
         ;
 
         $this->applyPublicVisibilityScope($queryBuilder, 'upcoming');
@@ -308,7 +310,7 @@ class EventRepository extends ServiceEntityRepository
         ;
 
         return array_values(array_map(
-            static fn (array $row): string => (string) $row['city'],
+            static fn (array $row): array => ['id' => (int) $row['id'], 'name' => (string) $row['name']],
             $rows
         ));
     }
@@ -320,13 +322,15 @@ class EventRepository extends ServiceEntityRepository
         ?string $city,
         ?\DateTimeImmutable $date
     ): void {
+        $queryBuilder->leftJoin('location.managedCity', 'managedCity');
         if (null !== $search && '' !== $search) {
             $queryBuilder
                 ->andWhere(
                     'LOWER(event.title) LIKE :search
                     OR LOWER(event.description) LIKE :search
                     OR LOWER(category.name) LIKE :search
-                    OR LOWER(location.city) LIKE :search'
+                    OR LOWER(location.city) LIKE :search
+                    OR LOWER(managedCity.name) LIKE :search'
                 )
                 ->setParameter('search', '%'.mb_strtolower($search).'%')
             ;
@@ -348,8 +352,9 @@ class EventRepository extends ServiceEntityRepository
 
         if (null !== $city && '' !== $city) {
             $queryBuilder
-                ->andWhere('LOWER(location.city) = :city')
-                ->setParameter('city', mb_strtolower($city))
+                ->andWhere('managedCity.active = true')
+                ->andWhere(ctype_digit($city) ? 'managedCity.id = :city' : 'LOWER(managedCity.name) = :city')
+                ->setParameter('city', ctype_digit($city) ? (int) $city : mb_strtolower($city))
             ;
         }
 

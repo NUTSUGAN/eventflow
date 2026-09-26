@@ -70,6 +70,7 @@ export type OrganizerEventSummary = {
     id: number | null
     address: string | null
     city: string | null
+    cityId: number | null
     postalCode: string | null
     country: string | null
     latitude: string | null

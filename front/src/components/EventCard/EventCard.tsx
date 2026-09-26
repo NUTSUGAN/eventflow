@@ -25,9 +25,9 @@ const monthLabels = ['JAN', 'FEV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUL', 'AOU', 'SE
 
 function formatDate(date: string): string {
   const eventDate = new Date(date)
-  const day = String(eventDate.getDate()).padStart(2, '0')
-  const month = monthLabels[eventDate.getMonth()] ?? ''
-  const time = new Intl.DateTimeFormat('fr-FR', {
+  const day = String(eventDate.getUTCDate()).padStart(2, '0')
+  const month = monthLabels[eventDate.getUTCMonth()] ?? ''
+  const time = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     hour: '2-digit',
     minute: '2-digit',
   }).format(eventDate)
@@ -84,7 +84,7 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
         <CardContent $variant={variant}>
           {isExplorerVariant ? <CardCategory>{event.category}</CardCategory> : null}
           <CardTitle>{event.title}</CardTitle>
-          <CardLocation>{event.city}, France</CardLocation>
+          <CardLocation>{[event.city, event.country].filter(Boolean).join(', ')}</CardLocation>
           {isExplorerVariant ? <CardDescription>{event.shortDescription}</CardDescription> : null}
           <CardMetaRow>
             <CardWhen>{formatDate(event.startsAt)}</CardWhen>

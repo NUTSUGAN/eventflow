@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getPublicEvents } from '../../api/events'
 import { FeatureSpotlight } from '../../components/FeatureSpotlight/FeatureSpotlight'
 import { EventCard } from '../../components/EventCard/EventCard'
+import { HomeCategories } from '../../components/HomeCategories/HomeCategories'
 import type { EventSummary } from '../../types/event'
 import {
   ActionRow,
@@ -65,7 +66,7 @@ export function EventsListPage() {
     <PageSection>
       <PageHeader>
         <PageTitle>
-          {searchQuery ? 'Résultats de recherche' : 'Événements à venir'}
+          {searchQuery ? 'Résultats de recherche' : 'Événements à la une'}
         </PageTitle>
         {searchQuery ? (
           <PageIntro>
@@ -103,6 +104,7 @@ export function EventsListPage() {
       )}
 
       <FeatureSpotlight />
+      <HomeCategories />
     </PageSection>
   )
 }

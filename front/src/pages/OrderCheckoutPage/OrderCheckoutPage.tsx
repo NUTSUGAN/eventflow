@@ -358,6 +358,14 @@ export function OrderCheckoutPage() {
             ) : null}
           </OrderPreparationList>
 
+          {!paymentAlreadyCompleted && <OrderPreparationHint>
+            Le total des billets est affiché ci-dessus en FCFA. Les éventuels frais du moyen
+            de paiement sont présentés par FedaPay avant validation.
+            {' '}<a href="/documents-legaux#politique-remboursement">Annulation et remboursement</a>.
+            {' '}Si ton compte a été débité sans billet, contacte EventFlow avec la référence
+            de commande avant de recommencer un paiement.
+          </OrderPreparationHint>}
+
           {isSuccessReturn && !paymentAlreadyCompleted ? (
             <OrderPreparationState>
               FedaPay a redirige le navigateur. Si la confirmation tarde, recharge simplement

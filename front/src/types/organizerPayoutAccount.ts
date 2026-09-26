@@ -1,6 +1,7 @@
 export type OrganizerPayoutType = 'bank' | 'mobile_money'
 
 export type OrganizerPayoutBank = {
+  accountReference: string | null
   holderName: string | null
   iban: string | null
   bic: string | null
@@ -30,6 +31,7 @@ export type OrganizerPayoutAccountPayload =
       type: 'bank'
       label?: string
       holderName: string
+      bankAccountReference?: string
       iban: string
       bic: string
       bankName?: string
@@ -44,6 +46,7 @@ export type OrganizerPayoutAccountPayload =
     }
 
 export type OrganizerPayoutAccountResponse = {
+  providers?: Record<string, string>
   active: OrganizerPayoutAccount | null
   history: OrganizerPayoutAccount[]
 }

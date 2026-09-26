@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/orders')]
 final class OrderPreparationController extends AbstractController
 {
-    private const PUBLIC_TIMEZONE = 'Europe/Paris';
+    private const PUBLIC_TIMEZONE = 'Africa/Lome';
 
     #[Route('/prepare', name: 'api_order_prepare', methods: ['POST'])]
     public function prepare(

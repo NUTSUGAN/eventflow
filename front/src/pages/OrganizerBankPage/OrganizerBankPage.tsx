@@ -33,6 +33,7 @@ type PayoutFormState = {
   type: OrganizerPayoutType
   label: string
   holderName: string
+  bankAccountReference: string
   iban: string
   bic: string
   bankName: string
@@ -43,16 +44,17 @@ type PayoutFormState = {
 }
 
 const initialForm: PayoutFormState = {
-  type: 'bank',
+  type: 'mobile_money',
   label: '',
   holderName: '',
+  bankAccountReference: '',
   iban: '',
   bic: '',
   bankName: '',
   mobileMoneyName: '',
   mobileMoneyPhone: '',
   mobileMoneyProvider: '',
-  mobileMoneyCountry: '',
+  mobileMoneyCountry: 'Togo',
 }
 
 function formatDate(value: string | null): string {
@@ -60,7 +62,7 @@ function formatDate(value: string | null): string {
     return 'Date à définir'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
@@ -90,6 +92,7 @@ function readApiMessage(error: unknown, fallback: string): string {
 }
 
 export function OrganizerBankPage() {
+  const [providers, setProviders] = useState<Record<string, string>>({})
   const navigate = useNavigate()
   const [activeAccount, setActiveAccount] = useState<OrganizerPayoutAccount | null>(null)
   const [history, setHistory] = useState<OrganizerPayoutAccount[]>([])
@@ -121,6 +124,7 @@ export function OrganizerBankPage() {
         }
 
         setActiveAccount(response.active)
+        setProviders(response.providers ?? {})
         setHistory(response.history)
       } catch (error) {
         if (!isMounted) {
@@ -162,6 +166,7 @@ export function OrganizerBankPage() {
             type: 'bank',
             label: form.label,
             holderName: form.holderName,
+            bankAccountReference: form.bankAccountReference,
             iban: form.iban,
             bic: form.bic,
             bankName: form.bankName,
@@ -295,7 +300,7 @@ export function OrganizerBankPage() {
             <PayoutInput
               value={form.label}
               onChange={(event) => patchForm({ label: event.target.value })}
-              placeholder={form.type === 'bank' ? 'Compte principal' : 'Orange Money'}
+              placeholder={form.type === 'bank' ? 'Compte principal' : 'Mon compte Mobile Money'}
             />
           </PayoutField>
 
@@ -311,21 +316,31 @@ export function OrganizerBankPage() {
                 />
               </PayoutField>
               <PayoutField>
-                <PayoutLabel>IBAN</PayoutLabel>
+                <PayoutLabel>RIB ou numéro de compte</PayoutLabel>
                 <PayoutInput
-                  value={form.iban}
-                  onChange={(event) => patchForm({ iban: event.target.value })}
-                  placeholder="FR76..."
-                  required
+                  value={form.bankAccountReference}
+                  onChange={(event) => patchForm({ bankAccountReference: event.target.value })}
+                  placeholder="Référence fournie par ta banque"
+                  maxLength={120}
+                  required={!form.iban.trim()}
                 />
               </PayoutField>
               <PayoutField>
-                <PayoutLabel>BIC</PayoutLabel>
+                <PayoutLabel>IBAN (si fourni par ta banque)</PayoutLabel>
+                <PayoutInput
+                  value={form.iban}
+                  onChange={(event) => patchForm({ iban: event.target.value })}
+                  placeholder="Facultatif"
+                  maxLength={80}
+                />
+              </PayoutField>
+              <PayoutField>
+                <PayoutLabel>BIC / SWIFT (facultatif)</PayoutLabel>
                 <PayoutInput
                   value={form.bic}
                   onChange={(event) => patchForm({ bic: event.target.value })}
-                  placeholder="AGRIFRPP"
-                  required
+                  placeholder="Code fourni par ta banque"
+                  maxLength={40}
                 />
               </PayoutField>
               <PayoutField>
@@ -334,6 +349,7 @@ export function OrganizerBankPage() {
                   value={form.bankName}
                   onChange={(event) => patchForm({ bankName: event.target.value })}
                   placeholder="Nom de la banque"
+                  required
                 />
               </PayoutField>
             </>
@@ -353,25 +369,30 @@ export function OrganizerBankPage() {
                 <PayoutInput
                   value={form.mobileMoneyPhone}
                   onChange={(event) => patchForm({ mobileMoneyPhone: event.target.value })}
-                  placeholder="+243..."
+                  placeholder="+228 XX XX XX XX"
+                  type="tel"
+                  maxLength={25}
                   required
                 />
               </PayoutField>
               <PayoutField>
                 <PayoutLabel>Opérateur</PayoutLabel>
-                <PayoutInput
+                <PayoutInput as="select"
                   value={form.mobileMoneyProvider}
                   onChange={(event) => patchForm({ mobileMoneyProvider: event.target.value })}
-                  placeholder="Orange Money, M-Pesa..."
                   required
-                />
+                >
+                  <option value="">Choisir un opérateur</option>
+                  {Object.entries(providers).map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+                </PayoutInput>
               </PayoutField>
               <PayoutField>
                 <PayoutLabel>Pays</PayoutLabel>
                 <PayoutInput
                   value={form.mobileMoneyCountry}
                   onChange={(event) => patchForm({ mobileMoneyCountry: event.target.value })}
-                  placeholder="RDC, France..."
+                  placeholder="Togo"
+                  readOnly
                   required
                 />
               </PayoutField>
@@ -441,8 +462,8 @@ function PayoutAccountCard({ account }: { account: OrganizerPayoutAccount }) {
               <strong>{account.bank.holderName ?? 'À définir'}</strong>
             </PayoutInfo>
             <PayoutInfo>
-              <span>IBAN</span>
-              <strong>{account.bank.iban ?? 'À définir'}</strong>
+              <span>RIB / compte bancaire</span>
+              <strong>{account.bank.accountReference ?? account.bank.iban ?? 'À définir'}</strong>
             </PayoutInfo>
             <PayoutInfo>
               <span>BIC</span>
@@ -534,6 +555,16 @@ const PayoutInput = styled.input`
 
   &::placeholder {
     color: rgba(255, 237, 222, 0.38);
+  }
+
+  option {
+    background: #241f1c;
+    color: #fffaf4;
+  }
+
+  option:checked {
+    background: #4a3022;
+    color: #fffaf4;
   }
 `
 

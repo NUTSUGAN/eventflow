@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/me/tickets')]
 final class MyTicketController extends AbstractController
 {
-    private const PUBLIC_TIMEZONE = 'Europe/Paris';
+    private const PUBLIC_TIMEZONE = 'Africa/Lome';
 
     #[Route('', name: 'api_my_tickets_index', methods: ['GET'])]
     public function index(

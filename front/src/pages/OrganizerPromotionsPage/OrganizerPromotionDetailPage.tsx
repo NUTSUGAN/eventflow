@@ -57,7 +57,7 @@ function apiMessage(error: unknown): string {
 
 function formatDate(value: string | null): string {
   if (!value) return 'À définir'
-  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 
 function linkedBrief(value: string | null) {

@@ -50,7 +50,7 @@ function formatDate(value: string | null): string {
     return 'Date à confirmer'
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))
@@ -191,8 +191,9 @@ export function OrganizerWithdrawalsPage() {
           <OrganizerDashboardEyebrow>Espace organisateur</OrganizerDashboardEyebrow>
           <OrganizerDashboardTitle>Retraits</OrganizerDashboardTitle>
           <OrganizerDashboardText>
-            Demande un retrait après la fin d’un événement et suis le traitement
-            réalisé par EventFlow.
+            Après la fin de l’événement, demande le versement de tes ventes confirmées.
+            EventFlow vérifie la demande, effectue le transfert puis enregistre sa référence.
+            Une demande approuvée n’est pas encore un paiement effectué.
           </OrganizerDashboardText>
         </OrganizerDashboardHeaderText>
         <OrganizerDashboardActions>

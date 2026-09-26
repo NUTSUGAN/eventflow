@@ -58,7 +58,7 @@ function formatSuggestionDate(date: string | null): string | null {
     return null
   }
 
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Africa/Lome',
     day: '2-digit',
     month: 'short',
     year: 'numeric',

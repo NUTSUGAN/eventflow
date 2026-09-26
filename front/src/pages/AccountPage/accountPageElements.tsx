@@ -3,22 +3,22 @@ import styled, { css } from 'styled-components'
 type BadgeTone = 'neutral' | 'accent' | 'success' | 'danger'
 
 export const AccountSection = styled.section`
-  width: min(1180px, calc(100% - 56px));
+  width: min(1280px, calc(100% - 64px));
   min-width: 0;
-  margin: 40px auto 96px;
+  margin: 36px auto 88px;
 
   @media (max-width: 720px) {
     width: min(100%, calc(100% - 24px));
-    margin: 24px auto 56px;
+    margin: 22px auto 52px;
   }
 `
 
 export const AccountShell = styled.div`
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(300px, 0.76fr) minmax(0, 1.6fr);
   align-items: start;
-  gap: 24px;
+  gap: 20px;
 
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
@@ -28,26 +28,29 @@ export const AccountShell = styled.div`
 const panelStyles = css`
   min-width: 0;
   display: grid;
-  gap: 22px;
-  padding: 28px;
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(43, 31, 25, 0.96) 0%, rgba(34, 26, 23, 0.96) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  gap: 20px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #201c1a;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
 
   @media (max-width: 560px) {
-    gap: 18px;
-    padding: 18px;
-    border-radius: 16px;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 12px;
   }
 `
 
 export const AccountOverviewCard = styled.div`
   ${panelStyles}
   align-content: start;
+  position: sticky;
+  top: calc(var(--site-header-height, 72px) + 20px);
+
+  @media (max-width: 980px) {
+    position: static;
+  }
 `
 
 export const AccountFormCard = styled.div`
@@ -60,18 +63,19 @@ export const AccountStateCard = styled.div`
 
 export const AccountHero = styled.div`
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 18px;
-  align-items: center;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
 
   @media (max-width: 560px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 12px;
   }
 `
 
 export const AccountAvatar = styled.div<{ $imageUrl?: string }>`
-  width: 92px;
-  height: 92px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   flex: 0 0 auto;
   display: grid;
@@ -89,11 +93,17 @@ export const AccountAvatar = styled.div<{ $imageUrl?: string }>`
   font-weight: 800;
   font-size: 1.9rem;
   box-shadow: 0 16px 28px rgba(0, 0, 0, 0.18);
+
+  @media (max-width: 560px) {
+    width: 60px;
+    height: 60px;
+    font-size: 1.4rem;
+  }
 `
 
 export const AccountEyebrow = styled.span`
   color: rgba(248, 143, 82, 0.9);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -102,11 +112,12 @@ export const AccountEyebrow = styled.span`
 export const AccountTitle = styled.h1`
   margin: 8px 0 0;
   color: var(--color-text);
-  font-size: clamp(2rem, 4vw, 3.1rem);
-  line-height: 1.02;
+  font-size: clamp(1.45rem, 2.1vw, 1.8rem);
+  line-height: 1.18;
+  overflow-wrap: anywhere;
 
   @media (max-width: 560px) {
-    font-size: clamp(1.55rem, 8vw, 2.1rem);
+    font-size: clamp(1.2rem, 5vw, 1.55rem);
   }
 `
 
@@ -189,8 +200,8 @@ export const AccountGrid = styled.div`
 `
 
 export const AccountInfoCard = styled.div`
-  padding: 18px;
-  border-radius: 18px;
+  padding: 16px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
 `
@@ -222,7 +233,8 @@ export const AccountMutedValue = styled.p`
 export const AccountSectionTitle = styled.h2`
   margin: 0;
   color: var(--color-text);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  line-height: 1.3;
 `
 
 export const AccountSectionLead = styled.p`
@@ -306,11 +318,11 @@ export const AccountReadonlyField = styled.div`
 
 export const AccountUploadCard = styled.div`
   display: grid;
-  gap: 16px;
+  gap: 14px;
   padding: 18px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.028);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
 `
 
 export const AccountUploadRow = styled.div`
@@ -358,6 +370,24 @@ export const AccountActions = styled.div`
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+`
+
+export const AccountOverviewActions = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+
+  & > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  & > button:last-child {
+    grid-column: 1 / -1;
+  }
 `
 
 const buttonStyles = css`

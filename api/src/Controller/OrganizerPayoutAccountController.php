@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/organizer/payout-account')]
 final class OrganizerPayoutAccountController extends AbstractController
 {
+    public function __construct(private readonly \App\Service\TogoPayoutDetails $details) {}
     #[Route('', name: 'api_organizer_payout_account_show', methods: ['GET'])]
     public function show(OrganizerPayoutAccountRepository $payoutAccountRepository): JsonResponse
     {
@@ -28,6 +29,7 @@ final class OrganizerPayoutAccountController extends AbstractController
         $history = $payoutAccountRepository->findInactiveHistoryForOrganizer($user);
 
         return $this->json([
+            'providers' => $this->details->providers(),
             'active' => $active instanceof OrganizerPayoutAccount ? $this->serialize($active) : null,
             'history' => array_map($this->serialize(...), $history),
         ]);
@@ -52,10 +54,11 @@ final class OrganizerPayoutAccountController extends AbstractController
             return $this->json(['message' => 'Choisis compte bancaire ou Mobile Money.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $validationError = $this->validatePayload($type, $data);
-
-        if (null !== $validationError) {
-            return $this->json(['message' => $validationError], Response::HTTP_BAD_REQUEST);
+        try {
+            $data['type'] = $type;
+            $data = $this->details->normalize($data);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
         $now = new \DateTimeImmutable();
@@ -77,6 +80,7 @@ final class OrganizerPayoutAccountController extends AbstractController
             $payoutAccount
                 ->setHolderName($this->normalizeNullableString($data['holderName'] ?? null))
                 ->setIban($this->normalizeBankIdentifier($data['iban'] ?? null))
+                ->setBankAccountReference($this->normalizeNullableString($data['bankAccountReference'] ?? null))
                 ->setBic($this->normalizeBankIdentifier($data['bic'] ?? null))
                 ->setBankName($this->normalizeNullableString($data['bankName'] ?? null))
             ;
@@ -103,46 +107,6 @@ final class OrganizerPayoutAccountController extends AbstractController
     }
 
     /**
-     * @param array<string, mixed> $data
-     */
-    private function validatePayload(string $type, array $data): ?string
-    {
-        if (OrganizerPayoutAccount::TYPE_BANK === $type) {
-            if (null === $this->normalizeNullableString($data['holderName'] ?? null)) {
-                return 'Le nom du titulaire est obligatoire.';
-            }
-
-            if (null === $this->normalizeBankIdentifier($data['iban'] ?? null)) {
-                return 'IBAN obligatoire.';
-            }
-
-            if (null === $this->normalizeBankIdentifier($data['bic'] ?? null)) {
-                return 'BIC obligatoire.';
-            }
-
-            return null;
-        }
-
-        if (null === $this->normalizeNullableString($data['mobileMoneyName'] ?? null)) {
-            return 'Le nom du titulaire Mobile Money est obligatoire.';
-        }
-
-        if (null === $this->normalizeNullableString($data['mobileMoneyPhone'] ?? null)) {
-            return 'Le numero Mobile Money est obligatoire.';
-        }
-
-        if (null === $this->normalizeNullableString($data['mobileMoneyProvider'] ?? null)) {
-            return 'L operateur Mobile Money est obligatoire.';
-        }
-
-        if (null === $this->normalizeNullableString($data['mobileMoneyCountry'] ?? null)) {
-            return 'Le pays Mobile Money est obligatoire.';
-        }
-
-        return null;
-    }
-
-    /**
      * @return array<string, mixed>
      */
     private function serialize(OrganizerPayoutAccount $payoutAccount): array
@@ -155,6 +119,7 @@ final class OrganizerPayoutAccountController extends AbstractController
             'createdAt' => $payoutAccount->getCreatedAt()->format(DATE_ATOM),
             'replacedAt' => $payoutAccount->getReplacedAt()?->format(DATE_ATOM),
             'bank' => [
+                'accountReference' => $this->maskValue($payoutAccount->getBankAccountReference()),
                 'holderName' => $payoutAccount->getHolderName(),
                 'iban' => $this->maskValue($payoutAccount->getIban()),
                 'bic' => $payoutAccount->getBic(),

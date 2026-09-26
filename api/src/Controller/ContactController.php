@@ -23,6 +23,7 @@ final class ContactController extends AbstractController
         $data = $request->toArray();
         $name = trim((string) ($data['name'] ?? ''));
         $email = mb_strtolower(trim((string) ($data['email'] ?? '')));
+        $phone = trim((string) ($data['phone'] ?? ''));
         $subject = trim((string) ($data['subject'] ?? ''));
         $category = trim((string) ($data['category'] ?? ''));
         $message = trim((string) ($data['message'] ?? ''));
@@ -39,9 +40,9 @@ final class ContactController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if (mb_strlen($name) > 120 || mb_strlen($subject) > 160) {
+        if (mb_strlen($name) > 120 || mb_strlen($subject) > 160 || mb_strlen($phone) > 40) {
             return $this->json([
-                'message' => 'Le nom ou le sujet est trop long.',
+                'message' => 'Le nom, le sujet ou le téléphone est trop long.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -74,6 +75,7 @@ final class ContactController extends AbstractController
                         'details' => [
                             'Nom' => $name,
                             'E-mail' => $email,
+                            ...('' !== $phone ? ['Téléphone' => $phone] : []),
                             'Catégorie' => '' !== $category ? $category : 'Non précisée',
                             'Sujet' => $subject,
                         ],
@@ -84,6 +86,7 @@ final class ContactController extends AbstractController
                         '',
                         'Nom : '.$name,
                         'Email : '.$email,
+                        ...('' !== $phone ? ['Téléphone : '.$phone] : []),
                         'Catégorie : '.('' !== $category ? $category : 'Non précisée'),
                         'Compte EventFlow : '.$accountLine,
                         '',

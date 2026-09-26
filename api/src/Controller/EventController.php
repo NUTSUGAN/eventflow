@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class EventController extends AbstractController
 {
-    private const PUBLIC_TIMEZONE = 'Europe/Paris';
+    private const PUBLIC_TIMEZONE = 'Africa/Lome';
 
     #[Route('/api/events/filters', name: 'api_event_filters', methods: ['GET'])]
     public function filters(EventRepository $eventRepository): JsonResponse
@@ -41,7 +41,7 @@ class EventController extends AbstractController
         $dateValue = trim((string) $request->query->get('date', ''));
 
         if ('' !== $dateValue) {
-            $dateFilter = \DateTimeImmutable::createFromFormat('!Y-m-d', $dateValue);
+            $dateFilter = \DateTimeImmutable::createFromFormat('!Y-m-d', $dateValue, new \DateTimeZone(self::PUBLIC_TIMEZONE));
 
             if (!$dateFilter instanceof \DateTimeImmutable) {
                 return $this->json([
@@ -174,6 +174,7 @@ class EventController extends AbstractController
                     : null,
             ],
             'location' => [
+                'cityId' => $event->getLocation()?->getManagedCity()?->getId(),
                 'address' => $event->getLocation()?->getAddress(),
                 'city' => $event->getLocation()?->getCity(),
                 'postalCode' => $event->getLocation()?->getPostalCode(),
@@ -246,6 +247,7 @@ class EventController extends AbstractController
             'title' => $event->getTitle(),
             'shortDescription' => $this->createExcerpt($event->getDescription()),
             'city' => $event->getLocation()?->getCity() ?? 'Ville à confirmer',
+            'country' => $event->getLocation()?->getCountry(),
             'venue' => $venue,
             'startsAt' => $this->formatDateTimeForFrontend($event->getStartDatetime()),
             'category' => $event->getCategory()?->getName() ?? 'évènement',

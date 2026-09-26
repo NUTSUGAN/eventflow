@@ -29,7 +29,7 @@ final class OrganizerGuestTicketController extends AbstractController
 {
     use OrganizerAdminReadOnlyTrait;
 
-    private const PUBLIC_TIMEZONE = 'Europe/Paris';
+    private const PUBLIC_TIMEZONE = 'Africa/Lome';
 
     #[Route('/api/organizer/events/{eventId}/guest-tickets', name: 'api_organizer_guest_tickets_index', methods: ['GET'])]
     public function index(

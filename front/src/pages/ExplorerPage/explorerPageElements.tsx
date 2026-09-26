@@ -131,15 +131,142 @@ export const FilterTextInput = styled.input`
   ${filterFieldStyles}
 `
 
+export const DatePickerControl = styled.div`
+  position: relative;
+  min-width: 0;
+  width: 100%;
+`
+
 export const FilterDateInput = styled.input`
   ${filterFieldStyles}
-  padding-right: 18px;
+  padding-right: 54px;
+  cursor: pointer;
+`
 
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    filter: invert(0.88) sepia(0.14) saturate(0.7) hue-rotate(330deg);
-    opacity: 0.92;
+export const CalendarButton = styled.button`
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+
+  &:hover, &:focus-visible {
+    background: rgba(248, 143, 82, 0.14);
+    outline: none;
   }
+`
+
+export const CalendarPopover = styled.div`
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(320px, calc(100vw - 48px));
+  max-width: calc(100vw - 24px);
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: #211d1b;
+  color: #fffaf4;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+
+  @media (max-width: 640px) {
+    width: min(320px, calc(100vw - 40px));
+    padding: 12px;
+  }
+`
+
+export const CalendarHeader = styled.div`
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+  text-transform: capitalize;
+  strong { font-size: 0.96rem; }
+`
+
+export const CalendarMonthButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fffaf4;
+  cursor: pointer;
+  &:hover, &:focus-visible { border-color: var(--color-secondary); color: var(--color-secondary); }
+`
+
+export const CalendarWeekdays = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  margin-bottom: 4px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.72rem;
+  font-weight: 700;
+  span { padding: 6px 0; }
+`
+
+export const CalendarDays = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+`
+
+export const CalendarDay = styled.button<{ $selected: boolean; $today: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid ${({ $today, $selected }) => $selected ? 'var(--color-secondary)' : $today ? 'rgba(248, 143, 82, 0.55)' : 'transparent'};
+  border-radius: 8px;
+  background: ${({ $selected }) => $selected ? 'var(--color-primary)' : 'transparent'};
+  color: #fffaf4;
+  font-size: 0.84rem;
+  cursor: pointer;
+  &:hover, &:focus-visible { background: ${({ $selected }) => $selected ? 'var(--color-primary)' : 'rgba(248, 143, 82, 0.18)'}; outline: none; }
+`
+
+export const CalendarFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  button {
+    min-height: 36px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #f4a16d;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button:hover, button:focus-visible { background: rgba(248, 143, 82, 0.12); outline: none; }
 `
 
 export const FilterMetaRow = styled.div`
