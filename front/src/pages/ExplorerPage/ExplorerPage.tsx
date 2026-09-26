@@ -140,11 +140,6 @@ export function ExplorerPage() {
   const currentPage = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1)
 
   useEffect(() => {
-    if (!selectedDate || Number.isNaN(selectedDate.getTime())) return
-    setViewMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
-  }, [dateFilter])
-
-  useEffect(() => {
     if (calendarOpen) {
       const onPointerDown = (event: PointerEvent) => {
         if (!datePickerRef.current?.contains(event.target as Node)) setCalendarOpen(false)
